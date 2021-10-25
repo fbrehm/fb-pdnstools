@@ -1,0 +1,44 @@
+# English (United States) translations for fb_pdnstools.
+# Copyright (C) 2021 Frank Brehm, Berlin
+# This file is distributed under the same license as the fb_pdnstools project.
+# Frank Brehm <frank.brehm@pixelpark.com>, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: fb_pdnstools 0.2.0\n"
+"Report-Msgid-Bugs-To: frank.brehm@pixelpark.com\n"
+"POT-Creation-Date: 2021-10-25 17:18+0200\n"
+"PO-Revision-Date: 2021-10-25 17:18+0200\n"
+"Last-Translator: FULL NAME <frank.brehm@pixelpark.com>\n"
+"Language: en_US\n"
+"Language-Team: en_US <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.6.0\n"
+
+#: lib/fb_pdnstools/errors.py:54
+msgid "Could not interprete SOA data: {!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/xlate.py:97
+msgid "Module directory: {!r}"
+msgstr ""
+
+#: lib/fb_pdnstools/xlate.py:98
+msgid "Base directory: {!r}"
+msgstr ""
+
+#: lib/fb_pdnstools/xlate.py:99
+msgid "Locale directory: {!r}"
+msgstr ""
+
+#: lib/fb_pdnstools/xlate.py:100
+msgid "Locale domain: {!r}"
+msgstr ""
+
+#: lib/fb_pdnstools/xlate.py:101
+msgid "Found .mo-file: {!r}"
+msgstr ""
+
