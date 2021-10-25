@@ -1,5 +1,7 @@
-fb-pdnstools (0.2.0) UNRELEASED; urgency=medium
+fb-pdnstools (0.3.0) all; urgency=medium
 
   * Initial release
+  * Adding class BasePowerDNSHandler in module
+    lib/fb_pdnstools/__init__.py
 
- -- Frank Brehm <frank.brehm@pixelpark.com>  Mon, 25 Oct 2021 17:04:38 +0200
+ -- Frank Brehm <frank.brehm@pixelpark.com>  Mon, 25 Oct 2021 17:41:48 +0200

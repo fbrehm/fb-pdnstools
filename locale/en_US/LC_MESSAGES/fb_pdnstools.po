@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: fb_pdnstools 0.2.0\n"
+"Project-Id-Version: fb_pdnstools 0.3.0\n"
 "Report-Msgid-Bugs-To: frank.brehm@pixelpark.com\n"
-"POT-Creation-Date: 2021-10-25 17:18+0200\n"
+"POT-Creation-Date: 2021-10-25 17:41+0200\n"
 "PO-Revision-Date: 2021-10-25 17:18+0200\n"
 "Last-Translator: FULL NAME <frank.brehm@pixelpark.com>\n"
 "Language: en_US\n"
@@ -17,6 +17,98 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
+
+#: lib/fb_pdnstools/__init__.py:115
+msgid "Setting Loglevel of the {m} module to {ll}."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:153
+msgid "Invalid port number {!r} for the PowerDNS API, must be 0 < PORT < 65536."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:218
+msgid "The path prefix {!r} must be an absolute path."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:234
+msgid "Invalid timeout {!r} for requesting the PowerDNS API, must be 0 < SECONDS < 3600."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:251
+msgid "Invalid user agent {!r} given."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:263
+msgid "Invalid API server name {!r} given."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:311
+msgid "Failed to extract request ID from response header 'location': {!r}"
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:319
+msgid "The path {!r} must be an absolute path."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:339
+msgid "Used URL: {!r}"
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:355
+msgid "Request method: {!r}"
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:377
+msgid "Simulation mode, Request will not be sent."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:392
+msgid "Got a {c} on connecting to {h!r}: {e}."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:400
+msgid "Failed to parse the response"
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:425
+msgid "Got an error response code {code}: {msg}"
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:455
+msgid "Name {!r} is not a valid IP address."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:460
+msgid "Invalid FQDN {!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:475
+msgid "A rrset type must be a string type, but is {!r} instead."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:483
+msgid "Invalid, empty rrset type {!r} given."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:490
+msgid "Invalid rrset type {!r} given."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:504
+msgid "Preparing mocking ..."
+msgstr "Preparing mocking …"
+
+#: lib/fb_pdnstools/__init__.py:514
+msgid "Mocking path {p!r} is not a dictionary object, but a {c} object instead."
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:521
+msgid "Mocking path has no {!r} key defined:"
+msgstr ""
+
+#: lib/fb_pdnstools/__init__.py:526
+msgid "Adding mocking path:"
+msgstr ""
 
 #: lib/fb_pdnstools/errors.py:54
 msgid "Could not interprete SOA data: {!r}."
