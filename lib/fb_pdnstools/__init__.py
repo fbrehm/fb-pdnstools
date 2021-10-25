@@ -41,7 +41,7 @@ from .xlate import XLATOR
 from .errors import PowerDNSHandlerError, PDNSApiError, PDNSApiNotAuthorizedError
 from .errors import PDNSApiNotFoundError, PDNSApiValidationError, PDNSApiRateLimitExceededError
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 LOG = logging.getLogger(__name__)
 LIBRARY_NAME = "fb-pdns-api-client"
 
@@ -94,7 +94,7 @@ class BasePowerDNSHandler(HandlingObject):
         self._use_https = False
         self._path_prefix = path_prefix
         self._timeout = self.default_timeout
-        self._user_agent = '{}/{}'.format(_LIBRARY_NAME, __version__)
+        self._user_agent = '{}/{}'.format(LIBRARY_NAME, __version__)
         self._api_servername = self.default_api_servername
         self._mocked = False
         self.mocking_paths = []
