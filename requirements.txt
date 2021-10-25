@@ -1,0 +1,8 @@
+fb_tools
+requests
+six
+setuptools
+wheel
+Babel
+requests_mock
+
