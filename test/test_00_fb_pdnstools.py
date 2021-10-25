@@ -42,6 +42,23 @@ class TestPdnsToolsBase(FbPdnsToolsTestcase):
 
         LOG.debug("Version of fb_pdnstools: {!r}.".format(fb_pdnstools.__version__))
 
+    # -------------------------------------------------------------------------
+    def test_base_class(self):
+
+        LOG.info("Testing base class BasePowerDNSHandler ...")
+
+        from fb_pdnstools import BasePowerDNSHandler
+
+        LOG.debug("Creating dummy PDNS handler on base of BasePowerDNSHandler ...")
+        # Creating dummy class
+        class DummyPowerDNSHandler(BasePowerDNSHandler):
+            pass
+
+        test_handler = DummyPowerDNSHandler(
+            appname=self.appname, verbose=self.verbose)
+
+        LOG.debug("Dummy PDNS handler:\n{}".format(pp(test_handler.as_dict())))
+
 
 # =============================================================================
 if __name__ == '__main__':
@@ -57,6 +74,7 @@ if __name__ == '__main__':
     suite = unittest.TestSuite()
 
     suite.addTest(TestPdnsToolsBase('test_import_modules', verbose))
+    suite.addTest(TestPdnsToolsBase('test_base_class', verbose))
 
     runner = unittest.TextTestRunner(verbosity=verbose)
 
