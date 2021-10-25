@@ -11,7 +11,7 @@ from __future__ import absolute_import
 # Standard modules
 
 # Own modules
-from fb_tools..errors import FbHandlerError
+from fb_tools.errors import FbHandlerError
 
 from .xlate import XLATOR
 
