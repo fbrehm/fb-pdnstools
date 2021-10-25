@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+export PYBUILD_NAME=fb-pdnstools
+export PYBUILD_DESTDIR_python3=debian/python3-fb-pdnstools/
+export PYBUILD_DISABLE=test
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild
+
+# vim: ts=8 list

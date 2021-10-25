@@ -1,0 +1,7 @@
+*.debhelper
+*.log
+*.substvars
+files
+fb-pdnstools
+python-fb-pdnstools
+python3-fb-pdnstools
