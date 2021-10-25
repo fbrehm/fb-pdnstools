@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Editors
+*.swp
+*.old
+*.bak
+
 # C extensions
 *.so
 
@@ -14,7 +19,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -26,6 +30,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+lib/fb_pdnstools/local_version.py
+tmp/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
