@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fb_pdnstools 0.3.0\n"
 "Report-Msgid-Bugs-To: frank.brehm@pixelpark.com\n"
-"POT-Creation-Date: 2021-10-25 17:41+0200\n"
+"POT-Creation-Date: 2021-11-11 18:29+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <frank.brehm@pixelpark.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -111,6 +111,83 @@ msgstr ""
 
 #: lib/fb_pdnstools/errors.py:54
 msgid "Could not interprete SOA data: {!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/errors.py:72
+msgid "Got a {code} error code from {uri!r}: {msg}"
+msgstr ""
+
+#: lib/fb_pdnstools/errors.py:75
+msgid "Got a {code} error code: {msg}"
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:61 lib/fb_pdnstools/record.py:65
+msgid "Argument {a} {v!r} must be a {o} object."
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:187 lib/fb_pdnstools/record.py:396 lib/fb_pdnstools/record.py:777
+#: lib/fb_pdnstools/record.py:1053
+msgid "Comparing {} objects ..."
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:384
+msgid "Copying current {}-object in a new one."
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:439
+msgid "Serial overflow - old serial {o} is in future, new serial {n} has reached its maximum value."
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:455 lib/fb_pdnstools/record.py:1093
+msgid "Invalid type {t!r} as an item of a {c}, only {o} objects are allowed."
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:473 lib/fb_pdnstools/record.py:1111
+msgid "{m} takes at most {max} arguments ({n} given)."
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:511
+msgid "Record {!r} is not in Record list."
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:679
+msgid "Invalid value for {w} of a {c} object - "
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:684
+msgid "Invalid value for {w} {v!r} of a {c} object - must be greater than or equal to zero."
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:837 lib/fb_pdnstools/record.py:867
+msgid "A {w} must be a string type, but is {v!r} instead."
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:842 lib/fb_pdnstools/record.py:872
+msgid "A {w} may not be empty: {v!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:897
+msgid "Given data {!r} is not a dict object."
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:900
+msgid "Creating {} object from data:"
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:1070
+msgid "Cannot create {o} from record set:"
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:1075
+msgid "RecordSet has no records:"
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:1083
+msgid "Got SOA:"
+msgstr ""
+
+#: lib/fb_pdnstools/record.py:1149
+msgid "RecordSet {n!r} ({n}) is not in RecordSet list."
 msgstr ""
 
 #: lib/fb_pdnstools/xlate.py:97

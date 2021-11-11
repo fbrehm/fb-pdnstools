@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fb_pdnstools 0.3.0\n"
 "Report-Msgid-Bugs-To: frank.brehm@pixelpark.com\n"
-"POT-Creation-Date: 2021-10-25 17:41+0200\n"
-"PO-Revision-Date: 2021-10-25 17:18+0200\n"
+"POT-Creation-Date: 2021-11-11 18:29+0100\n"
+"PO-Revision-Date: 2021-11-11 18:30+0200\n"
 "Last-Translator: FULL NAME <frank.brehm@pixelpark.com>\n"
 "Language: de_DE\n"
 "Language-Team: de_DE <LL@li.org>\n"
@@ -113,6 +113,86 @@ msgstr "Füge Mocking-Pfad hinzu:"
 #: lib/fb_pdnstools/errors.py:54
 msgid "Could not interprete SOA data: {!r}."
 msgstr "Konnte SOA-Daten nicht interpretieren: {!r}."
+
+#: lib/fb_pdnstools/errors.py:72
+msgid "Got a {code} error code from {uri!r}: {msg}"
+msgstr "Habe einen {code} Fehlercode von {uri!r} erhalten: {msg}"
+
+#: lib/fb_pdnstools/errors.py:75
+msgid "Got a {code} error code: {msg}"
+msgstr "Habe einen {code} Fehlercode erhalten: {msg}"
+
+#: lib/fb_pdnstools/record.py:61 lib/fb_pdnstools/record.py:65
+msgid "Argument {a} {v!r} must be a {o} object."
+msgstr "Das Argument {a} {v!r} muss ein {o}-Objekt sein."
+
+#: lib/fb_pdnstools/record.py:187 lib/fb_pdnstools/record.py:396 lib/fb_pdnstools/record.py:777
+#: lib/fb_pdnstools/record.py:1053
+msgid "Comparing {} objects ..."
+msgstr "Vergleiche {}-Objekte…"
+
+#: lib/fb_pdnstools/record.py:384
+msgid "Copying current {}-object in a new one."
+msgstr "Kopiere aktuelles {}-Objekt in ein neues."
+
+#: lib/fb_pdnstools/record.py:439
+msgid "Serial overflow - old serial {o} is in future, new serial {n} has reached its maximum value."
+msgstr ""
+"Überlauf der Seriennummer - die alte Seriennummer liegt in der Zukunft, die neue Seriennummer "
+"{n} hat seinen Maimalwert erreicht."
+
+
+#: lib/fb_pdnstools/record.py:455 lib/fb_pdnstools/record.py:1093
+msgid "Invalid type {t!r} as an item of a {c}, only {o} objects are allowed."
+msgstr "Ungültiger Typ {t!r} als ein Eintrag von {c}, nur {o}-Objekte sind erlaubt."
+
+#: lib/fb_pdnstools/record.py:473 lib/fb_pdnstools/record.py:1111
+msgid "{m} takes at most {max} arguments ({n} given)."
+msgstr "{m} akzeptiert höchstens {max} Argumente ({n} wurden gegeben)."
+
+#: lib/fb_pdnstools/record.py:511
+msgid "Record {!r} is not in Record list."
+msgstr "Der Record {!r} ist nicht in der Recordliste."
+
+#: lib/fb_pdnstools/record.py:679
+msgid "Invalid value for {w} of a {c} object - "
+msgstr "Ungültiger Wert für {w} eines {c}-Objektes - "
+
+#: lib/fb_pdnstools/record.py:684
+msgid "Invalid value for {w} {v!r} of a {c} object - must be greater than or equal to zero."
+msgstr "Ungültiger Wert für {w} {v!r} eines {c}-Objektes - er muss größer oder gleich Null sein."
+
+#: lib/fb_pdnstools/record.py:837 lib/fb_pdnstools/record.py:867
+msgid "A {w} must be a string type, but is {v!r} instead."
+msgstr "Ein {w} muss ein String-Typ sein, ist stattdessen ein {v!r}."
+
+#: lib/fb_pdnstools/record.py:842 lib/fb_pdnstools/record.py:872
+msgid "A {w} may not be empty: {v!r}."
+msgstr "Ein {w} darf nicht leer sein: {v!r}."
+
+#: lib/fb_pdnstools/record.py:897
+msgid "Given data {!r} is not a dict object."
+msgstr "Die übergebenen Daten {!r} sind kein dict-Objekt."
+
+#: lib/fb_pdnstools/record.py:900
+msgid "Creating {} object from data:"
+msgstr "Erstelle ein {}-Objekt aus Daten:"
+
+#: lib/fb_pdnstools/record.py:1070
+msgid "Cannot create {o} from record set:"
+msgstr "Kann kein {o} aus RecordSet erstellen:"
+
+#: lib/fb_pdnstools/record.py:1075
+msgid "RecordSet has no records:"
+msgstr "der RecordSet hat keine Records:"
+
+#: lib/fb_pdnstools/record.py:1083
+msgid "Got SOA:"
+msgstr "Erhielt SOA:"
+
+#: lib/fb_pdnstools/record.py:1149
+msgid "RecordSet {n!r} ({n}) is not in RecordSet list."
+msgstr "Der RecordSet {n!r} ({n}) befindet sich nicht in der RecordSet-Liste."
 
 #: lib/fb_pdnstools/xlate.py:97
 msgid "Module directory: {!r}"
