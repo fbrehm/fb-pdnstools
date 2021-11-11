@@ -17,7 +17,7 @@ from .xlate import XLATOR
 
 _ = XLATOR.gettext
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 
 # =============================================================================
@@ -58,11 +58,23 @@ class PowerDNSWrongSoaDataError(PowerDNSRecordSetError):
 # =============================================================================
 class PDNSApiError(PowerDNSHandlerError):
     """Base class for more complex exceptions"""
-    def __init__(self, resp, content, uri=None):
-        self.resp = resp
-        self.content = content
+
+    # -------------------------------------------------------------------------
+    def __init__(self, code, msg, uri=None):
+        self.code = code
+        self.msg = msg
         self.uri = uri
 
+    # -------------------------------------------------------------------------
+    def __str__(self):
+
+        if self.uri:
+            msg = _("Got a {code} error code from {uri!r}: {msg}").format(
+                    code=self.code, uri=self.uri, msg=self.msg)
+        else:
+            msg = _("Got a {code} error code: {msg}").format(code=self.code, msg=self.msg)
+
+        return msg
 
 # =============================================================================
 class PDNSApiNotAuthorizedError(PDNSApiError):
