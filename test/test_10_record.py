@@ -48,6 +48,84 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         record = PowerDNSRecord(appname=self.appname, verbose=self.verbose)
         LOG.debug("Empty PowerDNSRecord:\n{}".format(record))
 
+    # -------------------------------------------------------------------------
+    def test_pdns_record(self):
+
+        LOG.info("Testing class PowerDNSRecord ...")
+
+        test_content = "www.testing.com."
+
+        from fb_pdnstools.record import PowerDNSRecord
+
+        LOG.debug("Creating an empty record.")
+        record = PowerDNSRecord(
+                appname=self.appname, verbose=self.verbose)
+        LOG.debug("Record: %%r: {!r}".format(record))
+        if self.verbose > 1:
+            LOG.debug("Record: %%s: {}".format(record))
+            LOG.debug("record.as_dict():\n{}".format(pp(record.as_dict())))
+        self.assertIsNone(record.content)
+        self.assertIsInstance(record.disabled, bool)
+        self.assertFalse(record.disabled)
+
+        LOG.debug("Creating an enabled record.")
+        record = PowerDNSRecord(
+            appname=self.appname, verbose=self.verbose, content=test_content)
+        LOG.debug("Record: %%r: {!r}".format(record))
+        if self.verbose > 1:
+            LOG.debug("Record: %%s: {}".format(record))
+            LOG.debug("record.as_dict():\n{}".format(pp(record.as_dict())))
+        self.assertEqual(record.content, test_content)
+        self.assertIsInstance(record.disabled, bool)
+        self.assertFalse(record.disabled)
+
+        LOG.debug("Creating a disabled record.")
+        record = PowerDNSRecord(
+            appname=self.appname, verbose=self.verbose, content=test_content, disabled=True)
+        LOG.debug("Record: %%r: {!r}".format(record))
+        LOG.debug("Record: %%s: {}".format(record))
+        if self.verbose > 1:
+            LOG.debug("record.as_dict():\n{}".format(pp(record.as_dict())))
+        self.assertEqual(record.content, test_content)
+        self.assertIsInstance(record.disabled, bool)
+        self.assertTrue(record.disabled)
+
+    # -------------------------------------------------------------------------
+    def test_pdns_record_equality(self):
+
+        LOG.info("Testing equal operator of class PowerDNSRecord ...")
+
+        test_content = "www.testing.com."
+        test_content2 = "www.uhu-banane.com."
+        test_content3 = "www.Testing.com."
+
+        from fb_pdnstools.record import PowerDNSRecord
+
+        test_matrix = (
+                (None, None, True),
+                (test_content, None, False),
+                (None, test_content, False),
+                (test_content, test_content, True),
+                (test_content, test_content2, False),
+                (test_content, test_content3, True),
+        )
+        for test_set in test_matrix:
+            rec1 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_set[0])
+            rec2 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_set[1])
+            expected = test_set[2]
+            LOG.debug(
+                "Comparing equality of record {r1!r} and record {r2!r}, expected: {ex}.".format(
+                    r1=rec1.content, r2=rec2.content, ex=expected))
+            if rec1 == rec2:
+                result = True
+            else:
+                result = False
+            LOG.debug("Result: {}".format(result))
+            if expected:
+                self.assertTrue(result)
+            else:
+                self.assertFalse(result)
+
 
 # =============================================================================
 if __name__ == '__main__':
@@ -63,6 +141,8 @@ if __name__ == '__main__':
     suite = unittest.TestSuite()
 
     suite.addTest(TestPdnsRecord('test_import_modules', verbose))
+    suite.addTest(TestPdnsRecord('test_pdns_record', verbose))
+    suite.addTest(TestPdnsRecord('test_pdns_record_equality', verbose))
 
     runner = unittest.TextTestRunner(verbosity=verbose)
 
