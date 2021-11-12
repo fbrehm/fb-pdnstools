@@ -37,6 +37,11 @@ class PowerDNSRecordError(PowerDNSHandlerError):
 
 
 # =============================================================================
+class PowerDNSWrongRecordTypeError(PowerDNSRecordError, TypeError):
+    pass
+
+
+# =============================================================================
 class PowerDNSRecordSetError(PowerDNSHandlerError):
     pass
 
