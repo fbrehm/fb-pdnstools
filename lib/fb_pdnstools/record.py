@@ -120,6 +120,22 @@ class PowerDNSRecord(FbBaseObject):
     def disabled(self, value):
         self._disabled = bool(value)
 
+    # -----------------------------------------------------------
+    @property
+    def enabled(self):
+        "Flag, whether the record is enabled or not."
+        if self.disabled:
+            return False
+        return True
+
+    @enabled.setter
+    def enabled(self, value):
+        v = bool(value)
+        if v:
+            self._disabled = False
+        else:
+            self._disabled = True
+
     # -------------------------------------------------------------------------
     def as_dict(self, short=True, minimal=False):
         """
@@ -143,6 +159,7 @@ class PowerDNSRecord(FbBaseObject):
         res = super(PowerDNSRecord, self).as_dict(short=short)
         res['content'] = self.content
         res['disabled'] = self.disabled
+        res['enabled'] = self.enabled
 
         return res
 
@@ -185,7 +202,7 @@ class PowerDNSRecord(FbBaseObject):
     def __eq__(self, other):
 
         if self.verbose > 4:
-            LOG.debug(_("Comparing {} objects ...").format(self.__class__.__name__))
+            LOG.debug(_("Comparing equality of {} objects ...").format(self.__class__.__name__))
 
         if not isinstance(other, PowerDNSRecord):
             return False
@@ -207,6 +224,9 @@ class PowerDNSRecord(FbBaseObject):
     def __lt__(self, other):
         """ The '<' operator. """
 
+        if self.verbose > 4:
+            LOG.debug(_("Comparing less than of {} objects ...").format(self.__class__.__name__))
+
         if not isinstance(other, PowerDNSRecord):
             msg = _("Wrong type {cls} of other parameter {other!r} for comparision.").format(
                     cls=other.__class__.__name__, other=other)
@@ -226,6 +246,9 @@ class PowerDNSRecord(FbBaseObject):
     # -------------------------------------------------------------------------
     def __gt__(self, other):
         """ The '>' operator. """
+
+        if self.verbose > 4:
+            LOG.debug(_("Comparing greater than of {} objects ...").format(self.__class__.__name__))
 
         if not isinstance(other, PowerDNSRecord):
             msg = _("Wrong type {cls} of other parameter {other!r} for comparision.").format(
