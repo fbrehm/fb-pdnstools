@@ -1103,7 +1103,7 @@ class PowerDNSZone(BasePowerDNSHandler):
             LOG.debug(_("Checking FQDN {f!r} for ending on {t!r}.").format(
                 f=fqdn_used, t=tail))
         if not fqdn_used.endswith(tail):
-            msg = _("Invalid FQDN {f!r}, it must ends with {t!r}.").format(
+            msg = _("Invalid FQDN {f!r}, it must end up with {t!r}.").format(
                 f=fqdn, t=tail)
             if raise_on_error:
                 raise ValueError(msg)
