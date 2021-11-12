@@ -102,12 +102,12 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         from fb_pdnstools.record import PowerDNSRecord
 
         test_matrix = (
-                (None, None, True),
-                (test_content, None, False),
-                (None, test_content, False),
-                (test_content, test_content, True),
-                (test_content, test_content2, False),
-                (test_content, test_content3, True),
+            (None, None, True),
+            (test_content, None, False),
+            (None, test_content, False),
+            (test_content, test_content, True),
+            (test_content, test_content2, False),
+            (test_content, test_content3, True),
         )
         for test_set in test_matrix:
             rec1 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_set[0])
@@ -126,6 +126,113 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
             else:
                 self.assertFalse(result)
 
+    # -------------------------------------------------------------------------
+    def test_pdns_record_gt(self):
+
+        LOG.info("Testing the greater than operator of class PowerDNSRecord ...")
+
+        test_content = "www.1testing.com."
+        test_content2 = "www.2uhu-banane.com."
+        test_content3 = "www.1Testing.com."
+
+        from fb_pdnstools.record import PowerDNSRecord
+        from fb_pdnstools.errors import PowerDNSWrongRecordTypeError
+
+        LOG.debug("Testing the greater than operator with wrong argument ...")
+        record = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_content)
+        test_matrix = (
+            (record, 'uhu'),
+            (88, record)
+        )
+        for test_set in test_matrix:
+            with self.assertRaises(TypeError) as cm:
+                LOG.debug("Comparing {r1!r} with {r2!r} ...".format(
+                    r1=test_set[0], r2=test_set[1]))
+                if test_set[0] > test_set[1]:
+                    print("This should not be visible!")
+            e = cm.exception
+            LOG.debug("{} raised: {}".format(e.__class__.__name__, e))
+
+        test_matrix = (
+            (None, None, False),
+            (test_content, None, True),
+            (None, test_content, False),
+            (test_content, test_content, False),
+            (test_content, test_content2, False),
+            (test_content2, test_content, True),
+            (test_content, test_content3, False),
+        )
+
+        for test_set in test_matrix:
+            rec1 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_set[0])
+            rec2 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_set[1])
+            expected = test_set[2]
+            LOG.debug(
+                "Comparing record {r1!r} > record {r2!r}, expected: {ex}.".format(
+                    r1=rec1.content, r2=rec2.content, ex=expected))
+            if rec1 > rec2:
+                result = True
+            else:
+                result = False
+            LOG.debug("Result: {}".format(result))
+            if expected:
+                self.assertTrue(result)
+            else:
+                self.assertFalse(result)
+
+    # -------------------------------------------------------------------------
+    def test_pdns_record_lt(self):
+
+        LOG.info("Testing the less than operator of class PowerDNSRecord ...")
+
+        test_content = "www.1testing.com."
+        test_content2 = "www.2uhu-banane.com."
+        test_content3 = "www.1Testing.com."
+
+        from fb_pdnstools.record import PowerDNSRecord
+        from fb_pdnstools.errors import PowerDNSWrongRecordTypeError
+
+        LOG.debug("Testing the less than operator with wrong argument ...")
+        record = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_content)
+        test_matrix = (
+            (record, 'uhu'),
+            (88, record)
+        )
+        for test_set in test_matrix:
+            with self.assertRaises(TypeError) as cm:
+                LOG.debug("Comparing {r1!r} with {r2!r} ...".format(
+                    r1=test_set[0], r2=test_set[1]))
+                if test_set[0] < test_set[1]:
+                    print("This should not be visible!")
+            e = cm.exception
+            LOG.debug("{} raised: {}".format(e.__class__.__name__, e))
+
+        test_matrix = (
+            (None, None, False),
+            (test_content, None, False),
+            (None, test_content, True),
+            (test_content, test_content, False),
+            (test_content, test_content2, True),
+            (test_content2, test_content, False),
+            (test_content, test_content3, False),
+        )
+
+        for test_set in test_matrix:
+            rec1 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_set[0])
+            rec2 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_set[1])
+            expected = test_set[2]
+            LOG.debug(
+                "Comparing record {r1!r} < record {r2!r}, expected: {ex}.".format(
+                    r1=rec1.content, r2=rec2.content, ex=expected))
+            if rec1 < rec2:
+                result = True
+            else:
+                result = False
+            LOG.debug("Result: {}".format(result))
+            if expected:
+                self.assertTrue(result)
+            else:
+                self.assertFalse(result)
 
 # =============================================================================
 if __name__ == '__main__':
@@ -143,6 +250,8 @@ if __name__ == '__main__':
     suite.addTest(TestPdnsRecord('test_import_modules', verbose))
     suite.addTest(TestPdnsRecord('test_pdns_record', verbose))
     suite.addTest(TestPdnsRecord('test_pdns_record_equality', verbose))
+    suite.addTest(TestPdnsRecord('test_pdns_record_gt', verbose))
+    suite.addTest(TestPdnsRecord('test_pdns_record_lt', verbose))
 
     runner = unittest.TextTestRunner(verbosity=verbose)
 
