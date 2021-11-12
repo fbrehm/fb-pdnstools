@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fb_pdnstools 0.3.0\n"
 "Report-Msgid-Bugs-To: frank.brehm@pixelpark.com\n"
-"POT-Creation-Date: 2021-11-11 18:29+0100\n"
+"POT-Creation-Date: 2021-11-12 17:18+0100\n"
 "PO-Revision-Date: 2021-10-25 17:18+0200\n"
 "Last-Translator: FULL NAME <frank.brehm@pixelpark.com>\n"
 "Language: en_US\n"
@@ -78,7 +78,7 @@ msgstr ""
 msgid "Name {!r} is not a valid IP address."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:460
+#: lib/fb_pdnstools/__init__.py:460 lib/fb_pdnstools/zone.py:1120
 msgid "Invalid FQDN {!r}."
 msgstr ""
 
@@ -110,84 +110,99 @@ msgstr ""
 msgid "Adding mocking path:"
 msgstr ""
 
-#: lib/fb_pdnstools/errors.py:54
+#: lib/fb_pdnstools/errors.py:59
 msgid "Could not interprete SOA data: {!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/errors.py:72
+#: lib/fb_pdnstools/errors.py:77
 msgid "Got a {code} error code from {uri!r}: {msg}"
 msgstr ""
 
-#: lib/fb_pdnstools/errors.py:75
+#: lib/fb_pdnstools/errors.py:80
 msgid "Got a {code} error code: {msg}"
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:61 lib/fb_pdnstools/record.py:65
+#: lib/fb_pdnstools/record.py:62 lib/fb_pdnstools/record.py:66
 msgid "Argument {a} {v!r} must be a {o} object."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:187 lib/fb_pdnstools/record.py:396 lib/fb_pdnstools/record.py:777
-#: lib/fb_pdnstools/record.py:1053
-msgid "Comparing {} objects ..."
+#: lib/fb_pdnstools/record.py:205
+msgid "Comparing equality of {} objects ..."
+msgstr "Comparing equality of {} objects …"
+
+#: lib/fb_pdnstools/record.py:228
+msgid "Comparing less than of {} objects ..."
+msgstr "Comparing less than of {} objects …"
+
+#: lib/fb_pdnstools/record.py:231 lib/fb_pdnstools/record.py:254
+msgid "Wrong type {cls} of other parameter {other!r} for comparision."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:384
+#: lib/fb_pdnstools/record.py:251
+msgid "Comparing greater than of {} objects ..."
+msgstr "Comparing greater than of {} objects …"
+
+#: lib/fb_pdnstools/record.py:456
 msgid "Copying current {}-object in a new one."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:439
+#: lib/fb_pdnstools/record.py:468 lib/fb_pdnstools/record.py:849 lib/fb_pdnstools/record.py:1125
+msgid "Comparing {} objects ..."
+msgstr "Comparing {} objects …"
+
+#: lib/fb_pdnstools/record.py:511
 msgid "Serial overflow - old serial {o} is in future, new serial {n} has reached its maximum value."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:455 lib/fb_pdnstools/record.py:1093
+#: lib/fb_pdnstools/record.py:527 lib/fb_pdnstools/record.py:1165
 msgid "Invalid type {t!r} as an item of a {c}, only {o} objects are allowed."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:473 lib/fb_pdnstools/record.py:1111
+#: lib/fb_pdnstools/record.py:545 lib/fb_pdnstools/record.py:1183
 msgid "{m} takes at most {max} arguments ({n} given)."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:511
+#: lib/fb_pdnstools/record.py:583
 msgid "Record {!r} is not in Record list."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:679
+#: lib/fb_pdnstools/record.py:751
 msgid "Invalid value for {w} of a {c} object - "
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:684
+#: lib/fb_pdnstools/record.py:756
 msgid "Invalid value for {w} {v!r} of a {c} object - must be greater than or equal to zero."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:837 lib/fb_pdnstools/record.py:867
+#: lib/fb_pdnstools/record.py:909 lib/fb_pdnstools/record.py:939 lib/fb_pdnstools/zone.py:1080
 msgid "A {w} must be a string type, but is {v!r} instead."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:842 lib/fb_pdnstools/record.py:872
+#: lib/fb_pdnstools/record.py:914 lib/fb_pdnstools/record.py:944
 msgid "A {w} may not be empty: {v!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:897
+#: lib/fb_pdnstools/record.py:969 lib/fb_pdnstools/zone.py:137
 msgid "Given data {!r} is not a dict object."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:900
+#: lib/fb_pdnstools/record.py:972
 msgid "Creating {} object from data:"
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:1070
+#: lib/fb_pdnstools/record.py:1142
 msgid "Cannot create {o} from record set:"
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:1075
+#: lib/fb_pdnstools/record.py:1147
 msgid "RecordSet has no records:"
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:1083
+#: lib/fb_pdnstools/record.py:1155
 msgid "Got SOA:"
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:1149
+#: lib/fb_pdnstools/record.py:1221
 msgid "RecordSet {n!r} ({n}) is not in RecordSet list."
 msgstr ""
 
@@ -209,5 +224,171 @@ msgstr ""
 
 #: lib/fb_pdnstools/xlate.py:101
 msgid "Found .mo-file: {!r}"
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:61
+msgid "No Resource Record Sets found to remove from zone {!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:202
+msgid "Params initialisation:"
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:474
+msgid "Invalid source tuples for detecting IPv4-network: {!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:541
+msgid "Copying current {}-object into a new one."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:563
+msgid "Cannot update zone {!r}, no API URL defined."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:566
+msgid "Updating data of zone {n!r} from API path {u!r} ..."
+msgstr "Updating data of zone {n!r} from API path {u!r} …"
+
+#: lib/fb_pdnstools/zone.py:653
+msgid "Patching zone {!r} ..."
+msgstr "Patching zone {!r} …"
+
+#: lib/fb_pdnstools/zone.py:685
+msgid "Found invalid comment {!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:699
+msgid "New SOA must be of type {e}, given {t}: {s!r}"
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:710
+msgid "Got no SOA for zone {!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:731
+msgid "Setting new SOA {s!r} for zone {z!r}, TTL {t} ..."
+msgstr "Setting new SOA {s!r} for zone {z!r}, TTL {t} …"
+
+#: lib/fb_pdnstools/zone.py:748
+msgid "Increasing serial of zone {z!r} from {o} => {n}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:765 lib/fb_pdnstools/zone.py:794 lib/fb_pdnstools/zone.py:816
+msgid "Parameter {w!r} {a!r} is not a {e} object, but a {c} object instead."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:808
+msgid "Replacing record set in zone {!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:829
+msgid "Deleting record set in zone {!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:845
+msgid "Adding FQDN: {f!r}, type {t!r}, content: {c!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:855 lib/fb_pdnstools/zone.py:912
+msgid "Got an existing rrset for FQDN {f!r}, type {t!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:862 lib/fb_pdnstools/zone.py:920
+msgid "Got no existing rrset for FQDN {f!r}, type {t!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:880
+msgid "Record {c!r} already contained in record set {f!r} type {t}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:902
+msgid "Replacing FQDN: {f!r}, type {t!r} by content: {c!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:950 lib/fb_pdnstools/zone.py:976
+msgid "Parameter address {a!r} is not an IPv4Address or IPv6Address object, but a {c} object instead."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:958 lib/fb_pdnstools/zone.py:984 lib/fb_pdnstools/zone.py:1002
+msgid "Trying to create {t}-record {f!r} => {a!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1035
+msgid "Current zone:"
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1046
+msgid "DNS {t!r}-record {n!r} is already deleted."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1056
+msgid "Removing one resource record set from zone {z!r}."
+msgid_plural "Removing {c} resource record sets from zone {z!r}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: lib/fb_pdnstools/zone.py:1062
+msgid "Resorce record sets:"
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1065
+msgid "Done."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1072
+msgid "Notifying slave servers of zone {!r} ..."
+msgstr "Notifying slave servers of zone {!r} …"
+
+#: lib/fb_pdnstools/zone.py:1089
+msgid "Invalid, empty FQDN {!r} given."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1103
+msgid "Checking FQDN {f!r} for ending on {t!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1106
+msgid "Invalid FQDN {f!r}, it must end up with {t!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1116
+msgid "Basename of FQDN {f!r} is {h!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1138
+msgid "Searching for RecordSet {f!r} of type {t!r} in zone {z!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1147
+msgid "Found {} RecordSet:"
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1152
+msgid "Did not found RecordSet {f!r} of type {t!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1161
+msgid "Did not get SOA for zone {!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1176
+msgid "Invalid item type {{!r}} to set, only {} allowed."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1178
+msgid "The key {k!r} must be equal to the zone name {n!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1179
+msgid "None type as key is not allowed."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1180
+msgid "Empty key {!r} is not allowed."
+msgstr ""
+
+#: lib/fb_pdnstools/zone.py:1181
+msgid "Object {o!r} is not a {e} object."
 msgstr ""
 
