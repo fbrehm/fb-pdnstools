@@ -32,9 +32,10 @@ from .xlate import XLATOR
 
 from . import BasePowerDNSHandler, DEFAULT_PORT, DEFAULT_API_PREFIX
 
+from .errors import PowerDNSWrongRecordTypeError
 from .errors import PowerDNSRecordSetError, PowerDNSWrongSoaDataError
 
-__version__ = '0.6.1'
+__version__ = '0.6.2'
 
 LOG = logging.getLogger(__name__)
 
@@ -201,6 +202,46 @@ class PowerDNSRecord(FbBaseObject):
             return False
 
         return True
+
+    # -------------------------------------------------------------------------
+    def __lt__(self, other):
+        """ The '<' operator. """
+
+        if not isinstance(other, PowerDNSRecord):
+            msg = _("Wrong type {cls} of other parameter {other!r} for comparision.").format(
+                    cls=other.__class__.__name__, other=other)
+            raise PowerDNSWrongRecordTypeError(msg)
+
+        if self == other:
+            return False
+
+        if self.content is None:
+            return True
+
+        if other.content is None:
+            return False
+
+        return self.content.lower() < other.content.lower()
+
+    # -------------------------------------------------------------------------
+    def __gt__(self, other):
+        """ The '>' operator. """
+
+        if not isinstance(other, PowerDNSRecord):
+            msg = _("Wrong type {cls} of other parameter {other!r} for comparision.").format(
+                    cls=other.__class__.__name__, other=other)
+            raise PowerDNSWrongRecordTypeError(msg)
+
+        if self == other:
+            return False
+
+        if self.content is None:
+            return False
+
+        if other.content is None:
+            return True
+
+        return self.content.lower() > other.content.lower()
 
 
 # =============================================================================
