@@ -13,6 +13,7 @@ import sys
 import logging
 import logging.handlers
 import syslog
+import datetime
 
 try:
     import unittest2 as unittest
@@ -234,6 +235,80 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
             else:
                 self.assertFalse(result)
 
+    # -------------------------------------------------------------------------
+    def test_pdns_recordset_comment(self):
+
+        LOG.info("Testing class PowerDNSRecordSetComment ...")
+
+        test_account = 'tester'
+        test_content = "Test comment"
+        test_modified_at = 1000 * 24 * 60 * 60
+
+        from fb_pdnstools.record import PowerDNSRecordSetComment
+
+        LOG.debug("Creating an empty, invalid comment.")
+        empty_comment = PowerDNSRecordSetComment(
+            appname=self.appname, verbose=self.verbose)
+        LOG.debug("Empty comment: %%r: {!r}".format(empty_comment))
+        LOG.debug("Empty comment: %%s: {}".format(empty_comment))
+        if self.verbose > 1:
+            LOG.debug("Empty comment.as_dict():\n{}".format(pp(empty_comment.as_dict())))
+        LOG.debug("Empty comment.as_dict(minimal=True): {}".format(
+            pp(empty_comment.as_dict(minimal=True))))
+        self.assertIsNone(empty_comment.account)
+        self.assertEqual(empty_comment.content, '')
+        self.assertIsInstance(empty_comment.modified_at, int)
+        self.assertGreaterEqual(empty_comment.modified_at, 0)
+        self.assertIsInstance(empty_comment.modified_date, datetime.datetime)
+        self.assertFalse(empty_comment.valid)
+        del empty_comment
+
+        LOG.debug("Creating an non empty, valid comment.")
+        comment = PowerDNSRecordSetComment(
+            appname=self.appname, verbose=self.verbose, account=test_account, content=test_content)
+        LOG.debug("Comment: %%r: {!r}".format(comment))
+        LOG.debug("Comment: %%s: {}".format(comment))
+        if self.verbose > 1:
+            LOG.debug("Comment.as_dict():\n{}".format(pp(comment.as_dict())))
+        LOG.debug("Comment.as_dict(minimal=True): {}".format(
+            pp(comment.as_dict(minimal=True))))
+        self.assertEqual(comment.account, test_account)
+        self.assertEqual(comment.content, test_content)
+        self.assertIsInstance(comment.modified_at, int)
+        self.assertGreaterEqual(comment.modified_at, 0)
+        self.assertIsInstance(comment.modified_date, datetime.datetime)
+        self.assertTrue(comment.valid)
+
+        LOG.debug("Creating a comment with a defined modified_at property.")
+        comment = PowerDNSRecordSetComment(
+            appname=self.appname, verbose=self.verbose,
+            account=test_account, content=test_content, modified_at=test_modified_at)
+        LOG.debug("Comment: %%s: {}".format(comment))
+        if self.verbose > 1:
+            LOG.debug("Comment: %%r: {!r}".format(comment))
+        if self.verbose > 2:
+            LOG.debug("Ccomment.as_dict():\n{}".format(pp(comment.as_dict())))
+        self.assertIsInstance(comment.modified_at, int)
+        self.assertEqual(comment.modified_at, test_modified_at)
+        self.assertIsInstance(comment.modified_date, datetime.datetime)
+
+        LOG.debug("Testing raising errors on wrong (String) modified_at property.")
+        with self.assertRaises(ValueError) as cm:
+            comment = PowerDNSRecordSetComment(
+                appname=self.appname, verbose=self.verbose,
+                account=test_account, content=test_content, modified_at='bla')
+        e = cm.exception
+        LOG.debug("{} raised: {}".format(e.__class__.__name__, e))
+
+        LOG.debug("Testing raising errors on wrong (negative) modified_at property.")
+        with self.assertRaises(ValueError) as cm:
+            comment = PowerDNSRecordSetComment(
+                appname=self.appname, verbose=self.verbose,
+                account=test_account, content=test_content, modified_at=-100)
+        e = cm.exception
+        LOG.debug("{} raised: {}".format(e.__class__.__name__, e))
+
+
 # =============================================================================
 if __name__ == '__main__':
 
@@ -252,6 +327,7 @@ if __name__ == '__main__':
     suite.addTest(TestPdnsRecord('test_pdns_record_equality', verbose))
     suite.addTest(TestPdnsRecord('test_pdns_record_gt', verbose))
     suite.addTest(TestPdnsRecord('test_pdns_record_lt', verbose))
+    suite.addTest(TestPdnsRecord('test_pdns_recordset_comment', verbose))
 
     runner = unittest.TextTestRunner(verbosity=verbose)
 
