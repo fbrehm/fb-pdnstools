@@ -14,11 +14,16 @@ import sys
 import logging
 from logging import Formatter
 import argparse
+import json
+
+from pathlib import Path
 
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
+
+import six
 
 # Own modules
 from fb_logging.colored import ColoredFormatter
@@ -87,6 +92,37 @@ class FbPdnsToolsTestcase(unittest.TestCase):
 
         super(FbPdnsToolsTestcase, self).__init__(methodName)
 
+        self.curdir = Path(os.path.dirname(os.path.abspath(__file__)))
+        self.zone_file = self.curdir / 'zone.js'
+        self.zone_rev_file = self.curdir / 'zone-rev.js'
+        self.zones_file = self.curdir / 'zones.js'
+        self.a_rrset_file = self.curdir / 'rrset-a.js'
+        self.a_rrset_file_comment = self.curdir / 'rrset-a-with-comment.js'
+        self.mx_rrset_file = self.curdir / 'rrset-mx.js'
+        self.soa_rrset_file = self.curdir / 'rrset-soa.js'
+
+        self.server_name = 'pdns-master.testing.net'
+        self.api_key = 'test123'
+
+        self.open_args = {}
+        if six.PY3:
+            self.open_args['encoding'] = 'utf-8'
+            self.open_args['errors'] = 'surrogateescape'
+
+        self.server_version = '4.1.10-mocked'
+
+        self.server_list_data = [
+            {
+                "config_url": "/api/v1/servers/localhost/config{/config_setting}",
+                "daemon_type": "authoritative",
+                "id": "localhost",
+                "type": "Server",
+                "url": "/api/v1/servers/localhost",
+                "version": "{}".format(self.server_version),
+                "zones_url": "/api/v1/servers/localhost/zones{/zone}"
+            }
+        ]
+
     # -------------------------------------------------------------------------
     @property
     def verbose(self):
@@ -106,6 +142,81 @@ class FbPdnsToolsTestcase(unittest.TestCase):
     # -------------------------------------------------------------------------
     def tearDown(self):
         pass
+
+    # -------------------------------------------------------------------------
+    def get_js_a_rrset(self):
+
+        ret = None
+        LOG.debug("Loading file {!r} ...".format(str(self.a_rrset_file)))
+        with self.a_rrset_file.open('r', **self.open_args) as fh:
+            ret = json.load(fh)
+        return ret
+
+    # -------------------------------------------------------------------------
+    def get_js_a_rrset_comment(self):
+
+        ret = None
+        LOG.debug("Loading file {!r} ...".format(str(self.a_rrset_file_comment)))
+        with self.a_rrset_file_comment.open('r', **self.open_args) as fh:
+            ret = json.load(fh)
+        return ret
+
+    # -------------------------------------------------------------------------
+    def get_js_mx_rrset(self):
+
+        ret = None
+        LOG.debug("Loading file {!r} ...".format(str(self.mx_rrset_file)))
+        with self.mx_rrset_file.open('r', **self.open_args) as fh:
+            ret = json.load(fh)
+        return ret
+
+    # -------------------------------------------------------------------------
+    def get_js_soa_rrset(self):
+
+        ret = None
+        LOG.debug("Loading file {!r} ...".format(str(self.soa_rrset_file)))
+        with self.soa_rrset_file.open('r', **self.open_args) as fh:
+            ret = json.load(fh)
+        return ret
+
+    # -------------------------------------------------------------------------
+    def get_js_zone(self):
+
+        ret = None
+        LOG.debug("Loading file {!r} ...".format(str(self.zone_file)))
+        with self.zone_file.open('r', **self.open_args) as fh:
+            ret = json.load(fh)
+        return ret
+
+    # -------------------------------------------------------------------------
+    def get_js_zone_rev(self):
+
+        ret = None
+        LOG.debug("Loading file {!r} ...".format(str(self.zone_rev_file)))
+        with self.zone_rev_file.open('r', **self.open_args) as fh:
+            ret = json.load(fh)
+        return ret
+
+    # -------------------------------------------------------------------------
+    def get_js_zones(self):
+
+        ret = None
+        LOG.debug("Loading file {!r} ...".format(str(self.zones_file)))
+        with self.zones_file.open('r', **self.open_args) as fh:
+            ret = json.load(fh)
+        return ret
+
+    # -------------------------------------------------------------------------
+    def get_js_serverlist(self, index=None):
+
+        import json
+
+        if index is None:
+            data = self.server_list_data
+        else:
+            data = self.server_list_data[index]
+
+        return json.dumps(data)
 
 
 # =============================================================================
