@@ -1,0 +1,80 @@
+---
+
+name: Adding Debian repo definitions of Frank Brehm
+author: Frank Brehm
+description: Adding Debian repository definitions for the Repo server of Frank Brehm
+inputs:
+  use_https:
+    description: Use HTTPS instead of HTTP as the URL schema.
+    required: false
+    default: false
+  repo_server:
+    description: The FQDN of the repository server.
+    required: false
+    default: repo.uhu-banane.de
+  root_path:
+    description: The root path on the repository server.
+    required: false
+    default: /
+  gpg_key_path:
+    description: The path to the GPG key of the repository on the repo server.
+    required: false
+    default: public/repo.uhu-banane.de.gpg-key2.asc
+  vendor:
+    description: The main Debian vendor (Debian or Ubuntu).
+    required: true
+  distro:
+    description: The distribution of the vendor (buster, focal, bullshead a.s.o.)
+    required: true
+  suite:
+    description: The suite of the distribution
+    required: false
+    default: './'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Creating sources.list
+      shell: bash
+      env:
+        USE_HTTPS: ${{ inputs.use_https }}
+        REPO_SERVER: ${{ inputs.repo_server }}
+        ROOT_PATH: ${{ inputs.root_path }}
+        GPG_KEY_PATH: ${{ inputs.gpg_key_path }}
+        VENDOR: ${{ inputs.vendor }}
+        DISTRO: ${{ inputs.distro }}
+        SUITE: ${{ inputs.suite }}
+      run: |
+        if [[ ! -d /etc/apt/sources.list.d/ ]] ; then
+            echo "Directory '/etc/apt/sources.list.d' not found or is not a directory." >&2
+            exit 5
+        fi
+        URL="https://"
+        if [[ "${USE_HTTPS}" == false ]] ; then
+            URL="http://"
+        fi
+        KEY_URL="${URL}${REPO_SERVER}${ROOT_PATH}${GPG_KEY_PATH}"
+        URL+="${REPO_SERVER}${ROOT_PATH}${VENDOR}/${DISTRO}"
+        echo
+        echo "Updating APT ..."
+        apt update --yes
+        echo
+        echo "Installing necessary packages ..."
+        apt install --yes --no-install-recommends curl
+        echo
+        echo "Importing GPG key from '${KEY_URL}' ..."
+        mkdir --verbose --parents /etc/apt/trusted.gpg.d
+        curl --silent "${KEY_URL}" >/etc/apt/trusted.gpg.d/${REPO_SERVER}.keyring.asc
+        ls -l --color=always /etc/apt/trusted.gpg.d/
+        echo
+        echo "Creating '/etc/apt/sources.list.d/fbrehm.list' ..."
+        echo "deb	${URL}		${SUITE}" >/etc/apt/sources.list.d/fbrehm.list
+        echo
+        echo "Content of /etc/apt/sources.list.d/fbrehm.list:"
+        cat /etc/apt/sources.list.d/fbrehm.list
+        echo
+        echo "Updating APT again ..."
+        apt update --yes
+        echo
+
+# vim: et tabstop=2 expandtab shiftwidth=2 softtabstop=2 list
