@@ -105,6 +105,10 @@ jobs:
       - linter
     steps:
       - uses: actions/checkout@v2
+      - uses: ./.github/actions/add-fb-debian-repo
+        with:
+          vendor: Debian
+          distro: bullseye
       - uses: ./.github/actions/prepare-debian-container
       - uses: ./.github/actions/debian-install-buildenv
       - name: Debian build
