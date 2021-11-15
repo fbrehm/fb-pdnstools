@@ -91,7 +91,7 @@ jobs:
       - name: Execute Shellcheck
         shell: bash
         run: >
-          shellcheck -x compile-xlate-msgs.sh update-env.sh xtract-xlate-msgs.sh
+          shellcheck -x compile-xlate-msgs.sh xtract-xlate-msgs.sh
       - name: Execute Yamllint
         shell: bash
         run: yamllint -c yamllint.yaml .gitlab-ci.yml
