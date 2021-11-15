@@ -19,7 +19,7 @@ env:
   DEBEMAIL: 'frank@brehm-online.com'
   GITREF: ${{ github.ref }}
   NOTIFY_ADDRESS: 'frank@brehm-online.com,frank.brehm@pixelpark.com'
-  PKG_NAME: 'fb_tools'
+  PKG_NAME: 'fb_pdnstools'
   SENDER_ADDRESS: 'Frank Brehm <frank@brehm-online.com>'
   SMTP_SERVER_ADDRESS: 'mail.uhu-banane.net'
   SMTP_SERVER_PORT: 587
@@ -95,6 +95,31 @@ jobs:
       - name: Execute Yamllint
         shell: bash
         run: yamllint -c yamllint.yaml .github
+
+  build_debian_sources:
+    runs-on: ubuntu-latest
+    name: Building Debian Source Packages
+    # if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || startsWith( github.ref, 'refs/tags/' ) }}
+    container: debian:bullseye
+    needs:
+      - linter
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/prepare-debian-container
+      - uses: ./.github/actions/debian-install-buildenv
+      - name: Debian build
+        run: |
+          echo "y" | debuild -S -i -us -uc
+          ls -lA --color=always ..
+          mkdir -pv debian/pkgs/src
+          mv -vi ../*.dsc ../*.tar.* ../*.build* ../*.changes debian/pkgs/src
+          ls -lA --color=always debian/pkgs/*/*
+      - name: 'Upload Source Package'
+        uses: actions/upload-artifact@v2
+        with:
+          name: debian_sources
+          path: debian/pkgs/*/*
+          retention-days: 8
 
 
 # vim: et tabstop=2 expandtab shiftwidth=2 softtabstop=2 list
