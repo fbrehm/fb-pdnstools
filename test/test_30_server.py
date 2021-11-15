@@ -12,8 +12,6 @@ import os
 import sys
 import logging
 import logging.handlers
-import syslog
-import datetime
 import json
 
 try:

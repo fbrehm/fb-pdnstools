@@ -12,7 +12,6 @@ import os
 import sys
 import logging
 import logging.handlers
-import syslog
 
 try:
     import unittest2 as unittest
@@ -55,6 +54,7 @@ class TestPdnsToolsBase(FbPdnsToolsTestcase):
         from fb_pdnstools import BasePowerDNSHandler
 
         LOG.debug("Creating dummy PDNS handler on base of BasePowerDNSHandler ...")
+
         # Creating dummy class
         class DummyPowerDNSHandler(BasePowerDNSHandler):
             pass

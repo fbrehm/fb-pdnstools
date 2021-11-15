@@ -12,7 +12,6 @@
 import os
 import sys
 import logging
-from logging import Formatter
 import argparse
 import json
 

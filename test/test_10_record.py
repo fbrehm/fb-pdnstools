@@ -12,16 +12,12 @@ import os
 import sys
 import logging
 import logging.handlers
-import syslog
 import datetime
 
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-
-import requests
-import requests_mock
 
 libdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'lib'))
 sys.path.insert(0, libdir)
@@ -75,7 +71,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
 
         LOG.debug("Creating an empty record.")
         record = PowerDNSRecord(
-                appname=self.appname, verbose=self.verbose)
+            appname=self.appname, verbose=self.verbose)
         LOG.debug("Record: %%r: {!r}".format(record))
         if self.verbose > 1:
             LOG.debug("Record: %%s: {}".format(record))
@@ -156,7 +152,6 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         test_content3 = "www.1Testing.com."
 
         from fb_pdnstools.record import PowerDNSRecord
-        from fb_pdnstools.errors import PowerDNSWrongRecordTypeError
 
         LOG.debug("Testing the greater than operator with wrong argument ...")
         record = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_content)
@@ -212,7 +207,6 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         test_content3 = "www.1Testing.com."
 
         from fb_pdnstools.record import PowerDNSRecord
-        from fb_pdnstools.errors import PowerDNSWrongRecordTypeError
 
         LOG.debug("Testing the less than operator with wrong argument ...")
         record = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_content)

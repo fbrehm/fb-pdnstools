@@ -22,7 +22,6 @@ import subprocess
 
 # Third party modules
 from setuptools import setup
-from setuptools.command.install import install
 
 # own modules:
 __base_dir__ = os.path.abspath(os.path.dirname(__file__))
@@ -44,14 +43,15 @@ def pp(obj):
     pprinter = pprint.PrettyPrinter(indent=4)
     return pprinter.pformat(obj)
 
-#print("Paths:\n{}".format(pp(PATHS)))
+# print("Paths:\n{}".format(pp(PATHS)))
+
 
 if os.path.exists(__module_dir__) and os.path.isfile(__init_py__):
     sys.path.insert(0, os.path.abspath(__lib_dir__))
 
 import fb_tools
 
-#from fb_tools.common import pp
+# from fb_tools.common import pp
 
 ENCODING = "utf-8"
 
@@ -113,6 +113,7 @@ def get_debian_version():
     if not match:
         return None
     return match.group(1).strip()
+
 
 __debian_version__ = get_debian_version()
 
@@ -241,7 +242,7 @@ setup(
     scripts=__scripts__,
     requires=__requirements__,
     package_dir={'': 'lib'},
-    package_data = {
+    package_data={
         '': create_mo_files(),
     },
 )
