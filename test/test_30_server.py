@@ -14,6 +14,7 @@ import logging
 import logging.handlers
 import syslog
 import datetime
+import json
 
 try:
     import unittest2 as unittest
@@ -62,6 +63,84 @@ class TestPdnsServer(FbPdnsToolsTestcase):
         server = PowerDNSServer(appname=self.appname, verbose=self.verbose)
         LOG.debug("Empty PowerDNSServer:\n{}".format(server))
 
+    # -------------------------------------------------------------------------
+    def set_mocking(self, obj):
+
+        from fb_pdnstools import BasePowerDNSHandler
+
+        if not isinstance(obj, BasePowerDNSHandler):
+            msg = "Given object is not a BasePowerDNSHandler object, but a {} instead.".format(
+                obj.__class__.__name__)
+            raise TypeError(msg)
+
+        obj.mocked = True
+
+        slist = self.get_js_serverlist()
+        obj.mocking_paths.append({
+            'method': 'GET', 'url': '/api/v1/servers', 'text': slist})
+
+        s_localhost = self.get_js_serverlist(0)
+        obj.mocking_paths.append({
+            'method': 'GET', 'url': '/api/v1/servers/localhost', 'text': s_localhost})
+
+        js_zones = self.get_js_zones()
+        obj.mocking_paths.append({
+            'method': 'GET', 'url': '/api/v1/servers/localhost/zones',
+            'text': json.dumps(js_zones)})
+
+        js_zone = self.get_js_zone()
+        obj.mocking_paths.append({
+            'method': 'GET', 'url': '/api/v1/servers/localhost/zones/testing.com.',
+            'text': json.dumps(js_zone)})
+
+        js_zone_rev = self.get_js_zone_rev()
+        obj.mocking_paths.append({
+            'method': 'GET', 'url': '/api/v1/servers/localhost/zones/222.40.10.in-addr.arpa.',
+            'text': json.dumps(js_zone_rev)})
+
+    # -------------------------------------------------------------------------
+    def test_get_zone(self):
+
+        LOG.info("Testing getting a zone from a mocked PDNS API ...")
+
+        adapter = requests_mock.Adapter()
+        session = requests.Session()
+        session.mount('mock', adapter)
+
+        from fb_pdnstools.server import PowerDNSServer
+        from fb_pdnstools.zone import PowerDNSZone, PowerDNSZoneDict
+
+        pdns = PowerDNSServer(
+            appname=self.appname, verbose=self.verbose, master_server=self.server_name,
+            key=self.api_key, use_https=False)
+        self.set_mocking(pdns)
+
+        LOG.debug("PowerDNSServer  %%r: {!r}".format(pdns))
+        if self.verbose > 1:
+            LOG.debug("PowerDNSServer: %%s: {}".format(pdns))
+        if self.verbose > 2:
+            LOG.debug("pdns.as_dict():\n{}".format(pp(pdns.as_dict())))
+
+        api_version = pdns.get_api_server_version()
+        self.assertEqual(api_version, self.server_version)
+
+        LOG.debug("Retreiving all zones ...")
+        zones = pdns.get_api_zones()
+        self.assertIsInstance(zones, PowerDNSZoneDict)
+        self.assertIn("testing.com.", zones)
+
+        LOG.debug("Retreiving zone {!r} ...".format("testing.com."))
+        zone = zones["testing.com."]
+        self.assertIsInstance(zone, PowerDNSZone)
+        self.set_mocking(zone)
+        LOG.debug("Updating zone {!r} ...".format("testing.com."))
+        zone.update()
+        LOG.debug("Zone: %%r: {!r}".format(zone))
+        if self.verbose > 1:
+            LOG.debug("Zone: %%s: {}".format(zone))
+        if self.verbose > 2:
+            LOG.debug("zone.as_dict: {}".format(pp(zone.as_dict())))
+
 
 # =============================================================================
 if __name__ == '__main__':
@@ -77,6 +156,7 @@ if __name__ == '__main__':
     suite = unittest.TestSuite()
 
     suite.addTest(TestPdnsServer('test_import_modules', verbose))
+    suite.addTest(TestPdnsServer('test_get_zone', verbose))
 
     runner = unittest.TextTestRunner(verbosity=verbose)
 
