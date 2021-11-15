@@ -17,7 +17,7 @@ from .xlate import XLATOR
 
 _ = XLATOR.gettext
 
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 
 
 # =============================================================================
@@ -75,7 +75,7 @@ class PDNSApiError(PowerDNSHandlerError):
 
         if self.uri:
             msg = _("Got a {code} error code from {uri!r}: {msg}").format(
-                    code=self.code, uri=self.uri, msg=self.msg)
+                code=self.code, uri=self.uri, msg=self.msg)
         else:
             msg = _("Got a {code} error code: {msg}").format(code=self.code, msg=self.msg)
 
