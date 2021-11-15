@@ -1,3 +1,17 @@
+fb-pdnstools (0.4.0) UNRELEASED; urgency=medium
+
+  * Adding lib/fb_pdnstools/record.py for classes PowerDNSRecord,
+    PowerDNSRecord and PowerDNSRecordList
+  * Adding lib/fb_pdnstools/zone.py for classes PDNSNoRecordsToRemove,
+    PowerDNSZone and PowerDNSZoneDict
+  * Adding lib/fb_pdnstools/server.py for class PowerDNSServer
+  * Adding bin/pdns-bulk-remove, lib/fb_pdnstools/bulk_rm_app.py and
+    lib/fb_pdnstools/bulk_rm_cfg.py for an application to remove a bunch
+    of addresses from PowerDNS
+  * Adding tests for those new classes and modules
+
+ -- Frank Brehm <frank.brehm@pixelpark.com>  Mon, 15 Nov 2021 16:50:02 +0100
+
 fb-pdnstools (0.3.0) all; urgency=medium
 
   * Initial release
