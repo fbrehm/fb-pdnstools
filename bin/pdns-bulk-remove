@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function
+
+import sys
+
+if sys.version_info[0] != 3:
+    print("This script is intended to use with Python3.", file=sys.stderr)
+    print("You are using Python: {0}.{1}.{2}-{3}-{4}.\n".format(
+        *sys.version_info), file=sys.stderr)
+    sys.exit(1)
+
+if sys.version_info[1] < 6:
+    print("A minimal Python version of 3.6 is necessary to execute this script.", file=sys.stderr)
+    print("You are using Python: {0}.{1}.{2}-{3}-{4}.\n".format(
+        *sys.version_info), file=sys.stderr)
+    sys.exit(1)
+
+import os
+import logging
+import locale
+
+# own modules:
+cur_dir = os.getcwd()
+base_dir = cur_dir
+
+if sys.argv[0] != '' and sys.argv[0] != '-c':
+    bin_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
+else:
+    bin_dir = os.path.dirname(os.path.realpath(__file__))
+base_dir = os.path.abspath(os.path.join(bin_dir, '..'))
+lib_dir = os.path.join(base_dir, 'lib')
+module_dir = os.path.join(lib_dir, 'fb_pdnstools')
+if os.path.exists(module_dir):
+    sys.path.insert(0, lib_dir)
+
+from fb_pdnstools.bulk_rm_app import PdnsBulkRmApp
+
+log = logging.getLogger(__name__)
+
+__author__ = 'Frank Brehm <frank@brehm-online.com>'
+__copyright__ = '(C) 2021 by Frank Brehm, Berlin'
+
+appname = os.path.basename(sys.argv[0])
+
+locale.setlocale(locale.LC_ALL, '')
+
+app = PdnsBulkRmApp(appname=appname, base_dir=base_dir)
+app.initialized = True
+
+if app.verbose > 2:
+    print("{c}-Object:\n{a}".format(c=app.__class__.__name__, a=app))
+
+app()
+
+sys.exit(0)
+
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
