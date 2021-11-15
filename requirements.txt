@@ -1,3 +1,4 @@
+fb_logging
 fb_tools
 requests
 six
