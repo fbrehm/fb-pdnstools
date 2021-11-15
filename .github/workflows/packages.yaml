@@ -87,14 +87,14 @@ jobs:
       - name: Execute Flake 8
         shell: bash
         run: |
-          flake8 --max-line-length=$FLAKE8_MAX_LINE_LENGTH --max-complexity=$FLAKE8_MAX_COMPLEXITY --ignore=$FLAKE8_IGNORE_ERRORS bin lib
+          flake8 --max-line-length=$FLAKE8_MAX_LINE_LENGTH --max-complexity=$FLAKE8_MAX_COMPLEXITY --ignore=$FLAKE8_IGNORE_ERRORS bin lib setup.py
       - name: Execute Shellcheck
         shell: bash
         run: >
           shellcheck -x compile-xlate-msgs.sh xtract-xlate-msgs.sh
       - name: Execute Yamllint
         shell: bash
-        run: yamllint -c yamllint.yaml .gitlab-ci.yml
+        run: yamllint -c yamllint.yaml .github
 
 
 # vim: et tabstop=2 expandtab shiftwidth=2 softtabstop=2 list
