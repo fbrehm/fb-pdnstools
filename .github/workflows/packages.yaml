@@ -1,0 +1,100 @@
+---
+
+name: "Building OS packages."
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - '**'
+      - '!dev-**'
+      - '!dev/**'
+      - '!hf**'
+      - '!old**'
+    tags:
+      - '**'
+
+env:
+  DEBFULLNAME: 'Frank Brehm'
+  DEBEMAIL: 'frank@brehm-online.com'
+  GITREF: ${{ github.ref }}
+  NOTIFY_ADDRESS: 'frank@brehm-online.com,frank.brehm@pixelpark.com'
+  PKG_NAME: 'fb_tools'
+  SENDER_ADDRESS: 'Frank Brehm <frank@brehm-online.com>'
+  SMTP_SERVER_ADDRESS: 'mail.uhu-banane.net'
+  SMTP_SERVER_PORT: 587
+  USED_TIMEZONE: 'Europe/Berlin'
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    name: Executing Python tests
+    strategy:
+      fail-fast: false
+      matrix:
+        python_version: [ '3.6', '3.7', '3.8', '3.9', '3.10' ]
+    container: python:${{ matrix.python_version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Show Environment
+        run: python --version
+      - uses: ./.github/actions/prepare-debian-container
+      - uses: ./.github/actions/install-pip-modules
+      - name: Install PyTest with pip
+        run: |
+          pip install --upgrade --upgrade-strategy eager pytest
+          pip list --format columns
+      - name: Executing PyTest
+        run: pytest --verbose
+
+  linter:
+    runs-on: ubuntu-latest
+    name: Executing Linters
+    container: python:3.9
+    env:
+      FLAKE8_MAX_LINE_LENGTH: 99
+      FLAKE8_MAX_COMPLEXITY: 20
+      FLAKE8_IGNORE_ERRORS: 'E226,E302,E41,E402'
+    needs:
+      - test
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/prepare-debian-container
+      - uses: ./.github/actions/install-pip-modules
+      - name: Install shellcheck and yamllint
+        shell: bash
+        run: apt install --yes shellcheck yamllint
+      - name: Install flake8 and pylint
+        shell: bash
+        run: |
+          pip install --upgrade --upgrade-strategy eager flake8 pylint
+          pip list --format columns
+      - name: "Checking module version against tag."
+        shell: bash
+        run: |
+          MODULE_VERSION=$( cat lib/fb_pdnstools/__init__.py | grep -P '^__version__(\s|=)' | sed -e "s/^[^'\"]*['\"]//"  -e "s/['\"][ 	]*\$//" )
+          echo "Module version: '${MODULE_VERSION}'"
+          if echo "${GITREF}" | grep -q -P '^refs/tags/' ; then
+              TAG_VERSION=$( echo "${GITREF}" | sed -e 's|^refs/tags/||' )
+              if [[ "${MODULE_VERSION}" == "${TAG_VERSION}" ]] ; then
+                  echo "Tag and module version '${TAG_VERSION}' are okay."
+              else
+                  echo "Tag '${TAG_VERSION}' does not match module version '${MODULE_VERSION}'" >&2
+                  exit 5
+              fi
+          fi
+      - name: Execute Flake 8
+        shell: bash
+        run: |
+          flake8 --max-line-length=$FLAKE8_MAX_LINE_LENGTH --max-complexity=$FLAKE8_MAX_COMPLEXITY --ignore=$FLAKE8_IGNORE_ERRORS bin lib
+      - name: Execute Shellcheck
+        shell: bash
+        run: >
+          shellcheck -x compile-xlate-msgs.sh update-env.sh xtract-xlate-msgs.sh
+      - name: Execute Yamllint
+        shell: bash
+        run: yamllint -c yamllint.yaml .gitlab-ci.yml
+
+
+# vim: et tabstop=2 expandtab shiftwidth=2 softtabstop=2 list
