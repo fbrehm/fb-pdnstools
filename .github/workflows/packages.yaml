@@ -125,5 +125,84 @@ jobs:
           path: debian/pkgs/*/*
           retention-days: 8
 
+  build_debian_bin:
+    runs-on: ubuntu-latest
+    name: Building Debian Binary Packages
+    # if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || startsWith( github.ref, 'refs/tags/' ) }}
+    needs:
+      - linter
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distributor: 'Debian'
+            os_codename: 'buster'
+            os_release: '10'
+            container: 'debian:buster'
+            version_prefix: 'deb10'
+            compat: '11'
+          - distributor: 'Debian'
+            os_codename: 'bullseye'
+            os_release: '11'
+            container: 'debian:bullseye'
+            version_prefix: 'deb11'
+            compat: '12'
+          - distributor: 'Ubuntu'
+            os_codename: 'bionic'
+            os_release: '18.04'
+            container: 'ubuntu:bionic'
+            version_prefix: 'ubuntu18.04'
+            compat: '11'
+          - distributor: 'Ubuntu'
+            os_codename: 'focal'
+            os_release: '20.04'
+            container: 'ubuntu:focal'
+            version_prefix: 'ubuntu20.04'
+            compat: '12'
+    env:
+      COMPAT: ${{ matrix.compat }}
+      DISTRIBUTOR: ${{ matrix.distributor }}
+      OS_CODENAME: ${{ matrix.os_codename }}
+      OS_RELEASE: ${{ matrix.os_release }}
+      VERSION_PREFIX: ${{ matrix.version_prefix }}
+    container: ${{ matrix.container }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setting timezone
+        if: ${{ matrix.distributor == 'Ubuntu' }}
+        run: |
+          echo "Setting system timezone to ${USED_TIMEZONE} ..."
+          ln -fvs /usr/share/zoneinfo/${USED_TIMEZONE} /etc/localtime
+          export DEBIAN_FRONTEND=noninteractive
+      - uses: ./.github/actions/add-fb-debian-repo
+        with:
+          vendor: ${{ matrix.distributor }}
+          distro: ${{ matrix.os_codename }}
+      - uses: ./.github/actions/prepare-debian-container
+      - uses: ./.github/actions/debian-install-buildenv
+      - name: Updating Changelog
+        run: |
+          export PKG_VERSION=$( ./get-debian-version )
+          export BUILD_VERSION="${PKG_VERSION}+${VERSION_PREFIX}"
+          BUILDER="${DEBFULLNAME} <${DEBEMAIL}>"
+          echo "Version to build: ${BUILD_VERSION} - Builder: ${BUILDER}"
+          debchange --newversion "${BUILD_VERSION}" --force-bad-version --distribution "${OS_CODENAME}" --urgency medium "Build for ${DISTRIBUTOR} ${OS_RELEASE} - ${OS_CODENAME}"
+          head -n 5 debian/changelog
+      - name: Debian build
+        run: |
+          echo "Setting debian/compat to ${COMPAT}"
+          echo "${COMPAT}" > debian/compat
+          echo "y" | debuild -b -i -us -uc
+          ls -lA --color=always ..
+          mkdir -pv debian/pkgs/${VERSION_PREFIX}
+          mv -vi ../*.deb ../*.build* debian/pkgs/${VERSION_PREFIX}
+          ls -lA --color=always debian/pkgs/*/*
+      - name: 'Upload Binary Package'
+        uses: actions/upload-artifact@v2
+        with:
+          name: debian_bin_pkgs_${{ matrix.version_prefix }}
+          path: debian/pkgs/*/*
+          retention-days: 8
+
 
 # vim: et tabstop=2 expandtab shiftwidth=2 softtabstop=2 list
