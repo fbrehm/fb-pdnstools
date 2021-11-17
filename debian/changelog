@@ -1,4 +1,13 @@
-fb-pdnstools (0.4.0) UNRELEASED; urgency=medium
+fb-pdnstools (0.4.1) UNRELEASED; urgency=medium
+
+  * Adding fb-pdnstools.spec.template and some helper scripts for
+    creating RPM packages.
+  * Adding Github workflow and actions for a complete workchain for
+    creating PyPi, Debian and RPM packages and deploying them.
+
+ -- Frank Brehm <frank.brehm@pixelpark.com>  Wed, 17 Nov 2021 11:09:50 +0100
+
+fb-pdnstools (0.4.0) all; urgency=medium
 
   * Adding lib/fb_pdnstools/record.py for classes PowerDNSRecord,
     PowerDNSRecord and PowerDNSRecordList
