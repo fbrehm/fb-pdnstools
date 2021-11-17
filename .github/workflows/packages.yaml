@@ -17,6 +17,7 @@ on:
 env:
   DEBFULLNAME: 'Frank Brehm'
   DEBEMAIL: 'frank@brehm-online.com'
+  FB_REPO_IN_DIR: '/var/www/incoming'
   GITREF: ${{ github.ref }}
   NOTIFY_ADDRESS: 'frank@brehm-online.com,frank.brehm@pixelpark.com'
   PKG_NAME: 'fb-pdnstools'
