@@ -19,7 +19,7 @@ env:
   DEBEMAIL: 'frank@brehm-online.com'
   GITREF: ${{ github.ref }}
   NOTIFY_ADDRESS: 'frank@brehm-online.com,frank.brehm@pixelpark.com'
-  PKG_NAME: 'fb_pdnstools'
+  PKG_NAME: 'fb-pdnstools'
   SENDER_ADDRESS: 'Frank Brehm <frank@brehm-online.com>'
   SMTP_SERVER_ADDRESS: 'mail.uhu-banane.net'
   SMTP_SERVER_PORT: 587
