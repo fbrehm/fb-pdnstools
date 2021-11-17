@@ -1,0 +1,493 @@
+---
+
+name: "Building OS packages."
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - '**'
+      - '!dev-**'
+      - '!dev/**'
+      - '!hf**'
+      - '!old**'
+    tags:
+      - '**'
+
+env:
+  DEBFULLNAME: 'Frank Brehm'
+  DEBEMAIL: 'frank@brehm-online.com'
+  GITREF: ${{ github.ref }}
+  NOTIFY_ADDRESS: 'frank@brehm-online.com,frank.brehm@pixelpark.com'
+  PKG_NAME: 'fb-pdnstools'
+  SENDER_ADDRESS: 'Frank Brehm <frank@brehm-online.com>'
+  SMTP_SERVER_ADDRESS: 'mail.uhu-banane.net'
+  SMTP_SERVER_PORT: 587
+  USED_TIMEZONE: 'Europe/Berlin'
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    name: Executing Python tests
+    strategy:
+      fail-fast: false
+      matrix:
+        python_version: [ '3.6', '3.7', '3.8', '3.9', '3.10' ]
+    container: python:${{ matrix.python_version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Show Environment
+        run: python --version
+      - uses: ./.github/actions/prepare-debian-container
+      - uses: ./.github/actions/install-pip-modules
+      - name: Install PyTest with pip
+        run: |
+          pip install --upgrade --upgrade-strategy eager pytest
+          pip list --format columns
+      - name: Executing PyTest
+        run: pytest --verbose
+
+  linter:
+    runs-on: ubuntu-latest
+    name: Executing Linters
+    container: python:3.9
+    env:
+      FLAKE8_MAX_LINE_LENGTH: 99
+      FLAKE8_MAX_COMPLEXITY: 20
+      FLAKE8_IGNORE_ERRORS: 'E226,E302,E41,E402'
+    needs:
+      - test
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/prepare-debian-container
+      - uses: ./.github/actions/install-pip-modules
+      - name: Install shellcheck and yamllint
+        shell: bash
+        run: apt install --yes shellcheck yamllint
+      - name: Install flake8 and pylint
+        shell: bash
+        run: |
+          pip install --upgrade --upgrade-strategy eager flake8 pylint
+          pip list --format columns
+      - name: "Checking module version against tag."
+        shell: bash
+        run: |
+          MODULE_VERSION=$( cat lib/fb_pdnstools/__init__.py | grep -P '^__version__(\s|=)' | sed -e "s/^[^'\"]*['\"]//"  -e "s/['\"][ 	]*\$//" )
+          echo "Module version: '${MODULE_VERSION}'"
+          if echo "${GITREF}" | grep -q -P '^refs/tags/' ; then
+              TAG_VERSION=$( echo "${GITREF}" | sed -e 's|^refs/tags/||' )
+              if [[ "${MODULE_VERSION}" == "${TAG_VERSION}" ]] ; then
+                  echo "Tag and module version '${TAG_VERSION}' are okay."
+              else
+                  echo "Tag '${TAG_VERSION}' does not match module version '${MODULE_VERSION}'" >&2
+                  exit 5
+              fi
+          fi
+      - name: Execute Flake 8
+        shell: bash
+        run: |
+          flake8 --max-line-length=$FLAKE8_MAX_LINE_LENGTH --max-complexity=$FLAKE8_MAX_COMPLEXITY --ignore=$FLAKE8_IGNORE_ERRORS bin lib setup.py
+      - name: Execute Shellcheck
+        shell: bash
+        run: >
+          shellcheck -x compile-xlate-msgs.sh xtract-xlate-msgs.sh
+      - name: Execute Yamllint
+        shell: bash
+        run: yamllint -c yamllint.yaml .github
+
+  build_debian_sources:
+    runs-on: ubuntu-latest
+    name: Building Debian Source Packages
+    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || startsWith( github.ref, 'refs/tags/' ) }}
+    container: debian:bullseye
+    needs:
+      - linter
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/add-fb-debian-repo
+        with:
+          vendor: Debian
+          distro: bullseye
+      - uses: ./.github/actions/prepare-debian-container
+      - uses: ./.github/actions/debian-install-buildenv
+      - name: Debian build
+        run: |
+          echo "y" | debuild -S -i -us -uc
+          ls -lA --color=always ..
+          mkdir -pv debian/pkgs/src
+          mv -vi ../*.dsc ../*.tar.* ../*.build* ../*.changes debian/pkgs/src
+          ls -lA --color=always debian/pkgs/*/*
+      - name: 'Upload Source Package'
+        uses: actions/upload-artifact@v2
+        with:
+          name: debian_sources
+          path: debian/pkgs/*/*
+          retention-days: 15
+
+  build_debian_bin:
+    runs-on: ubuntu-latest
+    name: Building Debian Binary Packages
+    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || startsWith( github.ref, 'refs/tags/' ) }}
+    needs:
+      - linter
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distributor: 'Debian'
+            os_codename: 'buster'
+            os_release: '10'
+            container: 'debian:buster'
+            version_prefix: 'deb10'
+            compat: '11'
+          - distributor: 'Debian'
+            os_codename: 'bullseye'
+            os_release: '11'
+            container: 'debian:bullseye'
+            version_prefix: 'deb11'
+            compat: '12'
+          - distributor: 'Ubuntu'
+            os_codename: 'bionic'
+            os_release: '18.04'
+            container: 'ubuntu:bionic'
+            version_prefix: 'ubuntu18.04'
+            compat: '11'
+          - distributor: 'Ubuntu'
+            os_codename: 'focal'
+            os_release: '20.04'
+            container: 'ubuntu:focal'
+            version_prefix: 'ubuntu20.04'
+            compat: '12'
+    env:
+      COMPAT: ${{ matrix.compat }}
+      DISTRIBUTOR: ${{ matrix.distributor }}
+      OS_CODENAME: ${{ matrix.os_codename }}
+      OS_RELEASE: ${{ matrix.os_release }}
+      VERSION_PREFIX: ${{ matrix.version_prefix }}
+    container: ${{ matrix.container }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setting timezone
+        if: ${{ matrix.distributor == 'Ubuntu' }}
+        run: |
+          echo "Setting system timezone to ${USED_TIMEZONE} ..."
+          ln -fvs /usr/share/zoneinfo/${USED_TIMEZONE} /etc/localtime
+          export DEBIAN_FRONTEND=noninteractive
+      - uses: ./.github/actions/add-fb-debian-repo
+        with:
+          vendor: ${{ matrix.distributor }}
+          distro: ${{ matrix.os_codename }}
+      - uses: ./.github/actions/prepare-debian-container
+      - uses: ./.github/actions/debian-install-buildenv
+      - name: Updating Changelog
+        run: |
+          export PKG_VERSION=$( ./get-debian-version )
+          export BUILD_VERSION="${PKG_VERSION}+${VERSION_PREFIX}"
+          BUILDER="${DEBFULLNAME} <${DEBEMAIL}>"
+          echo "Version to build: ${BUILD_VERSION} - Builder: ${BUILDER}"
+          debchange --newversion "${BUILD_VERSION}" --force-bad-version --distribution "${OS_CODENAME}" --urgency medium "Build for ${DISTRIBUTOR} ${OS_RELEASE} - ${OS_CODENAME}"
+          head -n 5 debian/changelog
+      - name: Debian build
+        run: |
+          echo "Setting debian/compat to ${COMPAT}"
+          echo "${COMPAT}" > debian/compat
+          echo "y" | debuild -b -i -us -uc
+          ls -lA --color=always ..
+          mkdir -pv debian/pkgs/${VERSION_PREFIX}
+          mv -vi ../*.deb ../*.build* debian/pkgs/${VERSION_PREFIX}
+          ls -lA --color=always debian/pkgs/*/*
+      - name: 'Upload Binary Package'
+        uses: actions/upload-artifact@v2
+        with:
+          name: debian_bin_pkgs_${{ matrix.version_prefix }}
+          path: debian/pkgs/*/*
+          retention-days: 15
+
+  build_rpm:
+    runs-on: ubuntu-latest
+    name: Building RPM packages for Enterprise Linux
+    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || startsWith( github.ref, 'refs/tags/' ) }}
+    needs:
+      - linter
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - el_version: '7'
+            yum: 'yum'
+            py_minor_version: '6'
+          - el_version: '8'
+            yum: 'dnf'
+            py_minor_version: '8'
+    container: centos:${{ matrix.el_version }}
+    env:
+      EL_VERSION: ${{ matrix.el_version }}
+      PY_VERSION_DOT: 3.${{ matrix.py_minor_version}}
+      PY_VERSION_NODOT: 3${{ matrix.py_minor_version}}
+      USED_CHARSET: 'utf8'
+      USED_LOCALE: 'en_US'
+      USED_LC: 'en_US.utf8'
+      YUM: ${{ matrix.yum }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Checking locales
+        shell: bash
+        run: |
+          echo "All locales"
+          locale -a
+          echo
+          echo "Installing locales ..."
+          if [[ "${EL_VERSION}" == "7" ]] ; then
+            echo "${USED_LOCALE}.${USED_CHARSET}"
+            localedef --charmap UTF-8 --inputfile "${USED_LOCALE}" "${USED_LC}"
+          else
+            yum --assumeyes install langpacks-en glibc-all-langpacks
+          fi
+          echo
+          echo "All locales"
+          locale -a
+          echo
+          echo "locales:"
+          locale
+          echo
+          export LC_ALL="${USED_LC}"
+          locale
+      - uses: ./.github/actions/add-fb-yum-repo
+        with:
+          el_major_version: ${{ matrix.el_version }}
+      - name: Install EPEL repo
+        shell: bash
+        run: yum --assumeyes install epel-release
+      - name: Upgrade all packages
+        shell: bash
+        env:
+          LC_ALL: "en_US.utf8"
+        run: |
+          echo "Cleaning ${YUM} ..."
+          ${YUM} clean all
+          echo
+          echo "${YUM} makecache ..."
+          ${YUM} makecache
+          echo
+          echo "Upgrading all packages"
+          ${YUM} --assumeyes upgrade
+      - name: Install Python 3
+        shell: bash
+        env:
+          LC_ALL: "en_US.utf8"
+        run: |
+          echo "Installing Python ${PY_VERSION_NODOT} ..."
+          yum --assumeyes install python${PY_VERSION_NODOT} \
+                                  python${PY_VERSION_NODOT}-setuptools \
+                                  python${PY_VERSION_NODOT}-pip \
+                                  python${PY_VERSION_NODOT}-devel \
+                                  python${PY_VERSION_NODOT}-babel \
+                                  python${PY_VERSION_NODOT}-pytz \
+                                  python${PY_VERSION_NODOT}-six \
+                                  python${PY_VERSION_NODOT}-fb-logging \
+                                  python${PY_VERSION_NODOT}-fb-tools
+          echo
+          echo "Python binaries:"
+          ls -l --color=always /bin/python* /bin/pip* || true
+          echo
+          echo "Installing Python-Debian with pip3 ..."
+          pip3 install python-debian
+          echo
+          echo "Pip3 list:"
+          pip3 list --format columns
+      - name: Installing build tools
+        shell: bash
+        env:
+          LC_ALL: "en_US.utf8"
+        run: |
+          echo "Installing build tools"
+          yum --assumeyes install gnupg2 rpm-build gettext
+      - name: Create build environment
+        shell: bash
+        env:
+          LC_ALL: "en_US.utf8"
+        run: |
+          echo "Creating directories ..."
+          mkdir -pv rpmdir
+          mkdir -pv rpmdir/SOURCES
+          ODIR=$(pwd)
+          ROOT_OBJECTS=$( ls -A1 | egrep -vw ".git|rpmdir" )
+          echo
+          echo "Root objects:"; for o in ${ROOT_OBJECTS}; do echo " * ${o}"; done
+          PKG_VERSION=$( ./get-rpm-version )
+          PKG_RELEASE=$( ./get-rpm-release )
+          echo
+          echo "Version to build: ${PKG_VERSION}-${PKG_RELEASE}"
+          echo
+          RPM_SRC_DIR="python${PY_VERSION_NODOT}_${PKG_NAME}-${PKG_VERSION}"
+          mkdir -pv "rpmdir/SOURCES/${RPM_SRC_DIR}"
+          echo
+          echo "Copying sources recursive into rpmdir/SOURCES/${RPM_SRC_DIR} ..."
+          tar cf - ${ROOT_OBJECTS} | (cd "rpmdir/SOURCES/${RPM_SRC_DIR}" ; tar xf -)
+          echo
+          echo "Creating rpmdir/SOURCES/${PKG_NAME}.${PKG_VERSION}.tar.gz ..."
+          cd rpmdir/SOURCES
+          tar cfz "${PKG_NAME}.${PKG_VERSION}.tar.gz" "${RPM_SRC_DIR}"
+          echo
+          echo "Source file:"
+          ls -lA --color=always *.tar.gz
+          cd "${ODIR}"
+          echo
+          echo "Generating spec file 'fb_logging.spec' ..."
+          cat fb-pdnstools.spec.template | tail -n +3 | \
+                              sed -e "s/@@@Version@@@/${PKG_VERSION}/gi" \
+                                  -e "s/@@@Release@@@/${PKG_RELEASE}/gi" \
+                                  -e "s/@@@py_version_nodot@@@/${PY_VERSION_NODOT}/gi" \
+                                  -e "s/@@@py_version_dot@@@/${PY_VERSION_DOT}/gi" \
+                                  > fb-pdnstools.spec
+          python${PY_VERSION_DOT} changelog-deb2rpm.py debian/changelog >>fb-pdnstools.spec
+          echo
+          echo "Generated Spec file:"
+          cat fb-pdnstools.spec
+          echo
+          RPM_MACROS="${HOME}/.rpmmacros"
+          echo "Creating '${RPM_MACROS}' ..."
+          echo "%__python3 /bin/python${PY_VERSION_DOT}" >"${RPM_MACROS}"
+          echo "%_signature gpg" >>"${RPM_MACROS}"
+          echo
+          echo "Generated '${RPM_MACROS}':"
+          cat "${RPM_MACROS}"
+      - name: Creating RPMs
+        shell: bash
+        env:
+          LC_ALL: "en_US.utf8"
+        run: |
+          rpmbuild -ba --nocheck --verbose \
+              --define "_topdir $(pwd)/rpmdir" \
+              fb-pdnstools.spec
+          echo
+          echo "Results:"
+          find rpmdir/*RPMS -type f -print0 | xargs --null --no-run-if-empty ls -l -d --color=always
+      - name: 'Upload RPM Packages'
+        uses: actions/upload-artifact@v2
+        with:
+          name: rpm_pkgs_el${{ matrix.el_version }}
+          path: |
+            rpmdir/RPMS/*/*.rpm
+            rpmdir/SRPMS/*.rpm
+          retention-days: 15
+
+  deploy_to_pypi:
+    runs-on: ubuntu-latest
+    name: "Deployment of the Python package to PyPi"
+    container: debian:bullseye
+    needs:
+      - linter
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/add-fb-debian-repo
+        with:
+          vendor: Debian
+          distro: bullseye
+      - uses: ./.github/actions/prepare-debian-container
+      - uses: ./.github/actions/debian-install-buildenv
+      - uses: actions/setup-python@v2
+      - uses: casperdcl/deploy-pypi@v2
+        with:
+          password: ${{ secrets.PYPI_TOKEN }}
+          requirements: 'twine --requirement requirements.txt'
+          pip: wheel -w dist/ --no-deps .
+          build: clean sdist -d dist/ bdist_wheel -d dist/
+          # only upload if a tag is pushed (otherwise just build & check)
+          upload: ${{ github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags') }}
+      - name: Show results
+        shell: bash
+        run: ls -l --color=always dist/
+      - name: 'Upload Python Package'
+        uses: actions/upload-artifact@v2
+        with:
+          name: python_pkgs
+          path: dist/*
+          retention-days: 15
+
+  deploy_to_fbrepo:
+    runs-on: ubuntu-latest
+    name: "Deployment of all Packages to Frank Brehms repo server"
+    env:
+      TARGET: ${{ secrets.FB_REPO_USER }}@${{ secrets.FB_REPO_SERVER }}:${FB_REPO_IN_DIR}
+    needs:
+      - 'build_debian_sources'
+      - 'build_debian_bin'
+      - 'build_rpm'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Downloading all artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+      - name: Sorting all artifacts
+        run: |
+          mv -vi artifacts/debian_bin_pkgs_*/* artifacts/
+          mv -vi artifacts/debian_sources/src artifacts/
+          rmdir -v artifacts/debian_bin_pkgs_* artifacts/debian_sources
+          mkdir -pv artifacts/el-7 artifacts/el-8
+          mv -vi artifacts/rpm_pkgs_el7/*/*/*.rpm artifacts/rpm_pkgs_el7/*/*.rpm artifacts/el-7/
+          mv -vi artifacts/rpm_pkgs_el8/*/*/*.rpm artifacts/rpm_pkgs_el8/*/*.rpm artifacts/el-8/
+          rm -rv artifacts/rpm_pkgs_el*
+      - name: Show all artifacts
+        run: |
+          find artifacts -print0 | xargs --null --no-run-if-empty ls -l -d --color=always
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.FB_REPOIN_SSH_PRIVATE_KEY }}
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.FB_REPO_SERVER }} >> ~/.ssh/known_hosts
+      - name: Show .ssh dir
+        run: |
+          ls -l --color=always ~/.ssh/
+          echo "Content of ~/.ssh/known_hosts:"
+          cat ~/.ssh/known_hosts
+      - name: Deploy Debian packages with rsync
+        run: |
+          echo "Syncing Debian packages to '${TARGET}/debian/' ..."
+          if echo "${GITREF}" | grep -q -P '^refs/tags/' ; then
+              rsync -aHvz artifacts/deb* artifacts/ubuntu* artifacts/src "${TARGET}/debian/"
+          fi
+      - name: Deploy RPM packages with rsync
+        run: |
+          echo "Syncing RPMs to '${TARGET}/el/' ..."
+          if echo "${GITREF}" | grep -q -P '^refs/tags/' ; then
+              rsync -aHvz artifacts/el-* "${TARGET}/el/"
+          fi
+
+  notify_success:
+    runs-on: ubuntu-latest
+    name: Sending Success message
+    needs:
+      - 'build_debian_sources'
+      - 'build_debian_bin'
+      - 'build_rpm'
+      - 'deploy_to_pypi'
+      - 'deploy_to_fbrepo'
+    steps:
+      - name: Sending message
+        uses: dawidd6/action-send-mail@v2
+        with:
+          # mail server settings
+          server_address: ${{ env.SMTP_SERVER_ADDRESS }}
+          server_port: ${{ env.SMTP_SERVER_PORT }}
+          # user credentials
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          # email subject
+          subject: Github Workflow ${{ github.workflow }} of ${{ github.repository }} for ${{ github.ref }} was successful.
+          # email body as text
+          body: |
+            Github Actions Workflow ${{ github.workflow }} of ${{ github.repository }} for ${{ github.ref }} was successful.
+            Commiter: ${{ github.actor }}
+
+            Cheers Frank
+          # comma-separated string, send email to
+          to: ${{ env.NOTIFY_ADDRESS }}
+          # from email name
+          from: ${{ env.SENDER_ADDRESS }}
+
+# vim: et tabstop=2 expandtab shiftwidth=2 softtabstop=2 list
