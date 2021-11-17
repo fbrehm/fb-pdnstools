@@ -1,4 +1,4 @@
-fb-pdnstools (0.4.1) UNRELEASED; urgency=medium
+fb-pdnstools (0.4.1) all; urgency=medium
 
   * Adding fb-pdnstools.spec.template and some helper scripts for
     creating RPM packages.
