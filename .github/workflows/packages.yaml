@@ -411,7 +411,7 @@ jobs:
     runs-on: ubuntu-latest
     name: "Deployment of all Packages to Frank Brehms repo server"
     env:
-      TARGET: ${{ secrets.FB_REPO_USER }}@${{ secrets.FB_REPO_SERVER }}:${FB_REPO_IN_DIR}
+      TARGET: ${{ secrets.FB_REPO_USER }}@${{ secrets.FB_REPO_SERVER }}:
     needs:
       - 'build_debian_sources'
       - 'build_debian_bin'
@@ -448,15 +448,15 @@ jobs:
           cat ~/.ssh/known_hosts
       - name: Deploy Debian packages with rsync
         run: |
-          echo "Syncing Debian packages to '${TARGET}/debian/' ..."
+          echo "Syncing Debian packages to '${TARGET}${FB_REPO_IN_DIR}/debian/' ..."
           if echo "${GITREF}" | grep -q -P '^refs/tags/' ; then
-              rsync -aHvz artifacts/deb* artifacts/ubuntu* artifacts/src "${TARGET}/debian/"
+              rsync -aHvz artifacts/deb* artifacts/ubuntu* artifacts/src "${TARGET}${FB_REPO_IN_DIR}/debian/"
           fi
       - name: Deploy RPM packages with rsync
         run: |
-          echo "Syncing RPMs to '${TARGET}/el/' ..."
+          echo "Syncing RPMs to '${TARGET}${FB_REPO_IN_DIR}/el/' ..."
           if echo "${GITREF}" | grep -q -P '^refs/tags/' ; then
-              rsync -aHvz artifacts/el-* "${TARGET}/el/"
+              rsync -aHvz artifacts/el-* "${TARGET}${FB_REPO_IN_DIR}/el/"
           fi
 
   notify_success:
