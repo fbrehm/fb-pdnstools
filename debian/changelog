@@ -1,4 +1,4 @@
-fb-pdnstools (0.4.3) UNRELEASED; urgency=medium
+fb-pdnstools (0.4.3) all; urgency=medium
 
   * Fixing .github/workflows/packages.yaml
 
