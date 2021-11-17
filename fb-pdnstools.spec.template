@@ -1,7 +1,7 @@
 # vim: filetype=spec
 
 %define version @@@Version@@@
-%define builddir python@@@py_version_nodot@@@_fb--pdnstools%{version}
+%define builddir python@@@py_version_nodot@@@_fb-pdnstools-%{version}
 
 Name:           python@@@py_version_nodot@@@-fb-pdnstools
 Version:        %{version}
