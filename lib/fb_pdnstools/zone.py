@@ -40,7 +40,7 @@ from .record import PowerDnsSOAData, PowerDNSRecord
 from .record import PowerDNSRecordSetComment
 from .record import PowerDNSRecordSet, PowerDNSRecordSetList
 
-__version__ = '0.10.0'
+__version__ = '0.11.0'
 
 LOG = logging.getLogger(__name__)
 
@@ -73,12 +73,13 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -------------------------------------------------------------------------
     def __init__(
         self, appname=None, verbose=0, version=__version__, base_dir=None,
-            account=None, dnssec=False, id=None, kind=None, last_check=None,
+            account=None, dnssec=False, edited_serial=None, id=None, kind=None, last_check=None,
             masters=None, name=None, notified_serial=None, serial=None, url=None,
             soa_edit=None, soa_edit_api=None, nsec3narrow=None, nsec3param=None,
             presigned=None, api_rectify=None, master_server=None, port=DEFAULT_PORT,
             key=None, use_https=False, timeout=None, path_prefix=DEFAULT_API_PREFIX,
-            simulate=None, force=None, terminal_has_colors=False, initialized=None):
+            simulate=None, force=None, terminal_has_colors=False, initialized=None,
+            **kwargs):
 
         self._account = account
         self._dnssec = dnssec
@@ -91,6 +92,7 @@ class PowerDNSZone(BasePowerDNSHandler):
         self._name = None
         self._notified_serial = notified_serial
         self._serial = serial
+        self._edited_serial = edited_serial
         self._url = url
         self._nsec3narrow = None
         if nsec3narrow is not None:
@@ -112,6 +114,11 @@ class PowerDNSZone(BasePowerDNSHandler):
 
         self._soa_edit = soa_edit
         self._soa_edit_api = soa_edit_api
+
+        self._add_keys = {}
+        if kwargs:
+            self._add_keys = copy.copy(kwargs)
+            LOG.debug(_("Got unknown init parameters:") + '\n' + pp(self._add_keys))
 
         super(PowerDNSZone, self).__init__(
             appname=appname, verbose=verbose, version=version, base_dir=base_dir,
@@ -355,6 +362,14 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     # -----------------------------------------------------------
     @property
+    def edited_serial(self):
+        """The SOA serial as seen in query responses.
+        Calculated using the SOA-EDIT metadata, default-soa-edit and
+        default-soa-edit-signed settings."""
+        return getattr(self, '_edited_serial', None)
+
+    # -----------------------------------------------------------
+    @property
     def url(self):
         """The URL in the API to get the zone object."""
         return getattr(self, '_url', None)
@@ -417,6 +432,7 @@ class PowerDNSZone(BasePowerDNSHandler):
         res['name'] = self.name
         res['name_unicode'] = self.name_unicode
         res['notified_serial'] = self.notified_serial
+        res['edited_serial'] = self.edited_serial
         res['serial'] = self.serial
         res['url'] = self.url
         res['rrsets'] = []
@@ -543,13 +559,13 @@ class PowerDNSZone(BasePowerDNSHandler):
 
         zone = self.__class__(
             appname=self.appname, verbose=self.verbose, base_dir=self.base_dir,
-            account=self.account, dnssec=self.dnssec, id=self.id, kind=self.kind,
-            last_check=self.last_check, masters=self.masters, name=self.name,
-            notified_serial=self.notified_serial, serial=self.serial, url=self.url,
+            account=self.account, dnssec=self.dnssec, edited_serial=self.edited_serial,
+            id=self.id, kind=self.kind, last_check=self.last_check, masters=self.masters,
+            name=self.name, notified_serial=self.notified_serial, serial=self.serial, url=self.url,
             presigned=self.presigned, api_rectify=self.api_rectify,
             master_server=self.master_server, port=self.port, key=self.key,
             use_https=self.use_https, timeout=self.timeout, path_prefix=self.path_prefix,
-            simulate=self.simulate, force=self.force, initialized=False)
+            simulate=self.simulate, force=self.force, initialized=False, **self._add_keys)
 
         zone.rrsets = copy.copy(self.rrsets)
 
@@ -601,6 +617,11 @@ class PowerDNSZone(BasePowerDNSHandler):
             self._serial = json_response['serial']
         else:
             self._serial = None
+
+        if 'edited_serial' in json_response:
+            self._edited_serial = json_response['edited_serial']
+        else:
+            self._edited_serial = None
 
         if 'nsec3narrow' in json_response:
             self._nsec3narrow = json_response['nsec3narrow']
