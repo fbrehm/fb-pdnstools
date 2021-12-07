@@ -26,7 +26,8 @@ except ImportError:
 import six
 
 # Own modules
-from fb_tools.common import pp, to_utf8, to_bool, compare_fqdn, RE_DOT, to_str, to_unicode
+from fb_tools.common import pp, to_utf8, to_bool, compare_fqdn, RE_DOT, to_str
+from fb_tools.common import to_unicode, is_sequence
 
 from fb_tools.obj import FbBaseObject
 
@@ -40,7 +41,7 @@ from .record import PowerDnsSOAData, PowerDNSRecord
 from .record import PowerDNSRecordSetComment
 from .record import PowerDNSRecordSet, PowerDNSRecordSetList
 
-__version__ = '0.11.1'
+__version__ = '0.11.2'
 
 LOG = logging.getLogger(__name__)
 
@@ -75,7 +76,8 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -------------------------------------------------------------------------
     def __init__(
         self, appname=None, verbose=0, version=__version__, base_dir=None,
-            account=None, dnssec=False, edited_serial=None, id=None, kind=None, last_check=None,
+            account=None, dnssec=False, edited_serial=None, id=None, kind=None,
+            last_check=None, master_tsig_key_ids=None, slave_tsig_key_ids=None,
             masters=None, name=None, notified_serial=None, serial=None, url=None,
             soa_edit=None, soa_edit_api=None, nsec3narrow=None, nsec3param=None,
             presigned=None, api_rectify=None, master_server=None, port=DEFAULT_PORT,
@@ -108,6 +110,14 @@ class PowerDNSZone(BasePowerDNSHandler):
         self._api_rectify = None
         if api_rectify is not None:
             self._api_rectify = to_bool(api_rectify)
+
+        self._master_tsig_key_ids = []
+        if master_tsig_key_ids:
+            self.master_tsig_key_ids = master_tsig_key_ids
+
+        self._slave_tsig_key_ids = []
+        if slave_tsig_key_ids:
+            self.slave_tsig_key_ids = slave_tsig_key_ids
 
         self._reverse_zone = False
         self._reverse_net = None
@@ -422,6 +432,38 @@ class PowerDNSZone(BasePowerDNSHandler):
         """Additional, unexpected keys on initialisation."""
         return copy.copy(self._add_keys)
 
+    # -----------------------------------------------------------
+    @property
+    def master_tsig_key_ids(self):
+        """The id of the TSIG keys used for master operation in this zone."""
+        return copy.copy(self._master_tsig_key_ids)
+
+    @master_tsig_key_ids.setter
+    def master_tsig_key_ids(self, key_ids):
+        self._master_tsig_key_ids = []
+        if key_ids:
+            if is_sequence(key_ids):
+                for key_id in key_ids:
+                    self._master_tsig_key_ids.append(key_id)
+            else:
+                self._master_tsig_key_ids.append(key_ids)
+
+    # -----------------------------------------------------------
+    @property
+    def slave_tsig_key_ids(self):
+        """The id of the TSIG keys used for slave operation in this zone."""
+        return copy.copy(self._slave_tsig_key_ids)
+
+    @slave_tsig_key_ids.setter
+    def slave_tsig_key_ids(self, key_ids):
+        self._slave_tsig_key_ids = []
+        if key_ids:
+            if is_sequence(key_ids):
+                for key_id in key_ids:
+                    self._slave_tsig_key_ids.append(key_id)
+            else:
+                self._slave_tsig_key_ids.append(key_ids)
+
     # -------------------------------------------------------------------------
     def as_dict(self, short=True):
         """
@@ -457,6 +499,8 @@ class PowerDNSZone(BasePowerDNSHandler):
         res['reverse_zone'] = self.reverse_zone
         res['reverse_net'] = self.reverse_net
         res['add_keys'] = self.add_keys
+        res['master_tsig_key_ids'] = self.master_tsig_key_ids
+        res['slave_tsig_key_ids'] = self.slave_tsig_key_ids
 
         for rrset in self.rrsets:
             if isinstance(rrset, FbBaseObject):
@@ -574,8 +618,10 @@ class PowerDNSZone(BasePowerDNSHandler):
             appname=self.appname, verbose=self.verbose, base_dir=self.base_dir,
             account=self.account, dnssec=self.dnssec, edited_serial=self.edited_serial,
             id=self.id, kind=self.kind, last_check=self.last_check, masters=self.masters,
-            name=self.name, notified_serial=self.notified_serial, serial=self.serial, url=self.url,
-            presigned=self.presigned, api_rectify=self.api_rectify,
+            name=self.name, notified_serial=self.notified_serial, serial=self.serial,
+            url=self.url, presigned=self.presigned, api_rectify=self.api_rectify,
+            master_tsig_key_ids=self.master_tsig_key_ids,
+            slave_tsig_key_ids=self.slave_tsig_key_ids,
             master_server=self.master_server, port=self.port, key=self.key,
             use_https=self.use_https, timeout=self.timeout, path_prefix=self.path_prefix,
             simulate=self.simulate, force=self.force, initialized=False, **self._add_keys)
@@ -659,6 +705,14 @@ class PowerDNSZone(BasePowerDNSHandler):
         self.masters = []
         if 'masters' in json_response:
             self.masters = copy.copy(json_response['masters'])
+
+        self._master_tsig_key_ids = []
+        if 'master_tsig_key_ids' in json_response:
+            self.master_tsig_key_ids = copy.copy(json_response['master_tsig_key_ids'])
+
+        self._slave_tsig_key_ids = []
+        if 'slave_tsig_key_ids' in json_response:
+            self.slave_tsig_key_ids = copy.copy(json_response['slave_tsig_key_ids'])
 
         self.rrsets = PowerDNSRecordSetList()
         if 'rrsets' in json_response:
