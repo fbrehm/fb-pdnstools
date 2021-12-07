@@ -40,7 +40,7 @@ from .record import PowerDnsSOAData, PowerDNSRecord
 from .record import PowerDNSRecordSetComment
 from .record import PowerDNSRecordSet, PowerDNSRecordSetList
 
-__version__ = '0.11.0'
+__version__ = '0.11.1'
 
 LOG = logging.getLogger(__name__)
 
@@ -69,6 +69,8 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     re_rev_ipv4 = re.compile(r'^((?:\d+\.)*\d+)\.in-addr\.arpa\.?$', re.IGNORECASE)
     re_rev_ipv6 = re.compile(r'^((?:[0-9a-f]\.)*[0-9a-f])\.ip6.arpa.?$', re.IGNORECASE)
+
+    warn_on_unknown_property = False
 
     # -------------------------------------------------------------------------
     def __init__(
@@ -118,7 +120,11 @@ class PowerDNSZone(BasePowerDNSHandler):
         self._add_keys = {}
         if kwargs:
             self._add_keys = copy.copy(kwargs)
-            LOG.debug(_("Got unknown init parameters:") + '\n' + pp(self._add_keys))
+            msg = _("Got unknown init parameters:") + '\n' + pp(self._add_keys)
+            if self.warn_on_unknown_property:
+                LOG.warn(msg)
+            else:
+                LOG.debug(msg)
 
         super(PowerDNSZone, self).__init__(
             appname=appname, verbose=verbose, version=version, base_dir=base_dir,
@@ -410,6 +416,12 @@ class PowerDNSZone(BasePowerDNSHandler):
         """Some stuff belonging to PowerDNS >= 4.1."""
         return getattr(self, '_api_rectify', None)
 
+    # -----------------------------------------------------------
+    @property
+    def add_keys(self):
+        """Additional, unexpected keys on initialisation."""
+        return copy.copy(self._add_keys)
+
     # -------------------------------------------------------------------------
     def as_dict(self, short=True):
         """
@@ -444,6 +456,7 @@ class PowerDNSZone(BasePowerDNSHandler):
         res['api_rectify'] = self.api_rectify
         res['reverse_zone'] = self.reverse_zone
         res['reverse_net'] = self.reverse_net
+        res['add_keys'] = self.add_keys
 
         for rrset in self.rrsets:
             if isinstance(rrset, FbBaseObject):
