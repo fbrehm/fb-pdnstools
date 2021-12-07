@@ -132,6 +132,7 @@ class TestPdnsZone(FbPdnsToolsTestcase):
 
         js_zone = self.get_js_zone()
 
+        PowerDNSZone.warn_on_unknown_property = True
         zone = PowerDNSZone.init_from_dict(
             js_zone, appname=self.appname, verbose=self.verbose)
         LOG.debug("Zone: %%r: {!r}".format(zone))
@@ -148,6 +149,7 @@ class TestPdnsZone(FbPdnsToolsTestcase):
 
         js_zone = self.get_js_zone()
 
+        PowerDNSZone.warn_on_unknown_property = True
         zone = PowerDNSZone.init_from_dict(
             js_zone, appname=self.appname, verbose=self.verbose)
         if self.verbose > 1:
