@@ -2,6 +2,7 @@
   {
     "account": "local",
     "dnssec": false,
+    "edited_serial": 2021120201,
     "id": "222.40.10.in-addr.arpa.",
     "kind": "Master",
     "last_check": 0,
@@ -14,6 +15,7 @@
   {
     "account": "Verisign",
     "dnssec": false,
+    "edited_serial": 2021120201,
     "id": "testing.com.",
     "kind": "Master",
     "last_check": 0,
