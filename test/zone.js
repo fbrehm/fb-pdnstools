@@ -2,9 +2,13 @@
   "account": "Verisign",
   "api_rectify": false,
   "dnssec": false,
+  "edited_serial": 2021120201,
   "id": "testing.com.",
   "kind": "Master",
   "last_check": 0,
+  "master_tsig_key_ids": [
+    "pp-dns.com."
+  ],
   "masters": [],
   "name": "testing.com.",
   "notified_serial": 2018061201,
@@ -129,6 +133,7 @@
     }
   ],
   "serial": 2018061201,
+  "slave_tsig_key_ids": [],
   "soa_edit": "",
   "soa_edit_api": "INCEPTION-INCREMENT",
   "url": "/api/v1/servers/localhost/zones/testing.com."

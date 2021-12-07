@@ -17,7 +17,7 @@ from .xlate import XLATOR
 
 _ = XLATOR.gettext
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 
 # =============================================================================
@@ -80,6 +80,7 @@ class PDNSApiError(PowerDNSHandlerError):
             msg = _("Got a {code} error code: {msg}").format(code=self.code, msg=self.msg)
 
         return msg
+
 
 # =============================================================================
 class PDNSApiNotAuthorizedError(PDNSApiError):

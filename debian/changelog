@@ -1,3 +1,14 @@
+fb-pdnstools (0.4.4) all; urgency=medium
+
+  * Adding properties 'edited_serial', 'master_tsig_key_ids' and
+    'slave_tsig_key_ids' to class PowerDNSZone.
+  * Extending test data for new properties of class PowerDNSZone.
+  * Adding class property 'warn_on_unknown_property' to class
+    PowerDNSZone to optional warn on new properties of a zone in the
+    PowerDNS API.
+
+ -- Frank Brehm <frank.brehm@pixelpark.com>  Tue, 07 Dec 2021 10:17:16 +0100
+
 fb-pdnstools (0.4.3) all; urgency=medium
 
   * Fixing .github/workflows/packages.yaml
