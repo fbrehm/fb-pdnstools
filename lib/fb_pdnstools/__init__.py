@@ -3,7 +3,7 @@
 """
 @author: Frank Brehm
 @contact: frank@brehm-online.com
-@copyright: © 2021 Frank Brehm, Berlin
+@copyright: © 2022 Frank Brehm, Berlin
 @summary: The module for a base PowerDNS handler object.
 """
 from __future__ import absolute_import
@@ -41,7 +41,7 @@ from .xlate import XLATOR
 from .errors import PowerDNSHandlerError, PDNSApiError, PDNSApiNotAuthorizedError
 from .errors import PDNSApiNotFoundError, PDNSApiValidationError, PDNSApiRateLimitExceededError
 
-__version__ = '0.4.4'
+__version__ = '0.5.0'
 LOG = logging.getLogger(__name__)
 LIBRARY_NAME = "fb-pdns-api-client"
 
