@@ -1,3 +1,10 @@
+fb-pdnstools (0.5.0) UNRELEASED; urgency=medium
+
+  * Support creating RPMs for CentOS Stream 9
+  * Changing Distro for building EL-8 packages to CentOS Stream 8
+
+ -- Frank Brehm <frank@brehm-online.com>  Thu, 10 Feb 2022 04:09:45 +0100
+
 fb-pdnstools (0.4.4) all; urgency=medium
 
   * Adding properties 'edited_serial', 'master_tsig_key_ids' and
