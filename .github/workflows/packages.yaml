@@ -276,7 +276,7 @@ jobs:
           el_major_version: ${{ matrix.el_version }}
       - name: Install EPEL repo
         shell: bash
-        run: ${YUM} --assumeyes install epel-release
+        run: ${YUM} --assumeyes install "${EPEL_PACKAGE}"
       - name: Upgrade all packages
         shell: bash
         env:
