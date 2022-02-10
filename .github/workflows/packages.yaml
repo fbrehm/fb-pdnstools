@@ -218,14 +218,31 @@ jobs:
           - el_version: '7'
             yum: 'yum'
             py_minor_version: '6'
+            py_version_dot: '3.6'
+            py_version_nodot: '36'
+            image: centos:7
+            epel_package: epel-release
           - el_version: '8'
             yum: 'dnf'
             py_minor_version: '8'
-    container: centos:${{ matrix.el_version }}
+            py_version_dot: '3.8'
+            py_version_nodot: '38'
+            image: dokken/centos-stream-8
+            epel_package: epel-release
+          - el_version: '9'
+            yum: 'dnf'
+            py_minor_version: '9'
+            py_version_dot: '3'
+            py_version_nodot: '3'
+            image: dokken/centos-stream-9
+            epel_package: https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+    container: ${{ matrix.image }}
     env:
       EL_VERSION: ${{ matrix.el_version }}
-      PY_VERSION_DOT: 3.${{ matrix.py_minor_version}}
-      PY_VERSION_NODOT: 3${{ matrix.py_minor_version}}
+      EPEL_PACKAGE: ${{ matrix.epel_package }}
+      PY_VERSION_DOT: ${{ matrix.py_version_dot}}
+      PY_VERSION_NODOT: ${{ matrix.py_version_nodot}}
+      PYTHON: "python${{ matrix.py_version_nodot}}"
       USED_CHARSET: 'utf8'
       USED_LOCALE: 'en_US'
       USED_LC: 'en_US.utf8'
@@ -243,7 +260,7 @@ jobs:
             echo "${USED_LOCALE}.${USED_CHARSET}"
             localedef --charmap UTF-8 --inputfile "${USED_LOCALE}" "${USED_LC}"
           else
-            yum --assumeyes install langpacks-en glibc-all-langpacks
+            ${YUM} --assumeyes install langpacks-en glibc-all-langpacks
           fi
           echo
           echo "All locales"
@@ -259,7 +276,7 @@ jobs:
           el_major_version: ${{ matrix.el_version }}
       - name: Install EPEL repo
         shell: bash
-        run: yum --assumeyes install epel-release
+        run: ${YUM} --assumeyes install epel-release
       - name: Upgrade all packages
         shell: bash
         env:
@@ -279,15 +296,15 @@ jobs:
           LC_ALL: "en_US.utf8"
         run: |
           echo "Installing Python ${PY_VERSION_NODOT} ..."
-          yum --assumeyes install python${PY_VERSION_NODOT} \
-                                  python${PY_VERSION_NODOT}-setuptools \
-                                  python${PY_VERSION_NODOT}-pip \
-                                  python${PY_VERSION_NODOT}-devel \
-                                  python${PY_VERSION_NODOT}-babel \
-                                  python${PY_VERSION_NODOT}-pytz \
-                                  python${PY_VERSION_NODOT}-six \
-                                  python${PY_VERSION_NODOT}-fb-logging \
-                                  python${PY_VERSION_NODOT}-fb-tools
+          ${YUM} --assumeyes install ${PYTHON} \
+                                     ${PYTHON}-setuptools \
+                                     ${PYTHON}-pip \
+                                     ${PYTHON}-devel \
+                                     ${PYTHON}-babel \
+                                     ${PYTHON}-pytz \
+                                     ${PYTHON}-six \
+                                     ${PYTHON}-fb-logging \
+                                     ${PYTHON}-fb-tools
           echo
           echo "Python binaries:"
           ls -l --color=always /bin/python* /bin/pip* || true
@@ -303,7 +320,7 @@ jobs:
           LC_ALL: "en_US.utf8"
         run: |
           echo "Installing build tools"
-          yum --assumeyes install gnupg2 rpm-build gettext
+          ${YUM} --assumeyes install gnupg2 rpm-build gettext
       - name: Create build environment
         shell: bash
         env:
