@@ -41,7 +41,7 @@ from .xlate import XLATOR
 from .errors import PowerDNSHandlerError, PDNSApiError, PDNSApiNotAuthorizedError
 from .errors import PDNSApiNotFoundError, PDNSApiValidationError, PDNSApiRateLimitExceededError
 
-__version__ = '0.5.1'
+__version__ = '0.5.2'
 LOG = logging.getLogger(__name__)
 LIBRARY_NAME = "fb-pdns-api-client"
 

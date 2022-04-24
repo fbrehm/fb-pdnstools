@@ -302,6 +302,20 @@ jobs:
           echo
           echo "Upgrading all packages"
           ${YUM} --assumeyes upgrade
+      - name: Install TZdata
+        shell: bash
+        env:
+          LC_ALL: "en_US.utf8"
+        run: |
+          if rpm -qa | grep '^tzdata-' >/dev/null ; then
+            echo "Reinstalling tzdata ..."
+            ${YUM} --assumeyes reinstall tzdata || true
+          else
+            echo "Installing tzdata ..."
+            ${YUM} --assumeyes install tzdata || true
+          fi
+          echo
+          ls -l --color=always /usr/share/zoneinfo/zone.tab
       - name: Install Python 3
         shell: bash
         env:
@@ -457,9 +471,10 @@ jobs:
           mv -vi artifacts/debian_bin_pkgs_*/* artifacts/
           mv -vi artifacts/debian_sources/src artifacts/
           rmdir -v artifacts/debian_bin_pkgs_* artifacts/debian_sources
-          mkdir -pv artifacts/el-7 artifacts/el-8
+          mkdir -pv artifacts/el-7 artifacts/el-8 artifacts/el-9
           mv -vi artifacts/rpm_pkgs_el7/*/*/*.rpm artifacts/rpm_pkgs_el7/*/*.rpm artifacts/el-7/
           mv -vi artifacts/rpm_pkgs_el8/*/*/*.rpm artifacts/rpm_pkgs_el8/*/*.rpm artifacts/el-8/
+          mv -vi artifacts/rpm_pkgs_el9/*/*/*.rpm artifacts/rpm_pkgs_el9/*/*.rpm artifacts/el-8/
           rm -rv artifacts/rpm_pkgs_el*
       - name: Show all artifacts
         run: |
