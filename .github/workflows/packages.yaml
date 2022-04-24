@@ -441,6 +441,7 @@ jobs:
   deploy_to_fbrepo:
     runs-on: ubuntu-latest
     name: "Deployment of all Packages to Frank Brehms repo server"
+    if: ${{ startsWith( github.ref, 'refs/tags/' ) }}
     needs:
       - 'build_debian_sources'
       - 'build_debian_bin'
@@ -479,16 +480,12 @@ jobs:
         run: |
           tgt=${{ secrets.FB_REPO_USER }}@${{ secrets.FB_REPO_SERVER }}:${FB_REPO_IN_DIR}/debian/
           echo "Syncing Debian packages to '${tgt}' ..."
-          if echo "${GITREF}" | grep -q -P '^refs/tags/' ; then
-              rsync -aHvz artifacts/deb* artifacts/ubuntu* artifacts/src "${TARGET}"
-          fi
+          rsync -aHvz artifacts/deb* artifacts/ubuntu* artifacts/src "${tgt}"
       - name: Deploy RPM packages with rsync
         run: |
           tgt=${{ secrets.FB_REPO_USER }}@${{ secrets.FB_REPO_SERVER }}:${FB_REPO_IN_DIR}/el/
-          echo "Syncing RPMs to '${TARGET}' ..."
-          if echo "${GITREF}" | grep -q -P '^refs/tags/' ; then
-              rsync -aHvz artifacts/el-* "${TARGET}"
-          fi
+          echo "Syncing RPMs to '${tgt}' ..."
+          rsync -aHvz artifacts/el-* "${tgt}"
 
   ###########################
   notify_success:
