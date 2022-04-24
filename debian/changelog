@@ -1,4 +1,4 @@
-fb-pdnstools (0.5.1) UNRELEASED; urgency=medium
+fb-pdnstools (0.5.1) all; urgency=medium
 
   * Supporting Ubuntu 22.04 Jammy Jellyfish
 
