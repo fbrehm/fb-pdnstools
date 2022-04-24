@@ -1,4 +1,10 @@
-fb-pdnstools (0.5.0) UNRELEASED; urgency=medium
+fb-pdnstools (0.5.1) all; urgency=medium
+
+  * Supporting Ubuntu 22.04 Jammy Jellyfish
+
+ -- Frank Brehm <frank@brehm-online.com>  Sun, 24 Apr 2022 07:43:23 +0200
+
+fb-pdnstools (0.5.0) all; urgency=medium
 
   * Support creating RPMs for CentOS Stream 9
   * Changing Distro for building EL-8 packages to CentOS Stream 8

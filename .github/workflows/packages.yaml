@@ -11,6 +11,7 @@ on:
       - '!dev/**'
       - '!hf**'
       - '!old**'
+      - '!feature**'
     tags:
       - '**'
 
@@ -28,6 +29,7 @@ env:
 
 jobs:
 
+  ###########################
   test:
     runs-on: ubuntu-latest
     name: Executing Python tests
@@ -49,6 +51,7 @@ jobs:
       - name: Executing PyTest
         run: pytest --verbose
 
+  ###########################
   linter:
     runs-on: ubuntu-latest
     name: Executing Linters
@@ -97,10 +100,11 @@ jobs:
         shell: bash
         run: yamllint -c yamllint.yaml .github
 
+  ###########################
   build_debian_sources:
     runs-on: ubuntu-latest
     name: Building Debian Source Packages
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || startsWith( github.ref, 'refs/tags/' ) }}
+    if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/test') || startsWith(github.ref, 'refs/tags/') }}
     container: debian:bullseye
     needs:
       - linter
@@ -124,12 +128,13 @@ jobs:
         with:
           name: debian_sources
           path: debian/pkgs/*/*
-          retention-days: 15
+          retention-days: 8
 
+  ###########################
   build_debian_bin:
     runs-on: ubuntu-latest
     name: Building Debian Binary Packages
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || startsWith( github.ref, 'refs/tags/' ) }}
+    if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/test') || startsWith(github.ref, 'refs/tags/') }}
     needs:
       - linter
     strategy:
@@ -159,6 +164,12 @@ jobs:
             os_release: '20.04'
             container: 'ubuntu:focal'
             version_prefix: 'ubuntu20.04'
+            compat: '12'
+          - distributor: 'Ubuntu'
+            os_codename: 'jammy'
+            os_release: '22.04'
+            container: 'ubuntu:jammy'
+            version_prefix: 'ubuntu22.04'
             compat: '12'
     env:
       COMPAT: ${{ matrix.compat }}
@@ -203,12 +214,13 @@ jobs:
         with:
           name: debian_bin_pkgs_${{ matrix.version_prefix }}
           path: debian/pkgs/*/*
-          retention-days: 15
+          retention-days: 8
 
+  ###########################
   build_rpm:
     runs-on: ubuntu-latest
     name: Building RPM packages for Enterprise Linux
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || startsWith( github.ref, 'refs/tags/' ) }}
+    if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/test') || startsWith(github.ref, 'refs/tags/') }}
     needs:
       - linter
     strategy:
@@ -389,8 +401,9 @@ jobs:
           path: |
             rpmdir/RPMS/*/*.rpm
             rpmdir/SRPMS/*.rpm
-          retention-days: 15
+          retention-days: 8
 
+  ###########################
   deploy_to_pypi:
     runs-on: ubuntu-latest
     name: "Deployment of the Python package to PyPi"
@@ -422,11 +435,13 @@ jobs:
         with:
           name: python_pkgs
           path: dist/*
-          retention-days: 15
+          retention-days: 8
 
+  ###########################
   deploy_to_fbrepo:
     runs-on: ubuntu-latest
     name: "Deployment of all Packages to Frank Brehms repo server"
+    if: ${{ startsWith( github.ref, 'refs/tags/' ) }}
     needs:
       - 'build_debian_sources'
       - 'build_debian_bin'
@@ -465,24 +480,18 @@ jobs:
         run: |
           tgt=${{ secrets.FB_REPO_USER }}@${{ secrets.FB_REPO_SERVER }}:${FB_REPO_IN_DIR}/debian/
           echo "Syncing Debian packages to '${tgt}' ..."
-          if echo "${GITREF}" | grep -q -P '^refs/tags/' ; then
-              rsync -aHvz artifacts/deb* artifacts/ubuntu* artifacts/src "${TARGET}"
-          fi
+          rsync -aHvz artifacts/deb* artifacts/ubuntu* artifacts/src "${tgt}"
       - name: Deploy RPM packages with rsync
         run: |
           tgt=${{ secrets.FB_REPO_USER }}@${{ secrets.FB_REPO_SERVER }}:${FB_REPO_IN_DIR}/el/
-          echo "Syncing RPMs to '${TARGET}' ..."
-          if echo "${GITREF}" | grep -q -P '^refs/tags/' ; then
-              rsync -aHvz artifacts/el-* "${TARGET}"
-          fi
+          echo "Syncing RPMs to '${tgt}' ..."
+          rsync -aHvz artifacts/el-* "${tgt}"
 
+  ###########################
   notify_success:
     runs-on: ubuntu-latest
     name: Sending Success message
     needs:
-      - 'build_debian_sources'
-      - 'build_debian_bin'
-      - 'build_rpm'
       - 'deploy_to_pypi'
       - 'deploy_to_fbrepo'
     steps:
