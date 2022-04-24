@@ -302,6 +302,20 @@ jobs:
           echo
           echo "Upgrading all packages"
           ${YUM} --assumeyes upgrade
+      - name: Install TZdata
+        shell: bash
+        env:
+          LC_ALL: "en_US.utf8"
+        run: |
+          if rpm -qa | grep '^tzdata-' >/dev/null ; then
+            echo "Reinstalling tzdata ..."
+            ${YUM} --assumeyes reinstall tzdata || true
+          else
+            echo "Installing tzdata ..."
+            ${YUM} --assumeyes install tzdata || true
+          fi
+          echo
+          ls -l --color=always /usr/share/zoneinfo/zone.tab
       - name: Install Python 3
         shell: bash
         env:
