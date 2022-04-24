@@ -11,6 +11,7 @@ on:
       - '!dev/**'
       - '!hf**'
       - '!old**'
+      - '!feature**'
     tags:
       - '**'
 
@@ -100,7 +101,7 @@ jobs:
   build_debian_sources:
     runs-on: ubuntu-latest
     name: Building Debian Source Packages
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || startsWith( github.ref, 'refs/tags/' ) }}
+    if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/test') || startsWith(github.ref, 'refs/tags/') }}
     container: debian:bullseye
     needs:
       - linter
@@ -124,12 +125,12 @@ jobs:
         with:
           name: debian_sources
           path: debian/pkgs/*/*
-          retention-days: 15
+          retention-days: 8
 
   build_debian_bin:
     runs-on: ubuntu-latest
     name: Building Debian Binary Packages
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || startsWith( github.ref, 'refs/tags/' ) }}
+    if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/test') || startsWith(github.ref, 'refs/tags/') }}
     needs:
       - linter
     strategy:
@@ -159,6 +160,12 @@ jobs:
             os_release: '20.04'
             container: 'ubuntu:focal'
             version_prefix: 'ubuntu20.04'
+            compat: '12'
+          - distributor: 'Ubuntu'
+            os_codename: 'jammy'
+            os_release: '22.04'
+            container: 'ubuntu:jammy'
+            version_prefix: 'ubuntu22.04'
             compat: '12'
     env:
       COMPAT: ${{ matrix.compat }}
@@ -203,12 +210,12 @@ jobs:
         with:
           name: debian_bin_pkgs_${{ matrix.version_prefix }}
           path: debian/pkgs/*/*
-          retention-days: 15
+          retention-days: 8
 
   build_rpm:
     runs-on: ubuntu-latest
     name: Building RPM packages for Enterprise Linux
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || startsWith( github.ref, 'refs/tags/' ) }}
+    if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/test') || startsWith(github.ref, 'refs/tags/') }}
     needs:
       - linter
     strategy:
@@ -389,7 +396,7 @@ jobs:
           path: |
             rpmdir/RPMS/*/*.rpm
             rpmdir/SRPMS/*.rpm
-          retention-days: 15
+          retention-days: 8
 
   deploy_to_pypi:
     runs-on: ubuntu-latest
@@ -422,7 +429,7 @@ jobs:
         with:
           name: python_pkgs
           path: dist/*
-          retention-days: 15
+          retention-days: 8
 
   deploy_to_fbrepo:
     runs-on: ubuntu-latest
