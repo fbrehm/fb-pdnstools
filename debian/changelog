@@ -1,4 +1,4 @@
-fb-pdnstools (0.5.2) UNRELEASED; urgency=medium
+fb-pdnstools (0.5.2) all; urgency=medium
 
   * Adding reinstallation of tzdata on building RPM packages
 
