@@ -41,7 +41,7 @@ from .xlate import XLATOR
 from .errors import PowerDNSHandlerError, PDNSApiError, PDNSApiNotAuthorizedError
 from .errors import PDNSApiNotFoundError, PDNSApiValidationError, PDNSApiRateLimitExceededError
 
-__version__ = '0.5.2'
+__version__ = '0.5.3'
 LOG = logging.getLogger(__name__)
 LIBRARY_NAME = "fb-pdns-api-client"
 
@@ -72,6 +72,8 @@ class BasePowerDNSHandler(HandlingObject):
     Base class for a PowerDNS handler object.
     May not be instantiated.
     """
+
+    show_simulate_option = True
 
     default_port = DEFAULT_PORT
     default_timeout = DEFAULT_TIMEOUT

@@ -14,13 +14,17 @@ from __future__ import absolute_import, print_function
 import logging
 import gettext
 import copy
+import sys
 
 try:
     from pathlib import Path
 except ImportError:
     from pathlib2 import Path
 
-from distutils.version import LooseVersion
+try:
+    from packaging.version import Version
+except ImportError:
+    from distutils.version import LooseVersion as Version
 
 # Third party modules
 import babel
@@ -31,17 +35,21 @@ DOMAIN = 'fb_pdnstools'
 
 LOG = logging.getLogger(__name__)
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 __me__ = Path(__file__).resolve()
 __module_dir__ = __me__.parent
 __lib_dir__ = __module_dir__.parent
 __base_dir__ = __lib_dir__.parent
 LOCALE_DIR = __base_dir__.joinpath('locale')
-if not LOCALE_DIR.is_dir():
+if LOCALE_DIR.is_dir():
+    LOCALE_DIR = str(LOCALE_DIR)
+else:
     LOCALE_DIR = __module_dir__.joinpath('locale')
-    if not LOCALE_DIR.is_dir():
-        LOCALE_DIR = None
+    if LOCALE_DIR.is_dir():
+        LOCALE_DIR = str(LOCALE_DIR)
+    else:
+        LOCALE_DIR = sys.prefix + '/share/locale'
 
 DEFAULT_LOCALE_DEF = 'en_US'
 DEFAULT_LOCALE = babel.core.default_locale()
@@ -58,12 +66,12 @@ if __mo_file__:
 else:
     XLATOR = gettext.NullTranslations()
 
-CUR_BABEL_VERSION = LooseVersion(babel.__version__)
-NEWER_BABEL_VERSION = LooseVersion('2.6.0')
+CUR_BABEL_VERSION = Version(babel.__version__)
+NEWER_BABEL_VERSION = Version('2.6.0')
 
 SUPPORTED_LANGS = (
-    'de_DE',
-    'en_US'
+    'de',
+    'en'
 )
 
 _ = XLATOR.gettext
