@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_version: [ '3.6', '3.7', '3.8', '3.9', '3.10' ]
+        python_version: [ '3.6', '3.7', '3.8', '3.9', '3.10', '3.11' ]
     container: python:${{ matrix.python_version }}
     steps:
       - uses: actions/checkout@v2
@@ -98,7 +98,7 @@ jobs:
           shellcheck -x compile-xlate-msgs.sh xtract-xlate-msgs.sh
       - name: Execute Yamllint
         shell: bash
-        run: yamllint -c yamllint.yaml .github
+        run: yamllint -c .yamllint.yaml .github
 
   ###########################
   build_debian_sources:
@@ -474,7 +474,7 @@ jobs:
           mkdir -pv artifacts/el-7 artifacts/el-8 artifacts/el-9
           mv -vi artifacts/rpm_pkgs_el7/*/*/*.rpm artifacts/rpm_pkgs_el7/*/*.rpm artifacts/el-7/
           mv -vi artifacts/rpm_pkgs_el8/*/*/*.rpm artifacts/rpm_pkgs_el8/*/*.rpm artifacts/el-8/
-          mv -vi artifacts/rpm_pkgs_el9/*/*/*.rpm artifacts/rpm_pkgs_el9/*/*.rpm artifacts/el-8/
+          mv -vi artifacts/rpm_pkgs_el9/*/*/*.rpm artifacts/rpm_pkgs_el9/*/*.rpm artifacts/el-9/
           rm -rv artifacts/rpm_pkgs_el*
       - name: Show all artifacts
         run: |

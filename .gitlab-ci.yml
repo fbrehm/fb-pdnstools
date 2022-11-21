@@ -1,0 +1,508 @@
+---
+
+stages:
+  - test
+  - linter
+  - build
+  - sign
+  - deploy
+  - notify
+
+variables:
+  DEBFULLNAME: 'Frank Brehm'
+  DEBEMAIL: 'frank.brehm@pixelpark.com'
+  DEB_REPO_HOST: 'repo01.pixelpark.com'
+  DEB_REPO_USER: 'rpm-repo'
+  DEB_REPO_UPLOAD_DIR: '/srv/www/repo/Linux/debian/incoming'
+  EXPIRE_ARTIFACTS_IN: '1 week'
+  FB_REPOSERVER_URL: 'http://repo.uhu-banane.de'
+  FB_REPOSERVER_GPGKEY_URL: 'http://repo.uhu-banane.de/public/repo.uhu-banane.de.gpg-key2.asc'
+  NOTIFY_ADDRESS: 'frank.brehm@pixelpark.com'
+  SENDER_ADDRESS: 'gitlab-ci@pixelpark.com'
+  SSH_PRIV_KEY_YUM_REPO: 'nada'
+  USED_TIMEZONE: 'Europe/Berlin'
+  VERSION_PREFIX: 'unknown'
+  YUM_REPO_GPG_ID: 'C0E73F70'
+  YUM_REPO_GPG_PASSWD: 'secret'
+  YUM_REPO_HOST: 'repo02.pixelpark.com'
+  YUM_REPO_USER: 'rpm-repo'
+  YUM_REPO_DIR_HTTP: '/Linux/yum/pixelpark'
+  YUM_REPO_DIR: "/srv/www/repo${YUM_REPO_DIR_HTTP}"
+  YUM_REPO_GPG_KEY_PUB: 'nada'
+  YUM_REPO_GPG_KEY_SEC: 'nada'
+
+# ---------------------------
+.docker_job_definition:
+  before_script:
+    - locale -a
+    - apt update && apt install --yes sudo locales gettext
+    - >
+      if test -f /etc/locale.gen; then
+        echo "/etc/locale.gen:"
+        grep -P -v '^\s*(#.*)?$' /etc/locale.gen || true
+        echo "<-- EOF"
+      fi
+    - >
+      if grep 'en_US.UTF-8' /etc/locale.gen; then
+        sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+      else
+        echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
+      fi
+    - >
+      if grep 'de_DE.UTF-8' /etc/locale.gen; then
+        sed -i -e 's/# de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/' /etc/locale.gen
+      else
+        echo 'de_DE.UTF-8 UTF-8' >> /etc/locale.gen
+      fi
+    - locale-gen
+    - locale -a
+    - pip install --upgrade pip
+    - pip install -r requirements.txt --upgrade --upgrade-strategy eager
+
+# ---------------------------
+.test-rules:
+  stage: test
+  rules:
+    - if: '$CI_COMMIT_TAG'
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "test"
+    - if: $CI_COMMIT_BRANCH == "develop"
+  tags:
+    - docker
+  script:
+    - pip install --upgrade --upgrade-strategy eager pytest
+    - pip list --format columns
+    - pytest --verbose
+
+# ---------------------------
+test Python 3.6:
+  extends:
+    - .docker_job_definition
+    - .test-rules
+  image: python:3.6
+
+# ---------------------------
+test Python 3.7:
+  extends:
+    - .docker_job_definition
+    - .test-rules
+  image: python:3.7
+
+# ---------------------------
+test Python 3.8:
+  extends:
+    - .docker_job_definition
+    - .test-rules
+  image: python:3.8
+
+# ---------------------------
+test Python 3.9:
+  extends:
+    - .docker_job_definition
+    - .test-rules
+  image: python:3.9
+
+# ---------------------------
+test Python 3.10:
+  extends:
+    - .docker_job_definition
+    - .test-rules
+  image: python:3.10
+
+# ---------------------------
+test Python 3.11:
+  extends:
+    - .docker_job_definition
+    - .test-rules
+  image: python:3.11
+
+# ---------------------------
+Linter:
+  stage: linter
+  extends:
+    - .docker_job_definition
+  image: python:3.9
+  tags:
+    - docker
+  script:
+    - apt install --yes shellcheck yamllint
+    - pip install --upgrade --upgrade-strategy eager flake8 pylint
+    - pip list --format columns
+    - 'echo; echo -e "flake8 bin lib setup.py"'
+    - flake8 bin lib setup.py
+    - 'echo; echo -e "shellcheck -x compile-xlate-msgs.sh xtract-xlate-msgs.sh"'
+    - shellcheck -x compile-xlate-msgs.sh xtract-xlate-msgs.sh
+    - 'echo; echo -e "yamllint -c .yamllint.yaml .gitlab-ci.yml"'
+    - yamllint -c .yamllint.yaml .gitlab-ci.yml
+  rules:
+    - if: '$CI_COMMIT_TAG'
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "test"
+    - if: $CI_COMMIT_BRANCH == "develop"
+  needs:
+    - 'test Python 3.6'
+    - 'test Python 3.7'
+    - 'test Python 3.8'
+    - 'test Python 3.9'
+    - 'test Python 3.10'
+    - 'test Python 3.11'
+
+# ---------------------------
+.pkg-build-rules:
+  stage: build
+  rules:
+    - if: '$CI_COMMIT_TAG'
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "test"
+  tags:
+    - docker
+  needs:
+    - 'Linter'
+  variables:
+    USED_CHARSET: 'utf8'
+    USED_LOCALE: 'en_US'
+    USED_LC: 'en_US.utf8'
+    PKG_NAME: 'fb-pdnstools'
+    SRC_SPEC_FILE: 'fb-pdnstools.spec.template'
+    TGT_SPEC_FILE: "${PKG_NAME}.spec"
+  cache:
+    key: ${CI_JOB_NAME}
+    paths:
+      - .rpm-version
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - rpmdir/RPMS/*/*.rpm
+      - rpmdir/SRPMS/*.src.rpm
+    expire_in: '1 week'
+  before_script:
+    - ls -lA --color=always /etc/yum.repos.d
+    - ${YUM} clean all
+    - ${YUM} makecache
+    - |
+      echo "All locales"
+      locale -a
+    - |
+      echo "Installing locales ..."
+      if [[ "${EL_MAJOR_VERSION}" == "7" ]] ; then
+        echo "${USED_LOCALE}.${USED_CHARSET}"
+        localedef --charmap UTF-8 --inputfile "${USED_LOCALE}" "${USED_LC}"
+      else
+        dnf --assumeyes install langpacks-en glibc-all-langpacks
+      fi
+    - |
+      echo "All locales"
+      locale -a
+      echo
+      echo "locales:"
+      locale
+    - |
+      echo "Exporting LC_ALL ..."
+      export LC_ALL="${USED_LC}"
+      echo
+      echo "locales:"
+      locale
+    - |
+      echo "Installing epel-release  ..."
+      ${YUM} --assumeyes install epel-release
+    - |
+      echo "Adding Pixelpark YUM repo ..."
+      echo "[pixelpark]"                                                                    > /etc/yum.repos.d/pixelpark.repo
+      echo "name=pixelpark"                                                                >> /etc/yum.repos.d/pixelpark.repo
+      echo "baseurl=https://repo01.pixelpark.com/Linux/yum/pixelpark/${EL_MAJOR_VERSION}/" >> /etc/yum.repos.d/pixelpark.repo
+      echo "enabled=1"                                                                     >> /etc/yum.repos.d/pixelpark.repo
+      echo "gpgcheck=1"                                                                    >> /etc/yum.repos.d/pixelpark.repo
+      echo "gpgkey=https://repo01.pixelpark.com/gpg/pixelpark.gpg"                         >> /etc/yum.repos.d/pixelpark.repo
+      echo                                                                                 >> /etc/yum.repos.d/pixelpark.repo
+      echo
+      echo "Generated /etc/yum.repos.d/pixelpark.repo:"
+      cat /etc/yum.repos.d/pixelpark.repo
+    - ${YUM} makecache
+    - ${YUM} --assumeyes upgrade
+    - ${YUM} --assumeyes install ${PYTHON_PACKAGES} gnupg2 rpm-build gettext
+    - ls -l --color=always /bin/python* /bin/pip* || true
+    - pip3 list --format columns
+  script:
+    - mkdir -pv rpmdir
+    - mkdir -pv rpmdir/SOURCES
+    - |
+      echo "Creating source tar file ..."
+      ODIR=$(pwd)
+      ROOT_OBJECTS=$( ls -A1 | egrep -vw ".git|rpmdir|jes-old" )
+      PKG_VERSION=$( ./get-rpm-version )
+      PKG_RELEASE=$( ./get-rpm-release )
+      SRC_BASE="python${PYTHON_VERSION_NODOT}_${PKG_NAME}-${PKG_VERSION}"
+      SRC_DIR="rpmdir/SOURCES/${SRC_BASE}"
+      TAR_BASE="${PKG_NAME}.${PKG_VERSION}.tar.gz"
+      SRC_TARBALL="rpmdir/SOURCES/${TAR_BASE}"
+      echo "Version to build: ${PKG_VERSION}-${PKG_RELEASE}"
+      echo "Sources directory: '${SRC_DIR}'"
+      mkdir -pv "${SRC_DIR}"
+      tar cf - ${ROOT_OBJECTS} | (cd "${SRC_DIR}" ; tar xf -)
+      echo "Creating spource tar file '${SRC_TARBALL}' ..."
+      cd rpmdir/SOURCES && tar cfz "${TAR_BASE}" "${SRC_BASE}"
+      ls -lA --color=always
+      cd "${ODIR}"
+    - |
+      echo "Generating '${SRC_SPEC_FILE}' => '${TGT_SPEC_FILE}' ..."
+      PKG_VERSION=$( ./get-rpm-version )
+      PKG_RELEASE=$( ./get-rpm-release )
+      cat "${SRC_SPEC_FILE}" | \
+          tail -n +3 | \
+          sed -e "s/@@@Version@@@/$PKG_VERSION/gi" \
+              -e "s/@@@Release@@@/${PKG_RELEASE}/gi" \
+              -e "s/@@@py_version_dot@@@/${PYTHON_VERSION_DOT}/gi" \
+              -e "s/@@@py_version_nodot@@@/${PYTHON_VERSION_NODOT}/gi" > "${TGT_SPEC_FILE}"
+      echo
+      echo "Adding Changelog to '${TGT_SPEC_FILE}' ..."
+      dch2speclog debian/changelog >>"${TGT_SPEC_FILE}"
+      echo
+      echo "Generated spec-file:"
+      cat "${TGT_SPEC_FILE}"
+      echo
+      echo "Generating .rpm-version ..."
+      echo "${PKG_VERSION}-${PKG_RELEASE}" > .rpm-version
+      echo
+      echo -n "Cenerated .rpm-version: "
+      cat .rpm-version
+    - |
+      echo "Creating ${HOME}/.rpmmacros ..."
+      echo "%__python3 /bin/python${PYTHON_VERSION_DOT}" > "${HOME}/.rpmmacros"
+      echo "%_signature gpg" >> "${HOME}/.rpmmacros"
+      echo "Generated file:"
+      cat "${HOME}/.rpmmacros"
+    - |
+      echo "Building RPM packages:"
+      rpmbuild -ba --nocheck --verbose --define "_topdir $(pwd)/rpmdir" --define "version ${PKG_VERSION}" "${TGT_SPEC_FILE}"
+    - |
+      echo "Results:"
+      find rpmdir/*RPMS -type f -print0 | xargs --null --no-run-if-empty ls -l -d --color=always
+
+
+# ---------------------------
+build CentOS 7 with Python 3.6:
+  variables:
+    EL_MAJOR_VERSION: '7'
+    YUM: yum
+    PYTHON_PACKAGES: >
+      python36 python36-pip python36-devel python3-setuptools
+      python36-pytz python36-babel python36-six
+      python36-fb-logging python36-fb-tools
+    PYTHON_VERSION_DOT: '3.6'
+    PYTHON_VERSION_NODOT: '36'
+  extends:
+    - '.pkg-build-rules'
+  image: centos:7
+
+# ---------------------------
+build CentOS 8 with Python 3.8:
+  variables:
+    EL_MAJOR_VERSION: '8'
+    YUM: dnf
+    PYTHON_PACKAGES: >
+      python38 python38-pip python38-devel python38-setuptools
+      python38-pytz python38-babel python38-six platform-python-devel
+      python38-fb-logging python38-fb-tools
+    PYTHON_VERSION_DOT: '3.8'
+    PYTHON_VERSION_NODOT: '38'
+  extends:
+    - '.pkg-build-rules'
+  # image: centos:8
+  image: dokken/centos-stream-8
+
+# ---------------------------
+.pkg-sign-rules:
+  rules:
+    - if: '$CI_COMMIT_TAG'
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "main"
+  stage: sign
+  tags:
+    - docker
+  image: centos:7
+  before_script:
+    - |
+      echo "All locales"
+      locale -a
+    - |
+      echo "Installing locales ..."
+      for l in de_AT de_CH de_DE en_CA en_GB en_IE en_IN en_US; do
+        echo "${l}.utf8"
+        localedef --charmap UTF-8 --inputfile "${l}" "${l}.utf8"
+      done
+    - |
+      echo "All locales"
+      locale -a
+      echo
+      echo "locales:"
+      locale
+    - |
+      echo "Exporting LC_ALL ..."
+      export LC_ALL="${USED_LC}"
+      echo
+      echo "locales:"
+      locale
+    - yum makecache
+    - yum --assumeyes upgrade
+    - yum --assumeyes install rpm-sign expect
+  script:
+    - ls -lA rpmdir/RPMS/*/* rpmdir/SRPMS/*
+    - echo -e "%_signature gpg\n%_gpg_name ${YUM_REPO_GPG_ID}" >$HOME/.rpmmacros
+    - echo "$YUM_REPO_GPG_KEY_PUB" | gpg --import
+    - gpg --list-public-keys
+    - echo "$YUM_REPO_GPG_KEY_SEC" | gpg --import
+    - gpg --list-secret-keys
+    - 'for f in $( find rpmdir -type f -iname "*.rpm" ) ; do echo "Signing ${f} ..."; ./rpm-addsign-wrapper.expect "${f}" "${YUM_REPO_GPG_PASSWD}"; done'
+    - |
+      echo "Signing packages ..."
+      for f in $( find rpmdir -type f -iname "*.rpm" ) ; do
+          echo "  * ${f} ..."
+          ./rpm-addsign-wrapper.expect "${f}" "${YUM_REPO_GPG_PASSWD}"
+      done
+    - |
+      echo "Results:"
+      find rpmdir/*RPMS -type f -print0 | xargs --null --no-run-if-empty ls -l -d --color=always
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - rpmdir/RPMS/*/*.rpm
+      - rpmdir/SRPMS/*.src.rpm
+    expire_in: '1 week'
+
+# ---------------------------
+Sign EL 7 packages:
+  extends:
+    - '.pkg-sign-rules'
+  needs:
+    - 'build CentOS 7 with Python 3.6'
+  dependencies:
+    - 'build CentOS 7 with Python 3.6'
+
+# ---------------------------
+Sign EL 8 packages:
+  extends:
+    - '.pkg-sign-rules'
+  needs:
+    - 'build CentOS 8 with Python 3.8'
+  dependencies:
+    - 'build CentOS 8 with Python 3.8'
+
+# ---------------------------
+.rpm-pkg-deploy:
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: manual
+      allow_failure: true
+  stage: deploy
+  tags:
+    - deploy_v2
+  before_script:
+    - hostname -f
+    - whoami
+    - pwd
+    - ls -lA --color=always
+    - find rpmdir/*RPMS -type f -print0 | xargs --null --no-run-if-empty ls -l -d --color=always
+    - 'echo -e "YUM_REPO_USER: ${YUM_REPO_USER}"'
+    - 'echo -e "YUM_REPO_HOST: ${YUM_REPO_HOST}"'
+    - 'echo -e "YUM_REPO_DIR: ${YUM_REPO_DIR}"'
+    - 'mkdir -pv "${HOME}/.ssh"'
+    - 'chmod -v 0700 "${HOME}/.ssh"'
+    - '/bin/echo "${SSH_PRIV_KEY_YUM_REPO}" > "${HOME}/.ssh/id_rsa"'
+    - 'chmod -v 0600 "${HOME}/.ssh/id_rsa"'
+    - 'ls -lA --color=always "${HOME}/.ssh"'
+    - |
+      if [[ -f "${HOME}/.ssh/config" ]] ; then
+        echo "Content of ${HOME}/.ssh/config:"
+        cat "${HOME}/.ssh/config"
+        echo
+      fi
+  script:
+    - echo "Packages to deploy:"; find rpmdir/*RPMS -type f -print0 | xargs --null --no-run-if-empty ls -l -d --color=always
+    - |
+      src_repo_dir="${YUM_REPO_DIR}/${EL_MAJOR_VERSION}-src"
+      echo "Deploying source packages to ${YUM_REPO_HOST}:${src_repo_dir}/ ..."
+      ssh -o StrictHostKeyChecking=no "${YUM_REPO_USER}@${YUM_REPO_HOST}" "if [ ! -d ${src_repo_dir} ] ; then mkdir -pv ${src_repo_dir} ; fi"
+      scp -p -o StrictHostKeyChecking=no rpmdir/SRPMS/*.rpm "${YUM_REPO_USER}@${YUM_REPO_HOST}:${src_repo_dir}/"
+      ssh -o StrictHostKeyChecking=no "${YUM_REPO_USER}@${YUM_REPO_HOST}" "cd ${src_repo_dir}/ && createrepo --update . && chmod -v a+x repodata && chmod -Rv a+r repodata"
+    - |
+      bin_repo_dir="${YUM_REPO_DIR}/${EL_MAJOR_VERSION}"
+      echo "Deploying binary packages to ${YUM_REPO_HOST}:${bin_repo_dir}/ ..."
+      ssh -o StrictHostKeyChecking=no "${YUM_REPO_USER}@${YUM_REPO_HOST}" "if [ ! -d ${bin_repo_dir} ] ; then mkdir -pv ${bin_repo_dir} ; fi"
+      scp -p -o StrictHostKeyChecking=no rpmdir/RPMS/*/*.rpm "${YUM_REPO_USER}@${YUM_REPO_HOST}:${bin_repo_dir}/"
+      ssh -o StrictHostKeyChecking=no "${YUM_REPO_USER}@${YUM_REPO_HOST}" "cd ${bin_repo_dir}/ && createrepo --update . && chmod -v a+x repodata && chmod -Rv a+r repodata"
+  after_script:
+    - rm -rf rpmdir
+  environment:
+    name: production
+
+# ---------------------------
+Deploy packages EL7:
+  extends:
+    - '.rpm-pkg-deploy'
+  variables:
+    EL_MAJOR_VERSION: '7'
+  needs:
+    - 'Sign EL 7 packages'
+  dependencies:
+    - 'Sign EL 7 packages'
+
+# ---------------------------
+Deploy packages EL8:
+  extends:
+    - '.rpm-pkg-deploy'
+  variables:
+    EL_MAJOR_VERSION: '8'
+  needs:
+    - 'Sign EL 8 packages'
+  dependencies:
+    - 'Sign EL 8 packages'
+
+# # ---------------------------
+# .notify-rules:
+#   rules:
+#     - if: '$CI_COMMIT_TAG'
+#     - if: $CI_COMMIT_BRANCH == "master"
+#     - if: $CI_COMMIT_BRANCH == "main"
+#     - if: $CI_COMMIT_BRANCH == "test"
+#   tags:
+#     - deploy_v2
+#   needs:
+#     - 'Deploy packages EL7'
+#     - 'Deploy packages EL8'
+
+###################################
+# CAUTION!
+# Notification via E-Mail is currently not possible on current runners
+
+#  # ---------------------------
+#  Notify Success:
+#    stage: notify
+#    extends:
+#      - '.notify-rules'
+#    allow_failure: true
+#    script: |
+#      mailbody="Module ${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME} (${CI_COMMIT_REF_NAME}): "
+#      mailbody+="all checks successful\nCommiter: ${GITLAB_USER_NAME} <${GITLAB_USER_EMAIL}>\n"
+#      mailbody+="Commiter: ${GITLAB_USER_NAME} <${GITLAB_USER_EMAIL}>"
+#      subject="Gitlab-CI: Python module pp-admintools"
+#      echo -e "${mailbody}" | mailx -s "${subject}" -r "${SENDER_ADDRESS}" "${NOTIFY_ADDRESS}"
+
+#  # ---------------------------
+#  Notify Error:
+#    stage: notify
+#    extends:
+#      - '.notify-rules'
+#    allow_failure: true
+#    when: on_failure
+#    script: |
+#      mailbody="Error in module ${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME} (${CI_COMMIT_REF_NAME})\n"
+#      mailbody+="Please check ${CI_PROJECT_URL}/pipelines/${CI_PIPELINE_ID}\n\n"
+#      mailbody+="Commiter: ${GITLAB_USER_NAME} <${GITLAB_USER_EMAIL}>"
+#      subject="Gitlab-CI error for Python module pp-admintools"
+#      echo -e "${mailbody}" | mailx -s "${subject}" -r "${SENDER_ADDRESS}" "${NOTIFY_ADDRESS}"
+
+
+# vim: et tabstop=2 expandtab shiftwidth=2 softtabstop=2 list

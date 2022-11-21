@@ -40,7 +40,7 @@ from . import DEFAULT_PORT, DEFAULT_API_PREFIX
 
 from .server import PowerDNSServer
 
-__version__ = '0.7.0'
+__version__ = '0.7.1'
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -58,6 +58,8 @@ class PdnsBulkRmApp(BaseApplication):
     """
     Class for the application object.
     """
+
+    show_simulate_option = True
 
     # -------------------------------------------------------------------------
     def __init__(
