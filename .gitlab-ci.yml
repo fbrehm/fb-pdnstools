@@ -298,152 +298,152 @@ build CentOS 8 with Python 3.8:
   # image: centos:8
   image: dokken/centos-stream-8
 
-# # ---------------------------
-# .pkg-sign-rules:
-#   rules:
-#     - if: '$CI_COMMIT_TAG'
-#     - if: $CI_COMMIT_BRANCH == "master"
-#     - if: $CI_COMMIT_BRANCH == "main"
-#   stage: sign
-#   tags:
-#     - docker
-#   image: centos:7
-#   before_script:
-#     - |
-#       echo "All locales"
-#       locale -a
-#     - |
-#       echo "Installing locales ..."
-#       for l in de_AT de_CH de_DE en_CA en_GB en_IE en_IN en_US; do
-#         echo "${l}.utf8"
-#         localedef --charmap UTF-8 --inputfile "${l}" "${l}.utf8"
-#       done
-#     - |
-#       echo "All locales"
-#       locale -a
-#       echo
-#       echo "locales:"
-#       locale
-#     - |
-#       echo "Exporting LC_ALL ..."
-#       export LC_ALL="${USED_LC}"
-#       echo
-#       echo "locales:"
-#       locale
-#     - yum makecache
-#     - yum --assumeyes upgrade
-#     - yum --assumeyes install rpm-sign expect
-#   script:
-#     - ls -lA rpmdir/RPMS/*/* rpmdir/SRPMS/*
-#     - echo -e "%_signature gpg\n%_gpg_name ${YUM_REPO_GPG_ID}" >$HOME/.rpmmacros
-#     - echo "$YUM_REPO_GPG_KEY_PUB" | gpg --import
-#     - gpg --list-public-keys
-#     - echo "$YUM_REPO_GPG_KEY_SEC" | gpg --import
-#     - gpg --list-secret-keys
-#     - 'for f in $( find rpmdir -type f -iname "*.rpm" ) ; do echo "Signing ${f} ..."; ./rpm-addsign-wrapper.expect "${f}" "${YUM_REPO_GPG_PASSWD}"; done'
-#     - |
-#       echo "Signing packages ..."
-#       for f in $( find rpmdir -type f -iname "*.rpm" ) ; do
-#           echo "  * ${f} ..."
-#           ./rpm-addsign-wrapper.expect "${f}" "${YUM_REPO_GPG_PASSWD}"
-#       done
-#     - |
-#       echo "Results:"
-#       find rpmdir/*RPMS -type f -print0 | xargs --null --no-run-if-empty ls -l -d --color=always
-#   artifacts:
-#     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
-#     paths:
-#       - rpmdir/RPMS/*/*.rpm
-#       - rpmdir/SRPMS/*.src.rpm
-#     expire_in: '1 week'
+# ---------------------------
+.pkg-sign-rules:
+  rules:
+    - if: '$CI_COMMIT_TAG'
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "main"
+  stage: sign
+  tags:
+    - docker
+  image: centos:7
+  before_script:
+    - |
+      echo "All locales"
+      locale -a
+    - |
+      echo "Installing locales ..."
+      for l in de_AT de_CH de_DE en_CA en_GB en_IE en_IN en_US; do
+        echo "${l}.utf8"
+        localedef --charmap UTF-8 --inputfile "${l}" "${l}.utf8"
+      done
+    - |
+      echo "All locales"
+      locale -a
+      echo
+      echo "locales:"
+      locale
+    - |
+      echo "Exporting LC_ALL ..."
+      export LC_ALL="${USED_LC}"
+      echo
+      echo "locales:"
+      locale
+    - yum makecache
+    - yum --assumeyes upgrade
+    - yum --assumeyes install rpm-sign expect
+  script:
+    - ls -lA rpmdir/RPMS/*/* rpmdir/SRPMS/*
+    - echo -e "%_signature gpg\n%_gpg_name ${YUM_REPO_GPG_ID}" >$HOME/.rpmmacros
+    - echo "$YUM_REPO_GPG_KEY_PUB" | gpg --import
+    - gpg --list-public-keys
+    - echo "$YUM_REPO_GPG_KEY_SEC" | gpg --import
+    - gpg --list-secret-keys
+    - 'for f in $( find rpmdir -type f -iname "*.rpm" ) ; do echo "Signing ${f} ..."; ./rpm-addsign-wrapper.expect "${f}" "${YUM_REPO_GPG_PASSWD}"; done'
+    - |
+      echo "Signing packages ..."
+      for f in $( find rpmdir -type f -iname "*.rpm" ) ; do
+          echo "  * ${f} ..."
+          ./rpm-addsign-wrapper.expect "${f}" "${YUM_REPO_GPG_PASSWD}"
+      done
+    - |
+      echo "Results:"
+      find rpmdir/*RPMS -type f -print0 | xargs --null --no-run-if-empty ls -l -d --color=always
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - rpmdir/RPMS/*/*.rpm
+      - rpmdir/SRPMS/*.src.rpm
+    expire_in: '1 week'
 
-# # ---------------------------
-# Sign EL 7 packages:
-#   extends:
-#     - '.pkg-sign-rules'
-#   needs:
-#     - 'build CentOS 7 with Python 3.6'
-#   dependencies:
-#     - 'build CentOS 7 with Python 3.6'
+# ---------------------------
+Sign EL 7 packages:
+  extends:
+    - '.pkg-sign-rules'
+  needs:
+    - 'build CentOS 7 with Python 3.6'
+  dependencies:
+    - 'build CentOS 7 with Python 3.6'
 
-# # ---------------------------
-# Sign EL 8 packages:
-#   extends:
-#     - '.pkg-sign-rules'
-#   needs:
-#     - 'build CentOS 8 with Python 3.8'
-#   dependencies:
-#     - 'build CentOS 8 with Python 3.8'
+# ---------------------------
+Sign EL 8 packages:
+  extends:
+    - '.pkg-sign-rules'
+  needs:
+    - 'build CentOS 8 with Python 3.8'
+  dependencies:
+    - 'build CentOS 8 with Python 3.8'
 
-# # ---------------------------
-# .rpm-pkg-deploy:
-#   rules:
-#     - if: '$CI_COMMIT_TAG'
-#       when: manual
-#       allow_failure: true
-#   stage: deploy
-#   tags:
-#     - deploy_v2
-#   before_script:
-#     - hostname -f
-#     - whoami
-#     - pwd
-#     - ls -lA --color=always
-#     - find rpmdir/*RPMS -type f -print0 | xargs --null --no-run-if-empty ls -l -d --color=always
-#     - 'echo -e "YUM_REPO_USER: ${YUM_REPO_USER}"'
-#     - 'echo -e "YUM_REPO_HOST: ${YUM_REPO_HOST}"'
-#     - 'echo -e "YUM_REPO_DIR: ${YUM_REPO_DIR}"'
-#     - 'mkdir -pv "${HOME}/.ssh"'
-#     - 'chmod -v 0700 "${HOME}/.ssh"'
-#     - '/bin/echo "${SSH_PRIV_KEY_YUM_REPO}" > "${HOME}/.ssh/id_rsa"'
-#     - 'chmod -v 0600 "${HOME}/.ssh/id_rsa"'
-#     - 'ls -lA --color=always "${HOME}/.ssh"'
-#     - |
-#       if [[ -f "${HOME}/.ssh/config" ]] ; then
-#         echo "Content of ${HOME}/.ssh/config:"
-#         cat "${HOME}/.ssh/config"
-#         echo
-#       fi
-#   script:
-#     - echo "Packages to deploy:"; find rpmdir/*RPMS -type f -print0 | xargs --null --no-run-if-empty ls -l -d --color=always
-#     - |
-#       src_repo_dir="${YUM_REPO_DIR}/${EL_MAJOR_VERSION}-src"
-#       echo "Deploying source packages to ${YUM_REPO_HOST}:${src_repo_dir}/ ..."
-#       ssh -o StrictHostKeyChecking=no "${YUM_REPO_USER}@${YUM_REPO_HOST}" "if [ ! -d ${src_repo_dir} ] ; then mkdir -pv ${src_repo_dir} ; fi"
-#       scp -p -o StrictHostKeyChecking=no rpmdir/SRPMS/*.rpm "${YUM_REPO_USER}@${YUM_REPO_HOST}:${src_repo_dir}/"
-#       ssh -o StrictHostKeyChecking=no "${YUM_REPO_USER}@${YUM_REPO_HOST}" "cd ${src_repo_dir}/ && createrepo --update . && chmod -v a+x repodata && chmod -Rv a+r repodata"
-#     - |
-#       bin_repo_dir="${YUM_REPO_DIR}/${EL_MAJOR_VERSION}"
-#       echo "Deploying binary packages to ${YUM_REPO_HOST}:${bin_repo_dir}/ ..."
-#       ssh -o StrictHostKeyChecking=no "${YUM_REPO_USER}@${YUM_REPO_HOST}" "if [ ! -d ${bin_repo_dir} ] ; then mkdir -pv ${bin_repo_dir} ; fi"
-#       scp -p -o StrictHostKeyChecking=no rpmdir/RPMS/*/*.rpm "${YUM_REPO_USER}@${YUM_REPO_HOST}:${bin_repo_dir}/"
-#       ssh -o StrictHostKeyChecking=no "${YUM_REPO_USER}@${YUM_REPO_HOST}" "cd ${bin_repo_dir}/ && createrepo --update . && chmod -v a+x repodata && chmod -Rv a+r repodata"
-#   after_script:
-#     - rm -rf rpmdir
-#   environment:
-#     name: production
+# ---------------------------
+.rpm-pkg-deploy:
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: manual
+      allow_failure: true
+  stage: deploy
+  tags:
+    - deploy_v2
+  before_script:
+    - hostname -f
+    - whoami
+    - pwd
+    - ls -lA --color=always
+    - find rpmdir/*RPMS -type f -print0 | xargs --null --no-run-if-empty ls -l -d --color=always
+    - 'echo -e "YUM_REPO_USER: ${YUM_REPO_USER}"'
+    - 'echo -e "YUM_REPO_HOST: ${YUM_REPO_HOST}"'
+    - 'echo -e "YUM_REPO_DIR: ${YUM_REPO_DIR}"'
+    - 'mkdir -pv "${HOME}/.ssh"'
+    - 'chmod -v 0700 "${HOME}/.ssh"'
+    - '/bin/echo "${SSH_PRIV_KEY_YUM_REPO}" > "${HOME}/.ssh/id_rsa"'
+    - 'chmod -v 0600 "${HOME}/.ssh/id_rsa"'
+    - 'ls -lA --color=always "${HOME}/.ssh"'
+    - |
+      if [[ -f "${HOME}/.ssh/config" ]] ; then
+        echo "Content of ${HOME}/.ssh/config:"
+        cat "${HOME}/.ssh/config"
+        echo
+      fi
+  script:
+    - echo "Packages to deploy:"; find rpmdir/*RPMS -type f -print0 | xargs --null --no-run-if-empty ls -l -d --color=always
+    - |
+      src_repo_dir="${YUM_REPO_DIR}/${EL_MAJOR_VERSION}-src"
+      echo "Deploying source packages to ${YUM_REPO_HOST}:${src_repo_dir}/ ..."
+      ssh -o StrictHostKeyChecking=no "${YUM_REPO_USER}@${YUM_REPO_HOST}" "if [ ! -d ${src_repo_dir} ] ; then mkdir -pv ${src_repo_dir} ; fi"
+      scp -p -o StrictHostKeyChecking=no rpmdir/SRPMS/*.rpm "${YUM_REPO_USER}@${YUM_REPO_HOST}:${src_repo_dir}/"
+      ssh -o StrictHostKeyChecking=no "${YUM_REPO_USER}@${YUM_REPO_HOST}" "cd ${src_repo_dir}/ && createrepo --update . && chmod -v a+x repodata && chmod -Rv a+r repodata"
+    - |
+      bin_repo_dir="${YUM_REPO_DIR}/${EL_MAJOR_VERSION}"
+      echo "Deploying binary packages to ${YUM_REPO_HOST}:${bin_repo_dir}/ ..."
+      ssh -o StrictHostKeyChecking=no "${YUM_REPO_USER}@${YUM_REPO_HOST}" "if [ ! -d ${bin_repo_dir} ] ; then mkdir -pv ${bin_repo_dir} ; fi"
+      scp -p -o StrictHostKeyChecking=no rpmdir/RPMS/*/*.rpm "${YUM_REPO_USER}@${YUM_REPO_HOST}:${bin_repo_dir}/"
+      ssh -o StrictHostKeyChecking=no "${YUM_REPO_USER}@${YUM_REPO_HOST}" "cd ${bin_repo_dir}/ && createrepo --update . && chmod -v a+x repodata && chmod -Rv a+r repodata"
+  after_script:
+    - rm -rf rpmdir
+  environment:
+    name: production
 
-# # ---------------------------
-# Deploy packages EL7:
-#   extends:
-#     - '.rpm-pkg-deploy'
-#   variables:
-#     EL_MAJOR_VERSION: '7'
-#   needs:
-#     - 'Sign EL 7 packages'
-#   dependencies:
-#     - 'Sign EL 7 packages'
+# ---------------------------
+Deploy packages EL7:
+  extends:
+    - '.rpm-pkg-deploy'
+  variables:
+    EL_MAJOR_VERSION: '7'
+  needs:
+    - 'Sign EL 7 packages'
+  dependencies:
+    - 'Sign EL 7 packages'
 
-# # ---------------------------
-# Deploy packages EL8:
-#   extends:
-#     - '.rpm-pkg-deploy'
-#   variables:
-#     EL_MAJOR_VERSION: '8'
-#   needs:
-#     - 'Sign EL 8 packages'
-#   dependencies:
-#     - 'Sign EL 8 packages'
+# ---------------------------
+Deploy packages EL8:
+  extends:
+    - '.rpm-pkg-deploy'
+  variables:
+    EL_MAJOR_VERSION: '8'
+  needs:
+    - 'Sign EL 8 packages'
+  dependencies:
+    - 'Sign EL 8 packages'
 
 # # ---------------------------
 # .notify-rules:
