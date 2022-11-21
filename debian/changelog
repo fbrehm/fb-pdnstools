@@ -1,3 +1,9 @@
+fb-pdnstools (0.5.4) all; urgency=medium
+
+  * Adding rpm-addsign-wrapper.expect
+
+ -- Frank Brehm <frank.brehm@pixelpark.com>  Mon, 21 Nov 2022 17:55:31 +0100
+
 fb-pdnstools (0.5.3) all; urgency=medium
 
   * Ensuring visibility of --simulate option
