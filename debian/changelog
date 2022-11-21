@@ -1,4 +1,4 @@
-fb-pdnstools (0.5.3) UNRELEASED; urgency=medium
+fb-pdnstools (0.5.3) all; urgency=medium
 
   * Ensuring visibility of --simulate option
   * Adding tests for Python 3.11.
