@@ -98,7 +98,7 @@ jobs:
           shellcheck -x compile-xlate-msgs.sh xtract-xlate-msgs.sh
       - name: Execute Yamllint
         shell: bash
-        run: yamllint -c yamllint.yaml .github
+        run: yamllint -c .yamllint.yaml .github
 
   ###########################
   build_debian_sources:
