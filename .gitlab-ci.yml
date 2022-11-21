@@ -234,8 +234,6 @@ Linter:
       echo "Version to build: ${PKG_VERSION}-${PKG_RELEASE}"
       mkdir -pv "rpmdir/SOURCES/fb-pdnstools-${PKG_VERSION}"
       tar cf - ${ROOT_OBJECTS} | (cd "rpmdir/SOURCES/fb-pdnstools-${PKG_VERSION}" ; tar xf -)
-      echo "Dir content of rpmdir/SOURCES/fb-pdnstools-${PKG_VERSION}/etc/profile.d:"
-      ls -l rpmdir/SOURCES/fb-pdnstools-${PKG_VERSION}/etc/profile.d
       echo "Creating rpmdir/SOURCES/fb-pdnstools.${PKG_VERSION}.tar.gz ..."
       cd rpmdir/SOURCES && tar cfz "fb-pdnstools.${PKG_VERSION}.tar.gz" "fb-pdnstools-${PKG_VERSION}"
       ls -lA --color=always
