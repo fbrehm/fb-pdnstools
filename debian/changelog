@@ -1,3 +1,9 @@
+fb-pdnstools (0.5.5) all; urgency=medium
+
+  * Adding support for CentOS 9 in .gitlab-ci.yml
+
+ -- Frank Brehm <frank.brehm@pixelpark.com>  Wed, 23 Nov 2022 09:25:47 +0100
+
 fb-pdnstools (0.5.4) all; urgency=medium
 
   * Adding rpm-addsign-wrapper.expect
