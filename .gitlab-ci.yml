@@ -220,10 +220,37 @@ Linter:
       echo
       echo "Generated /etc/yum.repos.d/pixelpark.repo:"
       cat /etc/yum.repos.d/pixelpark.repo
-    - ${YUM} makecache
-    - ${YUM} --assumeyes upgrade
-    - ${YUM} --assumeyes install ${PYTHON_PACKAGES} gnupg2 rpm-build gettext
-    - ls -l --color=always /bin/python* /bin/pip* || true
+    - |
+      echo
+      echo "Executing: ${YUM} makecache"
+      ${YUM} makecache
+    - |
+      echo
+      echo "Executing: ${YUM} --assumeyes upgrade"
+      ${YUM} --assumeyes upgrade
+    - |
+      echo
+      echo "Installing or upgrading TZdata ..."
+      if rpm -qa | grep '^tzdata-' >/dev/null ; then
+        echo "Reinstalling tzdata ..."
+        echo "Executing: ${YUM} --assumeyes reinstall tzdata || true"
+        ${YUM} --assumeyes reinstall tzdata || true
+      else
+        echo "Installing tzdata ..."
+        echo "Executing: ${YUM} --assumeyes install tzdata || true"
+        ${YUM} --assumeyes install tzdata || true
+      fi
+      echo
+      echo "Timezone database:"
+      ls -l --color=always /usr/share/zoneinfo/zone.tab
+    - |
+      echo
+      echo "Executing: ${YUM} --assumeyes install ${PYTHON_PACKAGES} gnupg2 rpm-build gettext"
+      ${YUM} --assumeyes install ${PYTHON_PACKAGES} gnupg2 rpm-build gettext
+    - |
+      echo
+      echo "Python binaries:"
+      ls -l --color=always /bin/python* /bin/pip* || true
     - pip3 list --format columns
   script:
     - mkdir -pv rpmdir
@@ -310,8 +337,22 @@ build CentOS 8 with Python 3.8:
     PYTHON_VERSION_NODOT: '38'
   extends:
     - '.pkg-build-rules'
-  # image: centos:8
   image: dokken/centos-stream-8
+
+# ---------------------------
+build CentOS 9 with Python 3:
+  variables:
+    EL_MAJOR_VERSION: '9'
+    YUM: dnf
+    PYTHON_PACKAGES: >
+      python3 python3-six python3-pip python3-devel python3-setuptools
+      python3-babel python3-pytz
+      python3-fb-logging python3-fb-tools
+    PYTHON_VERSION_DOT: '3'
+    PYTHON_VERSION_NODOT: '3'
+  extends:
+    - '.pkg-build-rules'
+  image: dokken/centos-stream-9
 
 # ---------------------------
 .pkg-sign-rules:
@@ -391,6 +432,15 @@ Sign EL 8 packages:
     - 'build CentOS 8 with Python 3.8'
 
 # ---------------------------
+Sign EL 9 packages:
+  extends:
+    - '.pkg-sign-rules'
+  needs:
+    - 'build CentOS 9 with Python 3'
+  dependencies:
+    - 'build CentOS 9 with Python 3'
+
+# ---------------------------
 .rpm-pkg-deploy:
   rules:
     - if: '$CI_COMMIT_TAG'
@@ -459,6 +509,17 @@ Deploy packages EL8:
     - 'Sign EL 8 packages'
   dependencies:
     - 'Sign EL 8 packages'
+
+# ---------------------------
+Deploy packages EL9:
+  extends:
+    - '.rpm-pkg-deploy'
+  variables:
+    EL_MAJOR_VERSION: '9'
+  needs:
+    - 'Sign EL 9 packages'
+  dependencies:
+    - 'Sign EL 9 packages'
 
 # # ---------------------------
 # .notify-rules:
