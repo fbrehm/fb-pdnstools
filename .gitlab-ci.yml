@@ -157,6 +157,8 @@ Linter:
     - if: $CI_COMMIT_BRANCH == "master"
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_BRANCH == "test"
+    - if: $CI_COMMIT_BRANCH =~ /test-.*/
+    - if: $CI_COMMIT_BRANCH =~ /build.*/
   tags:
     - docker
   needs:
@@ -180,6 +182,15 @@ Linter:
     expire_in: '1 week'
   before_script:
     - ls -lA --color=always /etc/yum.repos.d
+    - |
+      repo_file="/etc/yum.repos.d/CentOS-Stream-PowerTools.repo"
+      if [[ -f "${repo_file}" ]] ; then
+          echo
+          echo "Enabling CentOS 8/9 PowerTools ..."
+          sed -i -e 's/enabled=.*/enabled=1/' "${repo_file}"
+          echo "Content of ${repo_file}:"
+          cat "${repo_file}"
+      fi
     - ${YUM} clean all
     - ${YUM} makecache
     - |
@@ -190,6 +201,14 @@ Linter:
       if [[ "${EL_MAJOR_VERSION}" == "7" ]] ; then
         echo "${USED_LOCALE}.${USED_CHARSET}"
         localedef --charmap UTF-8 --inputfile "${USED_LOCALE}" "${USED_LC}"
+          for my_locale in de_DE en_US ; do
+              if [[ "${my_locale}" == "${USED_LOCALE}" ]] ; then
+                  continue
+              fi
+              my_lc="${my_locale}.${USED_CHARSET}"
+              echo "${my_lc}"
+              localedef --charmap UTF-8 --inputfile "${my_locale}" "${my_lc}"
+          done
       else
         dnf --assumeyes install langpacks-en glibc-all-langpacks
       fi
@@ -202,6 +221,7 @@ Linter:
     - |
       echo "Exporting LC_ALL ..."
       export LC_ALL="${USED_LC}"
+      export LANG="${USED_LC}"
       echo
       echo "locales:"
       locale
@@ -214,7 +234,7 @@ Linter:
       echo "name=pixelpark"                                                                >> /etc/yum.repos.d/pixelpark.repo
       echo "baseurl=https://repo01.pixelpark.com/Linux/yum/pixelpark/${EL_MAJOR_VERSION}/" >> /etc/yum.repos.d/pixelpark.repo
       echo "enabled=1"                                                                     >> /etc/yum.repos.d/pixelpark.repo
-      echo "gpgcheck=1"                                                                    >> /etc/yum.repos.d/pixelpark.repo
+      echo "gpgcheck=0"                                                                    >> /etc/yum.repos.d/pixelpark.repo
       echo "gpgkey=https://repo01.pixelpark.com/gpg/pixelpark.gpg"                         >> /etc/yum.repos.d/pixelpark.repo
       echo                                                                                 >> /etc/yum.repos.d/pixelpark.repo
       echo
