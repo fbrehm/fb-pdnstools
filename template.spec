@@ -22,16 +22,16 @@ BuildRequires:  python@@@py_version_nodot@@@-setuptools
 BuildRequires:  python@@@py_version_nodot@@@-babel
 BuildRequires:  python@@@py_version_nodot@@@-pytz
 BuildRequires:  python@@@py_version_nodot@@@-six
-BuildRequires:  python@@@py_version_nodot@@@-fb-logging
-BuildRequires:  python@@@py_version_nodot@@@-fb-tools
+BuildRequires:  python@@@py_version_nodot@@@-fb-logging >= 0.5.0
+BuildRequires:  python@@@py_version_nodot@@@-fb-tools >= 2.2.0
 Requires:       python@@@py_version_nodot@@@
 Requires:       python@@@py_version_nodot@@@-libs
 Requires:       python@@@py_version_nodot@@@-babel
 Requires:       python@@@py_version_nodot@@@-pytz
 Requires:       python@@@py_version_nodot@@@-requests
 Requires:       python@@@py_version_nodot@@@-six
-Requires:       python@@@py_version_nodot@@@-fb-logging
-Requires:       python@@@py_version_nodot@@@-fb-tools
+Requires:       python@@@py_version_nodot@@@-fb-logging >= 0.5.0
+Requires:       python@@@py_version_nodot@@@-fb-tools >= 2.2.0
 BuildArch:      noarch
 
 %description
