@@ -379,7 +379,7 @@ jobs:
           cd "${ODIR}"
           echo
           echo "Generating spec file 'fb_logging.spec' ..."
-          cat fb-pdnstools.spec.template | tail -n +3 | \
+          cat template.spec | tail -n +3 | \
                               sed -e "s/@@@Version@@@/${PKG_VERSION}/gi" \
                                   -e "s/@@@Release@@@/${PKG_RELEASE}/gi" \
                                   -e "s/@@@py_version_nodot@@@/${PY_VERSION_NODOT}/gi" \
