@@ -1,8 +1,8 @@
 #!/bin/bash
 
-cd $( dirname $0 )
+cd "$( dirname "$0" )" || exit 6
 
-VERSION=$( cat debian/changelog | head -n 1 | sed -e "s/^[^(]*(//" -e "s/).*//" )
+VERSION=$( head -n 1 debian/changelog | sed -e "s/^[^(]*(//" -e "s/).*//" )
 
 echo "${VERSION}"
 
