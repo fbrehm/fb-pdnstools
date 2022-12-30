@@ -1,4 +1,4 @@
-fb-pdnstools (0.5.6) UNRELEASED; urgency=medium
+fb-pdnstools (0.5.6) all; urgency=medium
 
   * Updating package dependencies in template.spec and debian/control
   * Adding signing of all Debian packages in Githaub workflow
