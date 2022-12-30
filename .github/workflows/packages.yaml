@@ -57,7 +57,7 @@ jobs:
   linter:
     runs-on: ubuntu-latest
     name: Executing Linters
-    container: python:3.9
+    container: python:3.11
     env:
       FLAKE8_MAX_LINE_LENGTH: 99
       FLAKE8_MAX_COMPLEXITY: 20
@@ -488,7 +488,7 @@ jobs:
   deploy_to_pypi:
     runs-on: ubuntu-latest
     name: "Deployment of the Python package to PyPi"
-    container: debian:bullseye
+    container: python:3.11
     needs:
       - linter
     steps:
