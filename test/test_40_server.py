@@ -64,7 +64,7 @@ class TestPdnsServer(FbPdnsToolsTestcase):
     # -------------------------------------------------------------------------
     def set_mocking(self, obj):
 
-        from fb_pdnstools import BasePowerDNSHandler
+        from fb_pdnstools.base_handler import BasePowerDNSHandler
 
         if not isinstance(obj, BasePowerDNSHandler):
             msg = "Given object is not a BasePowerDNSHandler object, but a {} instead.".format(
