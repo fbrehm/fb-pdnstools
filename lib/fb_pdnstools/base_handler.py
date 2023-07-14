@@ -43,8 +43,8 @@ from . import DEFAULT_API_PREFIX
 from . import DEFAULT_PORT
 from . import DEFAULT_TIMEOUT
 from . import DEFAULT_USE_HTTPS
-from . import FQDN_REGEX
 from . import LIBRARY_NAME
+from . import MAX_PORT_NUMBER
 from . import VALID_RRSET_TYPES
 from .errors import PDNSApiError
 from .errors import PDNSApiNotAuthorizedError
@@ -55,7 +55,7 @@ from .errors import PowerDNSHandlerError
 from .xlate import XLATOR
 
 
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 LOG = logging.getLogger(__name__)
 
 LOGLEVEL_REQUESTS_SET = False
@@ -113,10 +113,10 @@ class BasePowerDNSHandler(HandlingObject):
         global LOGLEVEL_REQUESTS_SET
 
         if not LOGLEVEL_REQUESTS_SET:
-            msg = _("Setting Loglevel of the {m} module to {ll}.").format(
+            msg = _('Setting loglevel of the {m} module to {ll}.').format(
                 m='requests', ll='WARNING')
             LOG.debug(msg)
-            logging.getLogger("requests").setLevel(logging.WARNING)
+            logging.getLogger('requests').setLevel(logging.WARNING)
             LOGLEVEL_REQUESTS_SET = True
 
         self.initialized = initialized
@@ -152,11 +152,10 @@ class BasePowerDNSHandler(HandlingObject):
             return
         val = int(value)
         err_msg = _(
-            "Invalid port number {!r} for the PowerDNS API, "
-            "must be 0 < PORT < 65536.")
-        if val <= 0 or val > 65536:
-            msg = err_msg.format(value)
-            raise ValueError(msg)
+            'Invalid port number {port!r} for the PowerDNS API, must be greater than zero '
+            'and less than {max}.').format(port=value, max=(MAX_PORT_NUMBER + 1))
+        if val <= 0 or val >= MAX_PORT_NUMBER:
+            raise ValueError(err_msg)
         self._port = val
 
     # -----------------------------------------------------------
@@ -180,7 +179,7 @@ class BasePowerDNSHandler(HandlingObject):
     # -----------------------------------------------------------
     @property
     def use_https(self):
-        """Should be HTTPS used to communicate with the API?"""
+        """Return, whether to use HTTPS to communicate with the API."""
         if self.mocked:
             return False
         return self._use_https
@@ -216,7 +215,7 @@ class BasePowerDNSHandler(HandlingObject):
             self._path_prefix = None
         else:
             if not os.path.isabs(val):
-                msg = _("The path prefix {!r} must be an absolute path.").format(value)
+                msg = _('The path prefix {!r} must be an absolute path.').format(value)
                 raise ValueError(msg)
             self._path_prefix = val
 
@@ -233,8 +232,8 @@ class BasePowerDNSHandler(HandlingObject):
             return
         val = int(value)
         err_msg = _(
-            "Invalid timeout {!r} for requesting the PowerDNS API, "
-            "must be 0 < SECONDS < 3600.")
+            'Invalid timeout {!r} for requesting the PowerDNS API, must be greater than zero and '
+            'less or equal to  3600.')
         if val <= 0 or val > 3600:
             msg = err_msg.format(value)
             raise ValueError(msg)
@@ -243,31 +242,31 @@ class BasePowerDNSHandler(HandlingObject):
     # -----------------------------------------------------------
     @property
     def user_agent(self):
-        "The name of the user agent used in API calls."
+        """The name of the user agent used in API calls."""
         return self._user_agent
 
     @user_agent.setter
     def user_agent(self, value):
         if value is None or str(value).strip() == '':
-            raise PowerDNSHandlerError(_("Invalid user agent {!r} given.").format(value))
+            raise PowerDNSHandlerError(_('Invalid user agent {!r} given.').format(value))
         self._user_agent = str(value).strip()
 
     # -----------------------------------------------------------
     @property
     def api_servername(self):
-        "The (virtual) name of the PowerDNS server used in API calls."
+        """The (virtual) name of the PowerDNS server used in API calls."""
         return self._api_servername
 
     @api_servername.setter
     def api_servername(self, value):
         if value is None or str(value).strip() == '':
-            raise PowerDNSHandlerError(_("Invalid API server name {!r} given.").format(value))
+            raise PowerDNSHandlerError(_('Invalid API server name {!r} given.').format(value))
         self._api_servername = str(value).strip()
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=True):
         """
-        Transforms the elements of the object into a dict
+        Transform the elements of the object into a dict.
 
         @param short: don't include local properties in resulting dict.
         @type short: bool
@@ -275,7 +274,6 @@ class BasePowerDNSHandler(HandlingObject):
         @return: structure as dict
         @rtype:  dict
         """
-
         res = super(BasePowerDNSHandler, self).as_dict(short=short)
         res['default_port'] = self.default_port
         res['default_timeout'] = self.default_timeout
@@ -317,7 +315,7 @@ class BasePowerDNSHandler(HandlingObject):
     def _build_url(self, path, no_prefix=False):
 
         if not os.path.isabs(path):
-            msg = _("The path {!r} must be an absolute path.").format(path)
+            msg = _('The path {!r} must be an absolute path.').format(path)
             raise ValueError(msg)
 
         url = 'http://{}'.format(self.master_server)
@@ -337,34 +335,33 @@ class BasePowerDNSHandler(HandlingObject):
         url += path
 
         if self.verbose > 1:
-            LOG.debug(_("Used URL: {!r}").format(url))
+            LOG.debug(_('Used URL: {!r}').format(url))
         return url
 
     # -------------------------------------------------------------------------
     def perform_request(
         self, path, no_prefix=False, method='GET',
             data=None, headers=None, may_simulate=False):
-        """Performing the underlying API request."""
-
+        """Perform the underlying API request."""
         if headers is None:
-            headers = dict()
+            headers = {}
         if self.key:
             headers['X-API-Key'] = self.key
 
         url = self._build_url(path, no_prefix=no_prefix)
         if self.verbose > 1:
-            LOG.debug(_("Request method: {!r}").format(method))
+            LOG.debug(_('Request method: {!r}').format(method))
         if data and self.verbose > 1:
-            data_out = "{!r}".format(data)
+            data_out = '{!r}'.format(data)
             try:
                 data_out = json.loads(data)
             except ValueError:
                 pass
             else:
                 data_out = pp(data_out)
-            LOG.debug("Data:\n{}".format(data_out))
+            LOG.debug('Data:\n{}'.format(data_out))
             if self.verbose > 2:
-                LOG.debug("RAW data:\n{}".format(data))
+                LOG.debug('RAW data:\n{}'.format(data))
 
         headers.update({'User-Agent': self.user_agent})
         headers.update({'Content-Type': 'application/json'})
@@ -372,10 +369,10 @@ class BasePowerDNSHandler(HandlingObject):
             head_out = copy.copy(headers)
             if 'X-API-Key' in head_out and self.verbose <= 4:
                 head_out['X-API-Key'] = '******'
-            LOG.debug("Headers:\n{}".format(pp(head_out)))
+            LOG.debug('Headers:\n{}'.format(pp(head_out)))
 
         if may_simulate and self.simulate:
-            LOG.debug(_("Simulation mode, Request will not be sent."))
+            LOG.debug(_('Simulation mode, Request will not be sent.'))
             return ''
 
         try:
@@ -390,7 +387,7 @@ class BasePowerDNSHandler(HandlingObject):
                 socket.timeout, urllib3.exceptions.ConnectTimeoutError,
                 urllib3.exceptions.MaxRetryError,
                 requests.exceptions.ConnectTimeout) as e:
-            msg = _("Got a {c} on connecting to {h!r}: {e}.").format(
+            msg = _('Got a {c} on connecting to {h!r}: {e}.').format(
                 c=e.__class__.__name__, h=self.master_server, e=e)
             raise PowerDNSHandlerError(msg)
 
@@ -401,13 +398,13 @@ class BasePowerDNSHandler(HandlingObject):
             raise PDNSApiError(_('Failed to parse the response'), response.text)
 
         if self.verbose > 3:
-            LOG.debug("RAW response: {!r}.".format(response.text))
+            LOG.debug('RAW response: {!r}.'.format(response.text))
         if not response.text:
             return ''
 
         json_response = response.json()
         if self.verbose > 3:
-            LOG.debug("JSON response:\n{}".format(pp(json_response)))
+            LOG.debug('JSON response:\n{}'.format(pp(json_response)))
 
         if 'location' in response.headers:
             json_response['requestId'] = self._request_id(response.headers)
@@ -423,7 +420,7 @@ class BasePowerDNSHandler(HandlingObject):
         err = response.json()
         code = response.status_code
         msg = err['error']
-        LOG.debug(_("Got an error response code {code}: {msg}").format(code=code, msg=msg))
+        LOG.debug(_('Got an error response code {code}: {msg}').format(code=code, msg=msg))
         if response.status_code == 401:
             raise PDNSApiNotAuthorizedError(code, msg, url)
         if response.status_code == 404:
@@ -437,13 +434,19 @@ class BasePowerDNSHandler(HandlingObject):
 
     # -------------------------------------------------------------------------
     def canon_name(self, name):
-
+        """Canonize the DNS name, that means ensure a dot at the end of the name."""
         ret = RE_DOT_AT_END.sub('.', name, 1)
         return ret
 
     # -------------------------------------------------------------------------
     def name2fqdn(self, name, is_fqdn=False):
+        """
+        Transform the given name into a canonized FQDN.
 
+        If an IP address as name is given (and the parameter 'is_fqdn' is False), then
+        this name will be transformed into a reverse pointer address
+        (e.g. '4.3.2.1..in-addr.arpa.').
+        """
         fqdn = name
 
         if not is_fqdn:
@@ -453,27 +456,27 @@ class BasePowerDNSHandler(HandlingObject):
                 is_fqdn = False
             except ValueError:
                 if self.verbose > 3:
-                    LOG.debug(_("Name {!r} is not a valid IP address.").format(name))
+                    LOG.debug(_('Name {!r} is not a valid IP address.').format(name))
                 is_fqdn = True
                 fqdn = name
 
         if ':' in fqdn:
-            LOG.error(_("Invalid FQDN {!r}.").format(fqdn))
+            LOG.error(_('Invalid FQDN {!r}.').format(fqdn))
             return None
 
         return self.canon_name(fqdn)
 
     # -------------------------------------------------------------------------
     def decanon_name(self, name):
-
+        """Decanonize the FQDN - removing possible dots at the end of the name."""
         ret = RE_DOT_AT_END.sub('', name)
         return ret
 
     # -------------------------------------------------------------------------
     def verify_rrset_type(self, rtype, raise_on_error=True):
-
+        """Verify, that the given name is a valid RRset type name."""
         if not isinstance(rtype, six.string_types):
-            msg = _("A rrset type must be a string type, but is {!r} instead.").format(rtype)
+            msg = _('A rrset type must be a string type, but is {!r} instead.').format(rtype)
             if raise_on_error:
                 raise TypeError(msg)
             LOG.error(msg)
@@ -481,14 +484,14 @@ class BasePowerDNSHandler(HandlingObject):
 
         type_used = to_str(rtype).strip().upper()
         if not type_used:
-            msg = _("Invalid, empty rrset type {!r} given.").format(rtype)
+            msg = _('Invalid, empty rrset type {!r} given.').format(rtype)
             if raise_on_error:
                 raise ValueError(msg)
             LOG.error(msg)
             return None
 
         if type_used not in VALID_RRSET_TYPES:
-            msg = _("Invalid rrset type {!r} given.").format(rtype)
+            msg = _('Invalid rrset type {!r} given.').format(rtype)
             if raise_on_error:
                 raise ValueError(msg)
             LOG.error(msg)
@@ -498,11 +501,11 @@ class BasePowerDNSHandler(HandlingObject):
 
     # -------------------------------------------------------------------------
     def start_mocking(self, session):
-
+        """Start mocking mode of this class for unit testing."""
         if not self.mocked:
             return
 
-        LOG.debug(_("Preparing mocking ..."))
+        LOG.debug(_('Preparing mocking ...'))
 
         import requests_mock
 
@@ -513,23 +516,23 @@ class BasePowerDNSHandler(HandlingObject):
 
             if not isinstance(path, MutableMapping):
                 msg = _(
-                    "Mocking path {p!r} is not a dictionary object, but a "
-                    "{c} object instead.").format(p=path, c=path.__class__.__name__)
+                    'Mocking path {p!r} is not a dictionary object, but a '
+                    '{c} object instead.').format(p=path, c=path.__class__.__name__)
                 raise PowerDNSHandlerError(msg)
 
             for key in ('method', 'url'):
                 if key not in path:
-                    msg = _("Mocking path has no {!r} key defined:").format(key)
+                    msg = _('Mocking path has no {!r} key defined:').format(key)
                     msg += '\n' + pp(path)
                     raise PowerDNSHandlerError(msg)
 
             if self.verbose > 2:
-                LOG.debug(_("Adding mocking path:") + '\n' + pp(path))
+                LOG.debug(_('Adding mocking path:') + '\n' + pp(path))
             adapter.register_uri(**path)
 
 
 # =============================================================================
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     pass
 

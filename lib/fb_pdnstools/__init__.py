@@ -30,6 +30,8 @@ DEFAULT_TIMEOUT = 20
 DEFAULT_API_PREFIX = '/api/v1'
 DEFAULT_USE_HTTPS = False
 
+MAX_PORT_NUMBER = (2 ** 16) - 1
+
 FQDN_REGEX = re.compile(r'^((?!-)[-A-Z\d]{1,62}(?<!-)\.)+[A-Z]{1,62}\.?$', re.IGNORECASE)
 
 
