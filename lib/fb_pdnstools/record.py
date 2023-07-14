@@ -23,19 +23,19 @@ except ImportError:
 # Third party modules
 import six
 
-# Own modules
 from fb_tools.common import pp, compare_fqdn, to_utf8, to_str
 
 from fb_tools.obj import FbBaseObject
 
-from .xlate import XLATOR
+# Own modules
 
-from . import BasePowerDNSHandler, DEFAULT_PORT, DEFAULT_API_PREFIX
-
+from . import DEFAULT_API_PREFIX, DEFAULT_PORT
+from .base_handler import BasePowerDNSHandler
 from .errors import PowerDNSWrongRecordTypeError
 from .errors import PowerDNSRecordSetError, PowerDNSWrongSoaDataError
+from .xlate import XLATOR
 
-__version__ = '0.6.3'
+__version__ = '0.6.4'
 
 LOG = logging.getLogger(__name__)
 

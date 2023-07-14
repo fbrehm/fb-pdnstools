@@ -23,45 +23,30 @@ except ImportError:
     from collections import MutableMapping
 
 # Third party modules
+from fb_tools.common import pp, to_utf8, to_bool, compare_fqdn, RE_DOT, to_str
+from fb_tools.common import to_unicode, is_sequence
+from fb_tools.obj import FbBaseObject
+
 import six
 
 # Own modules
-from fb_tools.common import pp, to_utf8, to_bool, compare_fqdn, RE_DOT, to_str
-from fb_tools.common import to_unicode, is_sequence
-
-from fb_tools.obj import FbBaseObject
-
-from .xlate import XLATOR
-
-from . import BasePowerDNSHandler, DEFAULT_PORT, DEFAULT_API_PREFIX, FQDN_REGEX
-
+from . import DEFAULT_API_PREFIX
+from . import DEFAULT_PORT
+from . import FQDN_REGEX
+from .base_handler import BasePowerDNSHandler
 from .errors import PowerDNSZoneError
-
+from .errors import PDNSNoRecordsToRemove
 from .record import PowerDnsSOAData, PowerDNSRecord
 from .record import PowerDNSRecordSetComment
 from .record import PowerDNSRecordSet, PowerDNSRecordSetList
+from .xlate import XLATOR
 
-__version__ = '0.11.2'
+__version__ = '0.11.4'
 
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
 ngettext = XLATOR.ngettext
-
-
-# =============================================================================
-class PDNSNoRecordsToRemove(PowerDNSZoneError):
-
-    # -------------------------------------------------------------------------
-    def __init__(self, zone_name):
-        self.zone_name = zone_name
-
-    # -------------------------------------------------------------------------
-    def __str__(self):
-
-        msg = _("No Resource Record Sets found to remove from zone {!r}.").format(
-            self.zone_name)
-        return msg
 
 
 # =============================================================================

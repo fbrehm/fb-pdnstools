@@ -14,20 +14,19 @@ import re
 
 # Third party modules
 
-# Own modules
 from fb_tools.common import pp, to_bool, to_str
 
 from fb_tools.handling_obj import HandlingObject
 
-from .xlate import XLATOR
-
-from . import BasePowerDNSHandler, DEFAULT_PORT, DEFAULT_API_PREFIX
-
+# Own modules
+from . import DEFAULT_API_PREFIX
+from . import DEFAULT_PORT
+from .base_handler import BasePowerDNSHandler
 from .errors import PDNSApiNotFoundError, PDNSApiValidationError
-
+from .xlate import XLATOR
 from .zone import PowerDNSZone, PowerDNSZoneDict
 
-__version__ = '0.8.0'
+__version__ = '0.8.1'
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext

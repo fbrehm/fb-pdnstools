@@ -17,7 +17,7 @@ from .xlate import XLATOR
 
 _ = XLATOR.gettext
 
-__version__ = '0.2.4'
+__version__ = '0.3.0'
 
 
 # =============================================================================
@@ -29,6 +29,21 @@ class PowerDNSHandlerError(FbHandlerError):
 # =============================================================================
 class PowerDNSZoneError(PowerDNSHandlerError):
     pass
+
+
+# =============================================================================
+class PDNSNoRecordsToRemove(PowerDNSZoneError):
+
+    # -------------------------------------------------------------------------
+    def __init__(self, zone_name):
+        self.zone_name = zone_name
+
+    # -------------------------------------------------------------------------
+    def __str__(self):
+
+        msg = _("No Resource Record Sets found to remove from zone {!r}.").format(
+            self.zone_name)
+        return msg
 
 
 # =============================================================================
