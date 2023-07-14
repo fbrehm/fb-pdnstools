@@ -60,6 +60,30 @@ class TestPdnsBaseHandler(FbPdnsToolsTestcase):
 
         LOG.debug("Dummy PDNS handler:\n{}".format(pp(test_handler.as_dict())))
 
+    # -------------------------------------------------------------------------
+    def test_base_handler_wrong_params(self):
+
+        LOG.info("Testing base class BasePowerDNSHandler with wrong parameters ...")
+
+        from fb_pdnstools.base_handler import BasePowerDNSHandler
+
+        LOG.debug("Creating dummy PDNS handler on base of BasePowerDNSHandler ...")
+
+        # Creating dummy class
+        class DummyPowerDNSHandler(BasePowerDNSHandler):
+            pass
+
+        wrong_ports = ('uhu', 0, -10, 123456)
+
+        for wrong_port in wrong_ports:
+            LOG.debug("Testing with port {!r} ...".format(wrong_port))
+            with self.assertRaises(ValueError) as cm:
+                test_handler = DummyPowerDNSHandler(
+                    appname=self.appname, verbose=self.verbose, port=wrong_port)
+                LOG.debug("Dummy PDNS handler:\n{}".format(pp(test_handler.as_dict())))
+            e = cm.exception
+            LOG.debug("Got a {c}: {e}".format(c=e.__class__.__name__, e=e))
+
 
 # =============================================================================
 if __name__ == '__main__':
@@ -76,6 +100,7 @@ if __name__ == '__main__':
 
     suite.addTest(TestPdnsBaseHandler('test_import_modules', verbose))
     suite.addTest(TestPdnsBaseHandler('test_base_handler_class', verbose))
+    suite.addTest(TestPdnsBaseHandler('test_base_handler_wrong_params', verbose))
 
     runner = unittest.TextTestRunner(verbosity=verbose)
 
