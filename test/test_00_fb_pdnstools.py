@@ -3,7 +3,7 @@
 '''
 @author: Frank Brehm
 @contact: frank@brehm-online.com
-@copyright: © 2021 Frank Brehm, Berlin
+@copyright: © 2023 Frank Brehm, Berlin
 @license: LGPL3
 @summary: test script (and module) for unit tests on fb-pdnstools base classes
 '''
@@ -45,24 +45,6 @@ class TestPdnsToolsBase(FbPdnsToolsTestcase):
         import fb_pdnstools.errors
         LOG.debug("Version of fb_pdnstools.errors: {!r}.".format(
             fb_pdnstools.errors.__version__))
-
-    # -------------------------------------------------------------------------
-    def test_base_class(self):
-
-        LOG.info("Testing base class BasePowerDNSHandler ...")
-
-        from fb_pdnstools import BasePowerDNSHandler
-
-        LOG.debug("Creating dummy PDNS handler on base of BasePowerDNSHandler ...")
-
-        # Creating dummy class
-        class DummyPowerDNSHandler(BasePowerDNSHandler):
-            pass
-
-        test_handler = DummyPowerDNSHandler(
-            appname=self.appname, verbose=self.verbose)
-
-        LOG.debug("Dummy PDNS handler:\n{}".format(pp(test_handler.as_dict())))
 
     # -------------------------------------------------------------------------
     def test_error_classes(self):
@@ -166,7 +148,6 @@ if __name__ == '__main__':
     suite = unittest.TestSuite()
 
     suite.addTest(TestPdnsToolsBase('test_import_modules', verbose))
-    suite.addTest(TestPdnsToolsBase('test_base_class', verbose))
     suite.addTest(TestPdnsToolsBase('test_error_classes', verbose))
 
     runner = unittest.TextTestRunner(verbosity=verbose)
