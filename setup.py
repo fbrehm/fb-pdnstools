@@ -1,27 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
+@summary: Modules for handling the PowerDNS API.
+
 @author: Frank Brehm
 @contact: frank@brehm-online.com
 @license: LGPL3+
-@copyright: © 2018 Frank Brehm, Berlin
-@summary: Modules for handling the PowerDNS API
+@copyright: © 2023 Frank Brehm, Berlin
 """
 from __future__ import print_function
 
-import os
-import sys
-import re
-import pprint
 import datetime
-import textwrap
 import glob
+import os
 import pathlib
+import pprint
+import re
 import subprocess
-
-# Third party modules
-from setuptools import setup
+import sys
+import textwrap
 
 # own modules:
 __base_dir__ = os.path.abspath(os.path.dirname(__file__))
@@ -40,6 +37,7 @@ PATHS = {
 
 # -----------------------------------
 def pp(obj):
+    """Human friendly output of data structures."""
     pprinter = pprint.PrettyPrinter(indent=4)
     return pprinter.pformat(obj)
 
@@ -49,11 +47,14 @@ def pp(obj):
 if os.path.exists(__module_dir__) and os.path.isfile(__init_py__):
     sys.path.insert(0, os.path.abspath(__lib_dir__))
 
+# Third party modules
 import fb_tools
+
+from setuptools import setup
 
 # from fb_tools.common import pp
 
-ENCODING = "utf-8"
+ENCODING = 'utf-8'
 
 __packet_version__ = fb_tools.__version__
 
@@ -62,7 +63,7 @@ __debian_pkg_name__ = 'fb-pdnstools'
 
 __author__ = 'Frank Brehm'
 __contact__ = 'frank@brehm-online.com'
-__copyright__ = '(C) 2018 Frank Brehm, Berlin'
+__copyright__ = '(C) 2023 Frank Brehm, Berlin'
 __license__ = 'LGPL3+'
 __url__ = 'https://github.com/fbrehm/fb-pdnstools'
 
@@ -73,7 +74,7 @@ if sys.version_info[0] < 3:
 
 # -----------------------------------
 def read(fname):
-
+    """Read the given file and return its content."""
     content = None
 
     if sys.version_info[0] < 3:
@@ -88,6 +89,7 @@ def read(fname):
 
 # -----------------------------------
 def is_python_file(filename):
+    """Return, whether the given file seems to be a Python source file."""
     if filename.endswith('.py'):
         return True
     else:
@@ -102,6 +104,7 @@ __readme_file__ = os.path.join(__base_dir__, 'README.txt')
 
 # -----------------------------------
 def get_debian_version():
+    """Return the latest package version fron Debian changelog file."""
     if not os.path.isfile(__changelog_file__):
         return None
     changelog = read(__changelog_file__)
@@ -122,16 +125,17 @@ if __debian_version__ is not None and __debian_version__ != '':
 
 # -----------------------------------
 def write_local_version():
-
+    """Write the local version file."""
     local_version_file = os.path.join(__module_dir__, 'local_version.py')
     local_version_file_content = textwrap.dedent('''\
         #!/usr/bin/python
         # -*- coding: utf-8 -*-
         """
+        @summary: Modules for handling the PowerDNS API.
+
         @author: {author}
         @contact: {contact}
         @copyright: © {cur_year} by {author}, Berlin
-        @summary: Modules for handling the PowerDNS API.
         """
 
         __author__ = '{author} <{contact}>'
@@ -169,7 +173,7 @@ __requirements__ = [
 
 # -----------------------------------
 def read_requirements():
-
+    """Read the requiremments.txt file."""
     req_file = os.path.join(__base_dir__, 'requirements.txt')
     if not os.path.isfile(req_file):
         return
@@ -202,7 +206,7 @@ read_requirements()
 __scripts__ = []
 
 def get_scripts():
-
+    """Collect binary script files from bin/."""
     fpattern = os.path.join(__bin_dir__, '*')
     for fname in glob.glob(fpattern):
         script_name = os.path.relpath(fname, __base_dir__)
@@ -224,6 +228,7 @@ MO_FILES = 'locale/*/LC_MESSAGES/*.mo'
 PO_FILES = 'locale/*/LC_MESSAGES/*.po'
 
 def create_mo_files():
+    """Compile the translation files."""
     mo_files = []
     for po_path in glob.glob(PO_FILES):
         mo = pathlib.Path(po_path.replace('.po', '.mo'))
