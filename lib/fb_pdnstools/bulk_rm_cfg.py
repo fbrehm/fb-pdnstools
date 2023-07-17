@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
+@summary: A module for providing a configuration for the pdns-bulk-remove application.
+
 @author: Frank Brehm
 @contact: frank@brehm-online.com
-@copyright: © 2021 by Frank Brehm, Berlin
-@summary: A module for providing a configuration for the pdns-bulk-remove application
+@copyright: © 2023 by Frank Brehm, Berlin
 """
 from __future__ import absolute_import
 
@@ -13,32 +14,32 @@ import logging
 import re
 
 # Third party modules
+from fb_tools.common import to_bool
+from fb_tools.config import BaseConfiguration
+from fb_tools.config import ConfigError
 
 # Own modules
-from fb_tools.common import to_bool
+from . import DEFAULT_API_PREFIX
+from . import DEFAULT_PORT
+from .xlate import XLATOR
 
-from fb_tools.config import ConfigError, BaseConfiguration
-
-from . import DEFAULT_PORT, DEFAULT_API_PREFIX
-
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 LOG = logging.getLogger(__name__)
+
+_ = XLATOR.gettext
+ngettext = XLATOR.ngettext
 
 
 # =============================================================================
 class PdnsBulkRmConfigError(ConfigError):
-    """Base error class for all exceptions happened during
-    execution this configured application"""
+    """Error class for all exceptions reading configuration of the pdns-bulk-remove app."""
 
     pass
 
 
 # =============================================================================
 class PdnsBulkRmCfg(BaseConfiguration):
-    """
-    A class for providing a configuration for the GetVmApplication class
-    and methods to read it from configuration files.
-    """
+    """A class for providing a configuration for the GetVmApplication class."""
 
     default_pdns_master = 'master.pp-dns.com'
     default_pdns_api_port = DEFAULT_PORT
@@ -49,7 +50,7 @@ class PdnsBulkRmCfg(BaseConfiguration):
     def __init__(
         self, appname=None, verbose=0, version=__version__, base_dir=None,
             encoding=None, config_dir=None, config_file=None, initialized=False):
-
+        """Initialize the PdnsBulkRmCfg object."""
         self.pdns_master = self.default_pdns_master
         self.pdns_api_port = self.default_pdns_api_port
         self.pdns_api_key = None
@@ -67,7 +68,7 @@ class PdnsBulkRmCfg(BaseConfiguration):
     # -------------------------------------------------------------------------
     def as_dict(self, short=True):
         """
-        Transforms the elements of the object into a dict
+        Transform the elements of the object into a dict.
 
         @param short: don't include local properties in resulting dict.
         @type short: bool
@@ -75,7 +76,6 @@ class PdnsBulkRmCfg(BaseConfiguration):
         @return: structure as dict
         @rtype:  dict
         """
-
         res = super(PdnsBulkRmCfg, self).as_dict(short=short)
 
         res['pdns_api_key'] = None
@@ -89,7 +89,7 @@ class PdnsBulkRmCfg(BaseConfiguration):
 
     # -------------------------------------------------------------------------
     def eval_config_section(self, config, section_name):
-
+        """Evaluate configuration in the section with the given name."""
         super(PdnsBulkRmCfg, self).eval_config_section(config, section_name)
 
         if section_name.lower() in ('pdns', 'powerdns'):
@@ -97,13 +97,13 @@ class PdnsBulkRmCfg(BaseConfiguration):
             return
 
         if self.verbose > 1:
-            LOG.debug("Unhandled configuration section {!r}.".format(section_name))
+            LOG.debug(_('Unhandled configuration section {!r}.').format(section_name))
 
     # -------------------------------------------------------------------------
     def _eval_config_pdns(self, config, section_name):
 
         if self.verbose > 1:
-            LOG.debug("Checking config section {!r} ...".format(section_name))
+            LOG.debug(_('Checking config section {!r} ...').format(section_name))
 
         re_api_key = re.compile(r'^\s*(?:api[_-]?)?key\s*', re.IGNORECASE)
         re_api_prefix = re.compile(r'^\s*(?:api[_-]?)?prefix\s*', re.IGNORECASE)
@@ -130,7 +130,7 @@ class PdnsBulkRmCfg(BaseConfiguration):
 
 # =============================================================================
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     pass
 
