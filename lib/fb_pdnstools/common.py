@@ -10,14 +10,13 @@
 
 # Standard modules
 import logging
-from numbers import Number
 
 # Third party modules
 
 # Own modules
 from .xlate import XLATOR
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 _ = XLATOR.gettext
 
@@ -31,7 +30,7 @@ SECONDS_PER_MINUTE = 60
 # =============================================================================
 def seconds2human(value, fs='', all_fields=False):
     """
-    Converts the given value as seconds into a human readable format.
+    Convert the given value as seconds into a human readable format.
 
     For instance the value `286623` will be converted into `3d7h37m3s`.
 
