@@ -16,7 +16,7 @@ import logging
 # Own modules
 from .xlate import XLATOR
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 _ = XLATOR.gettext
 
@@ -28,7 +28,7 @@ SECONDS_PER_MINUTE = 60
 
 
 # =============================================================================
-def seconds2human(value, fs='', all_fields=False):
+def seconds2human(value, fs=' ', all_fields=False):
     """
     Convert the given value as seconds into a human readable format.
 

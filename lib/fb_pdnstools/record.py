@@ -1,41 +1,45 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
+@summary: An encapsulation class for a DNS record object by PowerDNS API.
+
 @author: Frank Brehm
 @contact: frank@brehm-online.com
-@copyright: © 2021 Frank Brehm, Berlin
-@summary: An encapsulation class for a DNS record object by PowerDNS API
+@copyright: © 2023 Frank Brehm, Berlin
 """
 from __future__ import absolute_import
 
 # Standard modules
-import logging
 import copy
-import re
 import datetime
+import logging
+import re
 import time
-
 try:
     from collections.abc import MutableSequence
 except ImportError:
     from collections import MutableSequence
 
 # Third party modules
-import six
-
-from fb_tools.common import pp, compare_fqdn, to_utf8, to_str
-
+from fb_tools.common import compare_fqdn
+from fb_tools.common import pp
+from fb_tools.common import to_str
+from fb_tools.common import to_utf8
 from fb_tools.obj import FbBaseObject
+
+import six
 
 # Own modules
 
 from . import DEFAULT_API_PREFIX, DEFAULT_PORT
 from .base_handler import BasePowerDNSHandler
+from .common import seconds2human
+from .errors import PowerDNSRecordSetError
 from .errors import PowerDNSWrongRecordTypeError
-from .errors import PowerDNSRecordSetError, PowerDNSWrongSoaDataError
+from .errors import PowerDNSWrongSoaDataError
 from .xlate import XLATOR
 
-__version__ = '0.6.4'
+__version__ = '0.7.0'
 
 LOG = logging.getLogger(__name__)
 
@@ -57,14 +61,14 @@ _ = XLATOR.gettext
 
 # =============================================================================
 def compare_rrsets(x, y):
-
+    """Compare two DNS record sets - thich function can be used for sorting record set lists."""
     if not isinstance(x, PowerDNSRecordSet):
-        raise TypeError(_("Argument {a} {v!r} must be a {o} object.").format(
+        raise TypeError(_('Argument {a} {v!r} must be a {o} object.').format(
             a='x', v=x, o='PowerDNSRecordSet'))
 
     if not isinstance(y, PowerDNSRecordSet):
-        raise TypeError(_("Argument {a} {v!r} must be a {o} object.").format(
-            a='y', v=x, o='PowerDNSRecordSet'))
+        raise TypeError(_('Argument {a} {v!r} must be a {o} object.').format(
+            a='y', v=y, o='PowerDNSRecordSet'))
 
     ret = compare_fqdn(x.name, y.name)
     if ret:
@@ -86,12 +90,13 @@ def compare_rrsets(x, y):
 
 # =============================================================================
 class PowerDNSRecord(FbBaseObject):
+    """Encapsulation class of a DNS record (part of a DNS record set) in PowerDNS."""
 
     # -------------------------------------------------------------------------
     def __init__(
         self, appname=None, verbose=0, version=__version__, base_dir=None, initialized=None,
             content=None, disabled=False):
-
+        """Initialize a PowerDNSRecord record."""
         self._content = None
         if content:
             self._content = to_str(str(content))
@@ -107,13 +112,13 @@ class PowerDNSRecord(FbBaseObject):
     # -----------------------------------------------------------
     @property
     def content(self):
-        "The underlying content of this record."
+        """The underlying content of this record."""
         return self._content
 
     # -----------------------------------------------------------
     @property
     def disabled(self):
-        "Flag, whether the record is disabled or not."
+        """Flag, whether the record is disabled or not."""
         return self._disabled
 
     @disabled.setter
@@ -123,7 +128,7 @@ class PowerDNSRecord(FbBaseObject):
     # -----------------------------------------------------------
     @property
     def enabled(self):
-        "Flag, whether the record is enabled or not."
+        """Flag, whether the record is enabled or not."""
         if self.disabled:
             return False
         return True
@@ -139,7 +144,7 @@ class PowerDNSRecord(FbBaseObject):
     # -------------------------------------------------------------------------
     def as_dict(self, short=True, minimal=False):
         """
-        Transforms the elements of the object into a dict
+        Transform the elements of the object into a dict.
 
         @param short: don't include local properties in resulting dict.
         @type short: bool
@@ -149,7 +154,6 @@ class PowerDNSRecord(FbBaseObject):
         @return: structure as dict
         @rtype:  dict
         """
-
         if minimal:
             return {
                 'content': self.content,
@@ -165,7 +169,7 @@ class PowerDNSRecord(FbBaseObject):
 
     # -------------------------------------------------------------------------
     def __copy__(self):
-
+        """Return a new PowerDNSRecord as a deep copy of the current object."""
         return PowerDNSRecord(
             appname=self.appname, verbose=self.verbose, base_dir=self.base_dir,
             initialized=self.initialized, content=self.content, disabled=self.disabled)
@@ -173,36 +177,33 @@ class PowerDNSRecord(FbBaseObject):
     # -------------------------------------------------------------------------
     def __str__(self):
         """
-        Typecasting function for translating object structure
-        into a string
+        Typecast into a string.
 
         @return: structure as string
         @rtype:  str
         """
-
         return pp(self.as_dict(short=True))
 
     # -------------------------------------------------------------------------
     def __repr__(self):
-        """Typecasting into a string for reproduction."""
-
-        out = "<%s(" % (self.__class__.__name__)
+        """Typecast into a string for reproduction."""
+        out = '<%s(' % (self.__class__.__name__)
 
         fields = []
-        fields.append("content={!r}".format(self.content))
-        fields.append("disabled={!r}".format(self.disabled))
-        fields.append("appname={!r}".format(self.appname))
-        fields.append("verbose={!r}".format(self.verbose))
-        fields.append("version={!r}".format(self.version))
+        fields.append('content={!r}'.format(self.content))
+        fields.append('disabled={!r}'.format(self.disabled))
+        fields.append('appname={!r}'.format(self.appname))
+        fields.append('verbose={!r}'.format(self.verbose))
+        fields.append('version={!r}'.format(self.version))
 
-        out += ", ".join(fields) + ")>"
+        out += ', '.join(fields) + ')>'
         return out
 
     # -------------------------------------------------------------------------
     def __eq__(self, other):
-
+        """Magic method for using it as the '=='-operator."""
         if self.verbose > 4:
-            LOG.debug(_("Comparing equality of {} objects ...").format(self.__class__.__name__))
+            LOG.debug(_('Comparing equality of {} objects ...').format(self.__class__.__name__))
 
         if not isinstance(other, PowerDNSRecord):
             return False
@@ -222,13 +223,12 @@ class PowerDNSRecord(FbBaseObject):
 
     # -------------------------------------------------------------------------
     def __lt__(self, other):
-        """ The '<' operator. """
-
+        """Magic method for using it as the '<'-operator."""
         if self.verbose > 4:
-            LOG.debug(_("Comparing less than of {} objects ...").format(self.__class__.__name__))
+            LOG.debug(_('Comparing less than of {} objects ...').format(self.__class__.__name__))
 
         if not isinstance(other, PowerDNSRecord):
-            msg = _("Wrong type {cls} of other parameter {other!r} for comparision.").format(
+            msg = _('Wrong type {cls} of other parameter {other!r} for comparision.').format(
                 cls=other.__class__.__name__, other=other)
             raise PowerDNSWrongRecordTypeError(msg)
 
@@ -245,14 +245,13 @@ class PowerDNSRecord(FbBaseObject):
 
     # -------------------------------------------------------------------------
     def __gt__(self, other):
-        """ The '>' operator. """
-
+        """Magic method for using it as the '>'-operator."""
         if self.verbose > 4:
-            LOG.debug(_("Comparing greater than of {} objects ...").format(
+            LOG.debug(_('Comparing greater than of {} objects ...').format(
                 self.__class__.__name__))
 
         if not isinstance(other, PowerDNSRecord):
-            msg = _("Wrong type {cls} of other parameter {other!r} for comparision.").format(
+            msg = _('Wrong type {cls} of other parameter {other!r} for comparision.').format(
                 cls=other.__class__.__name__, other=other)
             raise PowerDNSWrongRecordTypeError(msg)
 
@@ -270,6 +269,7 @@ class PowerDNSRecord(FbBaseObject):
 
 # =============================================================================
 class PowerDnsSOAData(FbBaseObject):
+    """Encapsulation class of a SOA (Start of authority) DNS record."""
 
     re_soa_data = re.compile(r'^\s*(\S+)\s+(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*$')
     re_ws = re.compile(r'\s+')
@@ -279,7 +279,7 @@ class PowerDnsSOAData(FbBaseObject):
         self, primary=None, email=None, serial=None, refresh=None, retry=None, expire=None,
             ttl=None, appname=None, verbose=0, version=__version__,
             base_dir=None):
-
+        """Initialize a PowerDnsSOAData record."""
         self._primary = None
         self._email = None
         self._serial = None
@@ -309,7 +309,7 @@ class PowerDnsSOAData(FbBaseObject):
     # -----------------------------------------------------------
     @property
     def primary(self):
-        "The primary name server of this SOA"
+        """Return the primary name server of this SOA record."""
         return self._primary
 
     @primary.setter
@@ -322,7 +322,7 @@ class PowerDnsSOAData(FbBaseObject):
     # -----------------------------------------------------------
     @property
     def email(self):
-        "The E-Mail-address of the hostmaster of this zone."
+        """Return the E-Mail-address of the hostmaster of this zone."""
         return self._email
 
     @email.setter
@@ -335,7 +335,7 @@ class PowerDnsSOAData(FbBaseObject):
     # -----------------------------------------------------------
     @property
     def serial(self):
-        "The serial number of this SOA."
+        """Return the serial number of this SOA record."""
         return self._serial
 
     @serial.setter
@@ -348,7 +348,7 @@ class PowerDnsSOAData(FbBaseObject):
     # -----------------------------------------------------------
     @property
     def refresh(self):
-        "The time in seconds when slaves should ask master for changes."
+        """Return the time in seconds when slaves should ask master for changes."""
         return self._refresh
 
     @refresh.setter
@@ -360,9 +360,21 @@ class PowerDnsSOAData(FbBaseObject):
 
     # -----------------------------------------------------------
     @property
+    def refresh_human(self):
+        """Return the refresh time in a human readable format."""
+        if self._refresh is None:
+            return None
+        return seconds2human(self._refresh)
+
+    # -----------------------------------------------------------
+    @property
     def retry(self):
-        """The time in seconds when slaves should retry getting changes from master,
-            if an attemt to get it was not successful."""
+        """
+        Return the retry time in seconds.
+
+        The time in seconds when slaves should retry getting changes from master,
+        if an attemt to get it was not successful.
+        """
         return self._retry
 
     @retry.setter
@@ -374,9 +386,21 @@ class PowerDnsSOAData(FbBaseObject):
 
     # -----------------------------------------------------------
     @property
+    def retry_human(self):
+        """Return the retry time in a human readable format."""
+        if self._retry is None:
+            return None
+        return seconds2human(self._retry)
+
+    # -----------------------------------------------------------
+    @property
     def expire(self):
-        """The time in seconds when slaves should expiring the zone,
-            if an attemt to get it was not successful."""
+        """
+        Retrun the expire time of the zone.
+
+        This is the time in seconds when slaves should expiring the zone,
+        if an attemt to get it was not successful.
+        """
         return self._expire
 
     @expire.setter
@@ -388,8 +412,16 @@ class PowerDnsSOAData(FbBaseObject):
 
     # -----------------------------------------------------------
     @property
+    def expire_human(self):
+        """Return the expire time in a human readable format."""
+        if self._expire is None:
+            return None
+        return seconds2human(self._expire)
+
+    # -----------------------------------------------------------
+    @property
     def ttl(self):
-        "The defaul TTL of this zone."
+        """Return the default TTL of this zone."""
         return self._ttl
 
     @ttl.setter
@@ -401,19 +433,59 @@ class PowerDnsSOAData(FbBaseObject):
 
     # -----------------------------------------------------------
     @property
-    def data(self):
-        "String representation of SOA data."
-        if self.primary and self.email and self.serial is not None and self.refresh and \
-                self.retry and self.expire and self.ttl:
-            return "{_primary} {_email} {_serial} {_refresh} {_retry} {_expire} {_ttl}".format(
-                **self.__dict__)
-        else:
+    def ttl_human(self):
+        """Return the ttl of the zone in a human readable format."""
+        if self._ttl is None:
             return None
+        return seconds2human(self._ttl)
+
+    # -----------------------------------------------------------
+    @property
+    def data(self):
+        """Return a string representation of SOA data."""
+        if not self.primary:
+            return None
+        if not self.email:
+            return None
+        if self.serial is None:
+            return None
+        if not self.refresh:
+            return None
+        if not self.retry:
+            return None
+        if not self.expire:
+            return None
+        if not self.ttl:
+            return None
+        return '{_primary} {_email} {_serial} {_refresh} {_retry} {_expire} {_ttl}'.format(
+            **self.__dict__)
+
+    # -----------------------------------------------------------
+    @property
+    def data_human(self):
+        """Return a string representation of SOA data in a human readable format."""
+        if not self.primary:
+            return None
+        if not self.email:
+            return None
+        if self.serial is None:
+            return None
+        if not self.refresh:
+            return None
+        if not self.retry:
+            return None
+        if not self.expire:
+            return None
+        if not self.ttl:
+            return None
+        return '{primary} {email} {serial} {refresh!r} {retry!r} {expire!r} {ttl!r}'.format(
+            primary=self.primary, email=self.email, serial=self.serial, refresh=self.refresh_human,
+            retry=self.retry_human, expire=self.expire_human, ttl=self.ttl_human)
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=True):
         """
-        Transforms the elements of the object into a dict
+        Transform the elements of the object into a dict.
 
         @param short: don't include local properties in resulting dict.
         @type short: bool
@@ -421,23 +493,27 @@ class PowerDnsSOAData(FbBaseObject):
         @return: structure as dict
         @rtype:  dict
         """
-
         res = super(PowerDnsSOAData, self).as_dict(short=short)
         res['primary'] = self.primary
         res['email'] = self.email
         res['serial'] = self.serial
         res['refresh'] = self.refresh
+        res['refresh_human'] = self.refresh_human
         res['retry'] = self.retry
+        res['retry_human'] = self.retry_human
         res['expire'] = self.expire
+        res['expire_human'] = self.expire_human
         res['ttl'] = self.ttl
+        res['ttl_human'] = self.ttl_human
         res['data'] = self.data
+        res['data_human'] = self.data_human
 
         return res
 
     # -------------------------------------------------------------------------
     @classmethod
     def init_from_data(cls, data, appname=None, verbose=0, base_dir=None):
-
+        """Create a PowerDnsSOAData on base of the SOA data given from DNS."""
         line = cls.re_ws.sub(' ', to_str(data))
         match = cls.re_soa_data.match(line)
         if not match:
@@ -452,9 +528,9 @@ class PowerDnsSOAData(FbBaseObject):
 
     # -------------------------------------------------------------------------
     def __copy__(self):
-
+        """Return a new PowerDnsSOAData as a deep copy of the current object."""
         if self.verbose > 4:
-            LOG.debug(_("Copying current {}-object in a new one.").format(self.__class__.__name__))
+            LOG.debug(_('Copying current {}-object in a new one.').format(self.__class__.__name__))
 
         soa = PowerDnsSOAData(
             primary=self.primary, email=self.email, serial=self.serial, refresh=self.refresh,
@@ -464,9 +540,9 @@ class PowerDnsSOAData(FbBaseObject):
 
     # -------------------------------------------------------------------------
     def __eq__(self, other):
-
+        """Magic method for using it as the '=='-operator."""
         if self.verbose > 4:
-            LOG.debug(_("Comparing {} objects ...").format(self.__class__.__name__))
+            LOG.debug(_('Comparing {} objects ...').format(self.__class__.__name__))
 
         if not isinstance(other, PowerDnsSOAData):
             return False
@@ -490,7 +566,7 @@ class PowerDnsSOAData(FbBaseObject):
 
     # -------------------------------------------------------------------------
     def increase_serial(self):
-
+        """Increase the serial number in current SOA to the current date + sequential number."""
         i = 0
         tpl = '{year:4d}{month:02d}{day:02d}{nr:02d}'
         curdate = datetime.date.today()
@@ -510,8 +586,8 @@ class PowerDnsSOAData(FbBaseObject):
             i += 1
             if i > 99:
                 msg = _(
-                    "Serial overflow - old serial {o} is in future, new serial {n} "
-                    "has reached its maximum value.").format(o=self.serial, n=new_serial)
+                    'Serial overflow - old serial {o} is in future, new serial {n} '
+                    'has reached its maximum value.').format(o=self.serial, n=new_serial)
                 raise ValueError(msg)
             params['nr'] = i
 
@@ -521,15 +597,13 @@ class PowerDnsSOAData(FbBaseObject):
 
 # =============================================================================
 class PowerDNSRecordList(MutableSequence):
-    """
-    A list containing Power DNS Records (as parts of a Record Set).
-    """
+    """A list containing Power DNS Records (as parts of a Record Set)."""
 
-    msg_no_pdns_record = _("Invalid type {t!r} as an item of a {c}, only {o} objects are allowed.")
+    msg_no_pdns_record = _('Invalid type {t!r} as an item of a {c}, only {o} objects are allowed.')
 
     # -------------------------------------------------------------------------
     def __init__(self, *records):
-
+        """Initialize a PowerDNSRecordList object."""
         self._list = []
 
         for record in records:
@@ -537,13 +611,13 @@ class PowerDNSRecordList(MutableSequence):
 
     # -------------------------------------------------------------------------
     def index(self, record, *args):
-
+        """Return the numeric index of the given record in current list."""
         i = None
         j = None
 
         if len(args) > 0:
             if len(args) > 2:
-                raise TypeError(_("{m} takes at most {max} arguments ({n} given).").format(
+                raise TypeError(_('{m} takes at most {max} arguments ({n} given).').format(
                     m='index()', max=3, n=len(args) + 1))
             i = int(args[0])
             if len(args) > 1:
@@ -581,12 +655,12 @@ class PowerDNSRecordList(MutableSequence):
             if item == record:
                 return index
 
-        msg = _("Record {!r} is not in Record list.").format(record.content)
+        msg = _('Record {!r} is not in Record list.').format(record.content)
         raise ValueError(msg)
 
     # -------------------------------------------------------------------------
     def __contains__(self, record):
-
+        """Return whether the given record is contained in current list."""
         if not isinstance(record, PowerDNSRecord):
             raise TypeError(self.msg_no_pdns_record.format(
                 t=record.__class__.__name__, c=self.__class__.__name__, o='PowerDNSRecord'))
@@ -602,7 +676,7 @@ class PowerDNSRecordList(MutableSequence):
 
     # -------------------------------------------------------------------------
     def count(self, record):
-
+        """Return the number of records which are equal to the given one in current list."""
         if not isinstance(record, PowerDNSRecord):
             raise TypeError(self.msg_no_pdns_record.format(
                 t=record.__class__.__name__, c=self.__class__.__name__, o='PowerDNSRecord'))
@@ -618,20 +692,22 @@ class PowerDNSRecordList(MutableSequence):
 
     # -------------------------------------------------------------------------
     def __len__(self):
+        """Return the number of records in current list."""
         return len(self._list)
 
     # -------------------------------------------------------------------------
     def __getitem__(self, key):
+        """Get a record from current list by the given numeric index."""
         return self._list.__getitem__(key)
 
     # -------------------------------------------------------------------------
     def __reversed__(self):
-
+        """Reverse the records in list in place."""
         return reversed(self._list)
 
     # -------------------------------------------------------------------------
     def __setitem__(self, key, record):
-
+        """Replace the record at the given numeric index by the given one."""
         if not isinstance(record, PowerDNSRecord):
             raise TypeError(self.msg_no_pdns_record.format(
                 t=record.__class__.__name__, c=self.__class__.__name__, o='PowerDNSRecord'))
@@ -640,12 +716,12 @@ class PowerDNSRecordList(MutableSequence):
 
     # -------------------------------------------------------------------------
     def __delitem__(self, key):
-
+        """Remove the record at the given numeric index from list."""
         del self._list[key]
 
     # -------------------------------------------------------------------------
     def append(self, record):
-
+        """Append the given record to the current list."""
         if not isinstance(record, PowerDNSRecord):
             raise TypeError(self.msg_no_pdns_record.format(
                 t=record.__class__.__name__, c=self.__class__.__name__, o='PowerDNSRecord'))
@@ -654,7 +730,7 @@ class PowerDNSRecordList(MutableSequence):
 
     # -------------------------------------------------------------------------
     def insert(self, index, record):
-
+        """Insert the given record in current list at given index."""
         if not isinstance(record, PowerDNSRecord):
             raise TypeError(self.msg_no_pdns_record.format(
                 t=record.__class__.__name__, c=self.__class__.__name__, o='PowerDNSRecord'))
@@ -663,7 +739,7 @@ class PowerDNSRecordList(MutableSequence):
 
     # -------------------------------------------------------------------------
     def __copy__(self):
-
+        """Return a new PowerDNSRecordList as a deep copy of the current object."""
         new_list = self.__class__()
         for record in self._list:
             new_list.append(copy.copy(record))
@@ -671,14 +747,12 @@ class PowerDNSRecordList(MutableSequence):
 
     # -------------------------------------------------------------------------
     def clear(self):
-        "Remove all items from the PowerDNSRecordList."
-
+        """Remove all items from the PowerDNSRecordList."""
         self._list = []
 
     # -------------------------------------------------------------------------
     def clean(self):
-        "Wrapper for clear()"
-
+        """Do exactly the same like clear() (wrapper for it)."""
         return self.clear()
 
 
@@ -951,12 +1025,20 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
     # -----------------------------------------------------------
     @property
     def ttl(self):
-        "The TTL of this record set."
+        "Return the TTL of this record set."
         return self._ttl
 
     @ttl.setter
     def ttl(self, value):
         self._ttl = int(value)
+
+    # -----------------------------------------------------------
+    @property
+    def ttl_human(self):
+        """Return the ttl of the record set in a human readable format."""
+        if self._ttl is None:
+            return None
+        return seconds2human(self._ttl)
 
     # -------------------------------------------------------------------------
     @classmethod
@@ -1076,6 +1158,7 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
         res['name'] = self.name
         res['type'] = self.type
         res['ttl'] = self.ttl
+        res['ttl_human'] = self.ttl_human
         res['name_unicode'] = self.name_unicode
         res['comments'] = []
         res['records'] = []
