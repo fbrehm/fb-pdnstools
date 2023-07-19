@@ -1,30 +1,35 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
+@summary: An encapsulation class for zone objects by PowerDNS API.
+
 @author: Frank Brehm
 @contact: frank@brehm-online.com
-@copyright: © 2021 Frank Brehm, Berlin
-@summary: An encapsulation class for zone objects by PowerDNS API
+@copyright: © 2022 Frank Brehm, Berlin
 """
 from __future__ import absolute_import
 
 # Standard modules
-import logging
 import copy
-import re
 import ipaddress
 import json
-
+import logging
+import re
 from functools import cmp_to_key
-
 try:
     from collections.abc import MutableMapping
 except ImportError:
     from collections import MutableMapping
 
 # Third party modules
-from fb_tools.common import pp, to_utf8, to_bool, compare_fqdn, RE_DOT, to_str
-from fb_tools.common import to_unicode, is_sequence
+from fb_tools.common import RE_DOT
+from fb_tools.common import compare_fqdn
+from fb_tools.common import is_sequence
+from fb_tools.common import pp
+from fb_tools.common import to_bool
+from fb_tools.common import to_str
+from fb_tools.common import to_unicode
+from fb_tools.common import to_utf8
 from fb_tools.obj import FbBaseObject
 
 import six
@@ -34,14 +39,16 @@ from . import DEFAULT_API_PREFIX
 from . import DEFAULT_PORT
 from . import FQDN_REGEX
 from .base_handler import BasePowerDNSHandler
-from .errors import PowerDNSZoneError
 from .errors import PDNSNoRecordsToRemove
-from .record import PowerDnsSOAData, PowerDNSRecord
+from .errors import PowerDNSZoneError
+from .record import PowerDNSRecord
+from .record import PowerDNSRecordSet
 from .record import PowerDNSRecordSetComment
-from .record import PowerDNSRecordSet, PowerDNSRecordSetList
+from .record import PowerDNSRecordSetList
+from .record import PowerDnsSOAData
 from .xlate import XLATOR
 
-__version__ = '0.11.4'
+__version__ = '0.11.5'
 
 LOG = logging.getLogger(__name__)
 
@@ -51,7 +58,7 @@ ngettext = XLATOR.ngettext
 
 # =============================================================================
 class PowerDNSZone(BasePowerDNSHandler):
-    """An encapsulation class for zone objects by PowerDNS API"""
+    """An encapsulation class for zone objects by PowerDNS API."""
 
     re_rev_ipv4 = re.compile(r'^((?:\d+\.)*\d+)\.in-addr\.arpa\.?$', re.IGNORECASE)
     re_rev_ipv6 = re.compile(r'^((?:[0-9a-f]\.)*[0-9a-f])\.ip6.arpa.?$', re.IGNORECASE)
@@ -61,7 +68,7 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -------------------------------------------------------------------------
     def __init__(
         self, appname=None, verbose=0, version=__version__, base_dir=None,
-            account=None, dnssec=False, edited_serial=None, id=None, kind=None,
+            account=None, dnssec=False, edited_serial=None, id=None, kind=None,     # noqa: A002
             last_check=None, master_tsig_key_ids=None, slave_tsig_key_ids=None,
             masters=None, name=None, notified_serial=None, serial=None, url=None,
             soa_edit=None, soa_edit_api=None, nsec3narrow=None, nsec3param=None,
@@ -69,7 +76,7 @@ class PowerDNSZone(BasePowerDNSHandler):
             key=None, use_https=False, timeout=None, path_prefix=DEFAULT_API_PREFIX,
             simulate=None, force=None, terminal_has_colors=False, initialized=None,
             **kwargs):
-
+        """Initialize a PowerDNSZone record."""
         self._account = account
         self._dnssec = dnssec
         self._id = id
@@ -115,7 +122,7 @@ class PowerDNSZone(BasePowerDNSHandler):
         self._add_keys = {}
         if kwargs:
             self._add_keys = copy.copy(kwargs)
-            msg = _("Got unknown init parameters:") + '\n' + pp(self._add_keys)
+            msg = _('Got unknown init parameters:') + '\n' + pp(self._add_keys)
             if self.warn_on_unknown_property:
                 LOG.warn(msg)
             else:
@@ -140,9 +147,9 @@ class PowerDNSZone(BasePowerDNSHandler):
             master_server=None, port=DEFAULT_PORT, key=None, use_https=False,
             timeout=None, path_prefix=DEFAULT_API_PREFIX,
             simulate=None, force=None, terminal_has_colors=False, initialized=None):
-
+        """Create a new PowerDNSZone object based on a given dict."""
         if not isinstance(data, dict):
-            raise PowerDNSZoneError(_("Given data {!r} is not a dict object.").format(data))
+            raise PowerDNSZoneError(_('Given data {!r} is not a dict object.').format(data))
 
         # {   'account': 'local',
         #     'api_rectify': False,
@@ -207,7 +214,7 @@ class PowerDNSZone(BasePowerDNSHandler):
             pout['key'] = None
             if key:
                 pout['key'] = '******'
-            LOG.debug(_("Params initialisation:") + '\n' + pp(pout))
+            LOG.debug(_('Params initialisation:') + '\n' + pp(pout))
 
         zone = cls(**params)
 
@@ -227,8 +234,11 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -----------------------------------------------------------
     @property
     def account(self):
-        """The name of the owning account of the zone, internal used
-            to differ local visible zones from all other zones."""
+        """
+        Gives the name of the owning account of the zone.
+
+        Using `internal` to differ local visible zones from all other zones.
+        """
         return getattr(self, '_account', None)
 
     @account.setter
@@ -254,12 +264,12 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     # -----------------------------------------------------------
     @property
-    def id(self):
-        """The unique idendity of the zone."""
+    def id(self):                                                                   # noqa: A003
+        """Gives the unique idendity of the zone."""
         return getattr(self, '_id', None)
 
     @id.setter
-    def id(self, value):
+    def id(self, value):                                                            # noqa: A003
         if value:
             v = to_str(str(value).strip())
             if v:
@@ -272,7 +282,7 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -----------------------------------------------------------
     @property
     def kind(self):
-        """The kind or type of the zone."""
+        """Gives the kind or type of the zone."""
         return getattr(self, '_kind', None)
 
     @kind.setter
@@ -289,13 +299,13 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -----------------------------------------------------------
     @property
     def last_check(self):
-        """The timestamp of the last check of the zone"""
+        """Gives the timestamp of the last check of the zone."""
         return getattr(self, '_last_check', None)
 
     # -----------------------------------------------------------
     @property
     def name(self):
-        """The name of the zone."""
+        """Gives the name of the zone."""
         return getattr(self, '_name', None)
 
     @name.setter
@@ -328,20 +338,19 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -----------------------------------------------------------
     @property
     def reverse_zone(self):
-        """Is this a reverse zone?"""
+        """Return, whether this is a reverse zone."""
         return self._reverse_zone
 
     # -----------------------------------------------------------
     @property
     def reverse_net(self):
-        """An IP network object representing the network, for which
-            this is the reverse zone."""
+        """Gives an IP network object for the network, for which this is the reverse zone."""
         return self._reverse_net
 
     # -----------------------------------------------------------
     @property
     def name_unicode(self):
-        """The name of the zone in unicode, if it is an IDNA encoded zone."""
+        """Gives name of the zone in unicode, if it is an IDNA encoded zone."""
         n = getattr(self, '_name', None)
         if n is None:
             return None
@@ -352,75 +361,78 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -----------------------------------------------------------
     @property
     def notified_serial(self):
-        """The notified serial number of the zone"""
+        """Gives the notified serial number of the zone."""
         return getattr(self, '_notified_serial', None)
 
     # -----------------------------------------------------------
     @property
     def serial(self):
-        """The serial number of the zone"""
+        """Gives the serial number of the zone."""
         return getattr(self, '_serial', None)
 
     # -----------------------------------------------------------
     @property
     def edited_serial(self):
-        """The SOA serial as seen in query responses.
+        """
+        Gives the SOA serial as seen in query responses.
+
         Calculated using the SOA-EDIT metadata, default-soa-edit and
-        default-soa-edit-signed settings."""
+        default-soa-edit-signed settings.
+        """
         return getattr(self, '_edited_serial', None)
 
     # -----------------------------------------------------------
     @property
     def url(self):
-        """The URL in the API to get the zone object."""
+        """Gives the URL in the API to get the zone object."""
         return getattr(self, '_url', None)
 
     # -----------------------------------------------------------
     @property
     def soa_edit(self):
-        """The SOA edit property of the zone object."""
+        """Gives the SOA edit property of the zone object."""
         return getattr(self, '_soa_edit', None)
 
     # -----------------------------------------------------------
     @property
     def soa_edit_api(self):
-        """The SOA edit property (API) of the zone object."""
+        """Gives the SOA edit property (API) of the zone object."""
         return getattr(self, '_soa_edit_api', None)
 
     # -----------------------------------------------------------
     @property
     def nsec3narrow(self):
-        """Some stuff belonging to DNSSEC."""
+        """Gives some stuff belonging to DNSSEC."""
         return getattr(self, '_nsec3narrow', None)
 
     # -----------------------------------------------------------
     @property
     def nsec3param(self):
-        """Some stuff belonging to DNSSEC."""
+        """Gives some stuff belonging to DNSSEC."""
         return getattr(self, '_nsec3param', None)
 
     # -----------------------------------------------------------
     @property
     def presigned(self):
-        """Some stuff belonging to PowerDNS >= 4.1."""
+        """Gives some stuff belonging to PowerDNS >= 4.1."""
         return getattr(self, '_presigned', None)
 
     # -----------------------------------------------------------
     @property
     def api_rectify(self):
-        """Some stuff belonging to PowerDNS >= 4.1."""
+        """Gives some stuff belonging to PowerDNS >= 4.1."""
         return getattr(self, '_api_rectify', None)
 
     # -----------------------------------------------------------
     @property
     def add_keys(self):
-        """Additional, unexpected keys on initialisation."""
+        """Gives additional, unexpected keys on initialisation."""
         return copy.copy(self._add_keys)
 
     # -----------------------------------------------------------
     @property
     def master_tsig_key_ids(self):
-        """The id of the TSIG keys used for master operation in this zone."""
+        """Gives the id of the TSIG keys used for master operation in this zone."""
         return copy.copy(self._master_tsig_key_ids)
 
     @master_tsig_key_ids.setter
@@ -452,7 +464,7 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -------------------------------------------------------------------------
     def as_dict(self, short=True):
         """
-        Transforms the elements of the object into a dict
+        Transform the elements of the object into a dict.
 
         @param short: don't include local properties in resulting dict.
         @type short: bool
@@ -460,8 +472,8 @@ class PowerDNSZone(BasePowerDNSHandler):
         @return: structure as dict
         @rtype:  dict
         """
-
         res = super(PowerDNSZone, self).as_dict(short=short)
+
         res['account'] = self.account
         res['dnssec'] = copy.copy(self.dnssec)
         res['id'] = self.id
@@ -498,19 +510,17 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -------------------------------------------------------------------------
     def __str__(self):
         """
-        Typecasting function for translating object structure
-        into a string
+        Typecast for translating object structure into a string.
 
         @return: structure as string
         @rtype:  str
         """
-
         return pp(self.as_dict(short=True))
 
     # -------------------------------------------------------------------------
     @classmethod
     def ipv4_nw_from_tuples(cls, tuples):
-
+        """Create ip_network-object from number tuples of the name of a reverse IPv4 zone."""
         bitmask = 0
         tokens = []
         for part in reversed(RE_DOT.split(tuples)):
@@ -529,7 +539,7 @@ class PowerDNSZone(BasePowerDNSHandler):
             tokens.append('0')
             bitmask = 8
         else:
-            msg = _("Invalid source tuples for detecting IPv4-network: {!r}.").format(tuples)
+            msg = _('Invalid source tuples for detecting IPv4-network: {!r}.').format(tuples)
             raise ValueError(msg)
 
         ip_str = to_unicode('.'.join(tokens) + '/{}'.format(bitmask))
@@ -540,7 +550,7 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -------------------------------------------------------------------------
     @classmethod
     def ipv6_nw_from_tuples(cls, tuples):
-
+        """Create ip_network-object from hexnumber tuples of the name of a reverse IPv6 zone."""
         parts = RE_DOT.split(tuples)
         bitmask = 0
         tokens = []
@@ -572,31 +582,30 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     # -------------------------------------------------------------------------
     def __repr__(self):
-        """Typecasting into a string for reproduction."""
-
-        out = "<%s(" % (self.__class__.__name__)
+        """Typecast into a string for reproduction."""
+        out = '<%s(' % (self.__class__.__name__)
 
         fields = []
-        fields.append("name={!r}".format(self.name))
-        fields.append("url={!r}".format(self.url))
-        fields.append("reverse_zone={!r}".format(self.reverse_zone))
-        fields.append("reverse_net={!r}".format(self.reverse_net))
-        fields.append("kind={!r}".format(self.kind))
-        fields.append("serial={!r}".format(self.serial))
-        fields.append("dnssec={!r}".format(self.dnssec))
-        fields.append("account={!r}".format(self.account))
-        fields.append("appname={!r}".format(self.appname))
-        fields.append("verbose={!r}".format(self.verbose))
-        fields.append("version={!r}".format(self.version))
+        fields.append('name={!r}'.format(self.name))
+        fields.append('url={!r}'.format(self.url))
+        fields.append('reverse_zone={!r}'.format(self.reverse_zone))
+        fields.append('reverse_net={!r}'.format(self.reverse_net))
+        fields.append('kind={!r}'.format(self.kind))
+        fields.append('serial={!r}'.format(self.serial))
+        fields.append('dnssec={!r}'.format(self.dnssec))
+        fields.append('account={!r}'.format(self.account))
+        fields.append('appname={!r}'.format(self.appname))
+        fields.append('verbose={!r}'.format(self.verbose))
+        fields.append('version={!r}'.format(self.version))
 
-        out += ", ".join(fields) + ")>"
+        out += ', '.join(fields) + ')>'
         return out
 
     # -------------------------------------------------------------------------
     def __copy__(self):
-
+        """Return a new PowerDNSZone as a deep copy of the current object."""
         if self.verbose > 3:
-            LOG.debug(_("Copying current {}-object into a new one.").format(
+            LOG.debug(_('Copying current {}-object into a new one.').format(
                 self.__class__.__name__))
 
         zone = self.__class__(
@@ -618,12 +627,12 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     # -------------------------------------------------------------------------
     def update(self):
-
+        """Update the records in the zone by requesting the API."""
         if not self.url:
-            msg = _("Cannot update zone {!r}, no API URL defined.").format(self.name)
+            msg = _('Cannot update zone {!r}, no API URL defined.').format(self.name)
             raise PowerDNSZoneError(msg)
 
-        LOG.debug(_("Updating data of zone {n!r} from API path {u!r} ...").format(
+        LOG.debug(_('Updating data of zone {n!r} from API path {u!r} ...').format(
             n=self.name, u=self.url))
         json_response = self.perform_request(self.url)
 
@@ -713,17 +722,16 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -------------------------------------------------------------------------
     def perform_request(
             self, path, no_prefix=True, method='GET', data=None, headers=None, may_simulate=False):
-        """Performing the underlying API request."""
-
+        """Perform the underlying API request."""
         return super(PowerDNSZone, self).perform_request(
             path=path, no_prefix=no_prefix, method=method, data=data,
             headers=copy.copy(headers), may_simulate=may_simulate)
 
     # -------------------------------------------------------------------------
     def patch(self, payload):
-
+        """Perform a PATCH request with given payload to current zone."""
         if self.verbose > 1:
-            LOG.debug(_("Patching zone {!r} ...").format(self.name))
+            LOG.debug(_('Patching zone {!r} ...').format(self.name))
 
         return self.perform_request(
             self.url, method='PATCH',
@@ -731,7 +739,7 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     # -------------------------------------------------------------------------
     def get_soa(self):
-
+        """Return a PowerDnsSOAData object created from the SOA record of this zone."""
         rrset = self.get_soa_rrset()
         if not rrset:
             return None
@@ -755,7 +763,7 @@ class PowerDNSZone(BasePowerDNSHandler):
                 if cmt.valid:
                     comment_list.append(copy.copy(cmt))
                 else:
-                    LOG.warn(_("Found invalid comment {!r}.").format(str(cmt)))
+                    LOG.warn(_('Found invalid comment {!r}.').format(str(cmt)))
             else:
                 cmt = str(cmt).strip()
                 comment = PowerDNSRecordSetComment(
@@ -767,9 +775,9 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     # -------------------------------------------------------------------------
     def update_soa(self, new_soa, comments=None, ttl=None):
-
+        """Update the SOA of the zone on the PowerDNS server."""
         if not isinstance(new_soa, PowerDnsSOAData):
-            msg = _("New SOA must be of type {e}, given {t}: {s!r}").format(
+            msg = _('New SOA must be of type {e}, given {t}: {s!r}').format(
                 e='PowerDnsSOAData', t=new_soa.__class__.__name__, s=new_soa)
             raise TypeError(msg)
 
@@ -780,7 +788,7 @@ class PowerDNSZone(BasePowerDNSHandler):
                 self.update()
             cur_soa_rrset = self.get_soa()
             if not cur_soa_rrset:
-                raise RuntimeError(_("Got no SOA for zone {!r}.").format(self.name))
+                raise RuntimeError(_('Got no SOA for zone {!r}.').format(self.name))
             ttl = cur_soa_rrset.ttl
 
         comment_list = []
@@ -793,23 +801,22 @@ class PowerDNSZone(BasePowerDNSHandler):
                 comment_list.append(comment)
 
         rrset = new_soa.as_dict(minimal=True)
-        rrset["comments"] = comment_list
-        rrset["changetype"] = 'REPLACE'
-        for record in rrset["records"]:
-            record["set-ptr"] = False
+        rrset['comments'] = comment_list
+        rrset['changetype'] = 'REPLACE'
+        for record in rrset['records']:
+            record['set-ptr'] = False
 
-        payload = {"rrsets": [rrset]}
+        payload = {'rrsets': [rrset]}
 
         if self.verbose > 1:
-            LOG.debug(_("Setting new SOA {s!r} for zone {z!r}, TTL {t} ...").format(
+            LOG.debug(_('Setting new SOA {s!r} for zone {z!r}, TTL {t} ...').format(
                 s=new_soa.data, z=self.name, t=ttl))
 
         self.patch(payload)
 
     # -------------------------------------------------------------------------
     def increase_serial(self):
-        "Increasing the serial number of current zone."
-
+        """Increase the serial number of current zone."""
         self.update()
 
         soa_rrset = self.get_soa_rrset()
@@ -818,7 +825,7 @@ class PowerDNSZone(BasePowerDNSHandler):
         old_serial = soa.serial
         new_serial = soa.increase_serial()
 
-        LOG.debug(_("Increasing serial of zone {z!r} from {o} => {n}.").format(
+        LOG.debug(_('Increasing serial of zone {z!r} from {o} => {n}.').format(
             z=self.name, o=old_serial, n=new_serial))
 
         new_soa_record = PowerDNSRecord(
@@ -833,9 +840,9 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     # -------------------------------------------------------------------------
     def generate_new_comment_list(self, rrset, comment=None, account=None, append_comments=True):
-
+        """Create a list of rrset comments from given PowerDNSRecordSet object and update it."""
         if not isinstance(rrset, PowerDNSRecordSet):
-            msg = _("Parameter {w!r} {a!r} is not a {e} object, but a {c} object instead.").format(
+            msg = _('Parameter {w!r} {a!r} is not a {e} object, but a {c} object instead.').format(
                 w='rrset', a=rrset, e='PowerDNSRecordSet', c=rrset.__class__.__name__)
             raise TypeError(msg)
 
@@ -862,9 +869,9 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -------------------------------------------------------------------------
     def replace_rrset(
             self, rrset, set_ptr=False, comment=None, account=None, append_comments=True):
-
+        """Replace the recordset on the PDNS server."""
         if not isinstance(rrset, PowerDNSRecordSet):
-            msg = _("Parameter {w!r} {a!r} is not a {e} object, but a {c} object instead.").format(
+            msg = _('Parameter {w!r} {a!r} is not a {e} object, but a {c} object instead.').format(
                 w='rrset', a=rrset, e='PowerDNSRecordSet', c=rrset.__class__.__name__)
             raise TypeError(msg)
 
@@ -873,33 +880,33 @@ class PowerDNSZone(BasePowerDNSHandler):
         rrset.comments = comment_list
 
         rrset_dict = rrset.as_dict(minimal=True)
-        rrset_dict["changetype"] = 'REPLACE'
-        for record in rrset_dict["records"]:
-            record["set-ptr"] = bool(set_ptr)
+        rrset_dict['changetype'] = 'REPLACE'
+        for record in rrset_dict['records']:
+            record['set-ptr'] = bool(set_ptr)
 
-        payload = {"rrsets": [rrset_dict]}
-        LOG.debug(_("Replacing record set in zone {!r}.").format(self.name))
+        payload = {'rrsets': [rrset_dict]}
+        LOG.debug(_('Replacing record set in zone {!r}.').format(self.name))
 
         self.patch(payload)
 
     # -------------------------------------------------------------------------
     def delete_rrset(self, rrset):
-
+        """Delete the given recordset on the PDNS server."""
         if not isinstance(rrset, PowerDNSRecordSet):
-            msg = _("Parameter {w!r} {a!r} is not a {e} object, but a {c} object instead.").format(
+            msg = _('Parameter {w!r} {a!r} is not a {e} object, but a {c} object instead.').format(
                 w='rrset', a=rrset, e='PowerDNSRecordSet', c=rrset.__class__.__name__)
             raise TypeError(msg)
 
         rrset_dict = {
             'name': rrset.name,
-            "type": rrset.type,
-            "changetype": 'DELETE',
-            "records": [],
-            "comments": [],
+            'type': rrset.type,
+            'changetype': 'DELETE',
+            'records': [],
+            'comments': [],
         }
 
-        payload = {"rrsets": [rrset_dict]}
-        LOG.debug(_("Deleting record set in zone {!r}.").format(self.name))
+        payload = {'rrsets': [rrset_dict]}
+        LOG.debug(_('Deleting record set in zone {!r}.').format(self.name))
 
         self.patch(payload)
 
@@ -907,7 +914,7 @@ class PowerDNSZone(BasePowerDNSHandler):
     def add_record_to_recordset(
         self, fqdn, rrset_type, content, ttl=None, disabled=False, set_ptr=False,
             comment=None, account=None, append_comments=True):
-
+        """Add a record to the given recordset on the PDNS server."""
         fqdn_used = self.verify_fqdn(fqdn)
         if not fqdn_used:
             return None
@@ -915,7 +922,7 @@ class PowerDNSZone(BasePowerDNSHandler):
         if not rtype:
             return None
         if self.verbose > 2:
-            msg = _("Adding FQDN: {f!r}, type {t!r}, content: {c!r}.").format(
+            msg = _('Adding FQDN: {f!r}, type {t!r}, content: {c!r}.').format(
                 f=fqdn_used, t=rtype, c=content)
             LOG.debug(msg)
 
@@ -925,14 +932,14 @@ class PowerDNSZone(BasePowerDNSHandler):
         rrset = self.get_rrset(fqdn, rrset_type)
         if rrset:
             if self.verbose > 1:
-                msg = _("Got an existing rrset for FQDN {f!r}, type {t!r}.").format(
+                msg = _('Got an existing rrset for FQDN {f!r}, type {t!r}.').format(
                     f=fqdn_used, t=rtype)
                 LOG.debug(msg)
             if ttl:
                 rrset.ttl = ttl
         else:
             if self.verbose > 1:
-                msg = _("Got no existing rrset for FQDN {f!r}, type {t!r}.").format(
+                msg = _('Got no existing rrset for FQDN {f!r}, type {t!r}.').format(
                     f=fqdn_used, t=rtype)
                 LOG.debug(msg)
             rrset = PowerDNSRecordSet(
@@ -950,7 +957,7 @@ class PowerDNSZone(BasePowerDNSHandler):
             appname=self.appname, verbose=self.verbose, base_dir=self.base_dir,
             content=content, disabled=bool(disabled), initialized=True)
         if record in rrset.records:
-            msg = _("Record {c!r} already contained in record set {f!r} type {t}.").format(
+            msg = _('Record {c!r} already contained in record set {f!r} type {t}.').format(
                 c=content, f=rrset.name, t=rrset.type)
             LOG.warn(msg)
             return
@@ -964,7 +971,7 @@ class PowerDNSZone(BasePowerDNSHandler):
     def replace_record_in_recordset(
         self, fqdn, rrset_type, content, ttl=None, disabled=False, set_ptr=False,
             comment=None, account=None, append_comments=True):
-
+        """Replace a record in the given recordset on the PDNS server."""
         fqdn_used = self.verify_fqdn(fqdn)
         if not fqdn_used:
             return None
@@ -972,7 +979,7 @@ class PowerDNSZone(BasePowerDNSHandler):
         if not rtype:
             return None
         if self.verbose > 2:
-            msg = _("Replacing FQDN: {f!r}, type {t!r} by content: {c!r}.").format(
+            msg = _('Replacing FQDN: {f!r}, type {t!r} by content: {c!r}.').format(
                 f=fqdn_used, t=rtype, c=content)
             LOG.debug(msg)
 
@@ -982,7 +989,7 @@ class PowerDNSZone(BasePowerDNSHandler):
         rrset = self.get_rrset(fqdn, rrset_type)
         if rrset:
             if self.verbose > 1:
-                msg = _("Got an existing rrset for FQDN {f!r}, type {t!r}.").format(
+                msg = _('Got an existing rrset for FQDN {f!r}, type {t!r}.').format(
                     f=fqdn_used, t=rtype)
                 LOG.debug(msg)
             rrset.records.clear()
@@ -990,7 +997,7 @@ class PowerDNSZone(BasePowerDNSHandler):
                 rrset.ttl = ttl
         else:
             if self.verbose > 1:
-                msg = _("Got no existing rrset for FQDN {f!r}, type {t!r}.").format(
+                msg = _('Got no existing rrset for FQDN {f!r}, type {t!r}.').format(
                     f=fqdn_used, t=rtype)
                 LOG.debug(msg)
             rrset = PowerDNSRecordSet(
@@ -1018,17 +1025,17 @@ class PowerDNSZone(BasePowerDNSHandler):
     def add_address_record(
         self, fqdn, address, ttl=None, disabled=False, set_ptr=True,
             comment=None, account=None, append_comments=False):
-
+        """Add a PTR record to the current (revertse) zone on the PDNS server."""
         if not isinstance(address, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
             msg = _(
-                "Parameter address {a!r} is not an IPv4Address or IPv6Address object, "
-                "but a {c} object instead.").format(a=address, c=address.__class__.__name__)
+                'Parameter address {a!r} is not an IPv4Address or IPv6Address object, '
+                'but a {c} object instead.').format(a=address, c=address.__class__.__name__)
             raise TypeError(msg)
 
         record_type = 'A'
         if address.version == 6:
             record_type = 'AAAA'
-        LOG.debug(_("Trying to create {t}-record {f!r} => {a!r}.").format(
+        LOG.debug(_('Trying to create {t}-record {f!r} => {a!r}.').format(
             t=record_type, f=fqdn, a=str(address)))
 
         canon_fqdn = self.canon_name(fqdn)
@@ -1044,17 +1051,17 @@ class PowerDNSZone(BasePowerDNSHandler):
     def set_address_record(
         self, fqdn, address, ttl=None, disabled=False, set_ptr=True,
             comment=None, account=None, append_comments=False):
-
+        """Replace a PTR record on the current (revertse) zone on the PDNS server."""
         if not isinstance(address, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
             msg = _(
-                "Parameter address {a!r} is not an IPv4Address or IPv6Address object, "
-                "but a {c} object instead.").format(a=address, c=address.__class__.__name__)
+                'Parameter address {a!r} is not an IPv4Address or IPv6Address object, '
+                'but a {c} object instead.').format(a=address, c=address.__class__.__name__)
             raise TypeError(msg)
 
         record_type = 'A'
         if address.version == 6:
             record_type = 'AAAA'
-        LOG.debug(_("Trying to create {t}-record {f!r} => {a!r}.").format(
+        LOG.debug(_('Trying to create {t}-record {f!r} => {a!r}.').format(
             t=record_type, f=fqdn, a=str(address)))
 
         canon_fqdn = self.canon_name(fqdn)
@@ -1070,9 +1077,9 @@ class PowerDNSZone(BasePowerDNSHandler):
     def add_ptr_record(
         self, pointer, fqdn, ttl=None, disabled=False,
             comment=None, account=None, append_comments=False):
-
+        """Add a PTR record to the current (revertse) zone on the PDNS server."""
         canon_fqdn = self.canon_name(fqdn)
-        LOG.debug(_("Trying to create {t}-record {f!r} => {a!r}.").format(
+        LOG.debug(_('Trying to create {t}-record {f!r} => {a!r}.').format(
             t='PTR', f=pointer, a=canon_fqdn))
 
         self.replace_record_in_recordset(
@@ -1083,74 +1090,74 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     # -------------------------------------------------------------------------
     def add_rrset_for_remove(self, fqdn, rr_type, rrsets=None):
-
+        """Append a dict for removing a recordset to a list."""
         if rrsets is None:
             rrsets = []
 
         rrset = {
-            "name": self.canon_name(fqdn),
-            "type": rr_type.upper(),
-            "records": [],
-            "comments": [],
-            "changetype": "DELETE",
+            'name': self.canon_name(fqdn),
+            'type': rr_type.upper(),
+            'records': [],
+            'comments': [],
+            'changetype': 'DELETE',
         }
         rrsets.append(rrset)
         return rrsets
 
     # -------------------------------------------------------------------------
     def del_rrsets(self, rrsets):
-
+        """Remove the recordsets in the given list fron PDNS server´."""
         if not rrsets:
             raise PDNSNoRecordsToRemove(self.name_unicode)
 
         self.update()
         if self.verbose > 3:
-            LOG.debug(_("Current zone:") + '\n' + pp(self.as_dict()))
+            LOG.debug(_('Current zone:') + '\n' + pp(self.as_dict()))
 
         rrsets_rm = []
 
         for rrset in rrsets:
             found = False
             for item in self.rrsets:
-                if item.name == rrset["name"] and item.type == rrset["type"]:
+                if item.name == rrset['name'] and item.type == rrset['type']:
                     found = True
                     break
             if not found:
-                msg = _("DNS {t!r}-record {n!r} is already deleted.").format(
-                    t=rrset["type"], n=rrset["name"])
+                msg = _('DNS {t!r}-record {n!r} is already deleted.').format(
+                    t=rrset['type'], n=rrset['name'])
                 LOG.warning(msg)
                 continue
             rrsets_rm.append(rrset)
         if not rrsets_rm:
             raise PDNSNoRecordsToRemove(self.name_unicode)
 
-        payload = {"rrsets": rrsets_rm}
+        payload = {'rrsets': rrsets_rm}
         count = len(rrsets_rm)
         msg = ngettext(
-            "Removing one resource record set from zone {z!r}.",
-            "Removing {c} resource record sets from zone {z!r}.", count).format(
+            'Removing one resource record set from zone {z!r}.',
+            'Removing {c} resource record sets from zone {z!r}.', count).format(
             c=count, z=self.name_unicode)
         LOG.info(msg)
         if self.verbose > 1:
-            LOG.debug(_("Resorce record sets:") + '\n' + pp(payload))
+            LOG.debug(_('Resorce record sets:') + '\n' + pp(payload))
 
         self.patch(payload)
-        LOG.info(_("Done."))
+        LOG.info(_('Done.'))
 
         return True
 
     # -------------------------------------------------------------------------
     def notify(self):
-
-        LOG.info(_("Notifying slave servers of zone {!r} ...").format(self.name))
+        """Initiate a notify of all secondary servers of current zone."""
+        LOG.info(_('Notifying slave servers of zone {!r} ...').format(self.name))
         path = self.url + '/notify'
         return self.perform_request(path, method='PUT', may_simulate=True)
 
     # -------------------------------------------------------------------------
     def verify_fqdn(self, fqdn, raise_on_error=True):
-
+        """Verify syntax of the given FQDN, and whether it fits into current zone."""
         if not isinstance(fqdn, six.string_types):
-            msg = _("A {w} must be a string type, but is {v!r} instead.").format(
+            msg = _('A {w} must be a string type, but is {v!r} instead.').format(
                 w='FQDN', v=fqdn)
             if raise_on_error:
                 raise TypeError(msg)
@@ -1159,7 +1166,7 @@ class PowerDNSZone(BasePowerDNSHandler):
 
         fqdn_used = to_str(fqdn).strip().lower()
         if not fqdn_used:
-            msg = _("Invalid, empty FQDN {!r} given.").format(fqdn)
+            msg = _('Invalid, empty FQDN {!r} given.').format(fqdn)
             if raise_on_error:
                 raise ValueError(msg)
             LOG.error(msg)
@@ -1173,10 +1180,10 @@ class PowerDNSZone(BasePowerDNSHandler):
 
         tail = '.' + self.name
         if self.verbose > 2:
-            LOG.debug(_("Checking FQDN {f!r} for ending on {t!r}.").format(
+            LOG.debug(_('Checking FQDN {f!r} for ending on {t!r}.').format(
                 f=fqdn_used, t=tail))
         if not fqdn_used.endswith(tail):
-            msg = _("Invalid FQDN {f!r}, it must end up with {t!r}.").format(
+            msg = _('Invalid FQDN {f!r}, it must end up with {t!r}.').format(
                 f=fqdn, t=tail)
             if raise_on_error:
                 raise ValueError(msg)
@@ -1186,11 +1193,11 @@ class PowerDNSZone(BasePowerDNSHandler):
         idx = fqdn_used.rfind(tail)
         head = fqdn_used[:idx]
         if self.verbose > 2:
-            LOG.debug(_("Basename of FQDN {f!r} is {h!r}.").format(
+            LOG.debug(_('Basename of FQDN {f!r} is {h!r}.').format(
                 f=fqdn_used, h=head))
 
         if not FQDN_REGEX.match(fqdn_used):
-            msg = _("Invalid FQDN {!r}.").format(fqdn)
+            msg = _('Invalid FQDN {!r}.').format(fqdn)
             if raise_on_error:
                 raise ValueError(msg)
             LOG.error(msg)
