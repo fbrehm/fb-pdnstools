@@ -112,7 +112,7 @@ class PowerDNSRecord(FbBaseObject):
     # -----------------------------------------------------------
     @property
     def content(self):
-        """The underlying content of this record."""
+        """Give the underlying content of this record."""
         return self._content
 
     # -----------------------------------------------------------
@@ -758,12 +758,13 @@ class PowerDNSRecordList(MutableSequence):
 
 # =============================================================================
 class PowerDNSRecordSetComment(FbBaseObject):
+    """This class encapsulates a comment to a DNS Record set."""
 
     # -------------------------------------------------------------------------
     def __init__(
         self, appname=None, verbose=0, version=__version__, base_dir=None, initialized=None,
             account=None, content='', modified_at=None):
-
+        """Initialize a PowerDNSRecordSetComment object."""
         self._account = None
         self._content = ''
         self._modified_at = int(time.time() + 0.5)
@@ -781,7 +782,7 @@ class PowerDNSRecordSetComment(FbBaseObject):
     # -------------------------------------------------------------------------
     @property
     def account(self):
-        "The name of the account, who has created this comment"
+        """Give the name of the account, who has created this comment."""
         return self._account
 
     @account.setter
@@ -798,7 +799,7 @@ class PowerDNSRecordSetComment(FbBaseObject):
     # -------------------------------------------------------------------------
     @property
     def content(self):
-        "The underlying content of this comment"
+        """Give the underlying content of this comment."""
         return self._content
 
     @content.setter
@@ -812,7 +813,7 @@ class PowerDNSRecordSetComment(FbBaseObject):
     # -------------------------------------------------------------------------
     @property
     def modified_at(self):
-        "The UNIX time stamp of the last modification of this comment."
+        """Give the UNIX time stamp of the last modification of this comment."""
         return self._modified_at
 
     @modified_at.setter
@@ -824,13 +825,13 @@ class PowerDNSRecordSetComment(FbBaseObject):
             v = int(value)
         except ValueError as e:
             msg = (_(
-                "Invalid value for {w} of a {c} object - ").format(
+                'Invalid value for {w} of a {c} object - ').format(
                 w='modified_at', c=self.__class__.__name__) + str(e))
             raise ValueError(msg)
         if v < 0:
             msg = _(
-                "Invalid value for {w} {v!r} of a {c} object - "
-                "must be greater than or equal to zero.").format(
+                'Invalid value for {w} {v!r} of a {c} object - '
+                'must be greater than or equal to zero.').format(
                 w='modified_at', c=self.__class__.__name__, v=value)
             raise ValueError(msg)
         self._modified_at = v
@@ -838,14 +839,13 @@ class PowerDNSRecordSetComment(FbBaseObject):
     # -------------------------------------------------------------------------
     @property
     def modified_date(self):
-        "The modification of this comment as a datetime object."
-
+        """Give the modification of this comment as a datetime object."""
         return datetime.datetime.utcfromtimestamp(self.modified_at)
 
     # -------------------------------------------------------------------------
     @property
     def valid(self):
-        "Is this a valid comment or not."
+        """Is this a valid comment or not."""
         if self.account is None or self.modified_at is None:
             return False
         return True
@@ -853,7 +853,7 @@ class PowerDNSRecordSetComment(FbBaseObject):
     # -------------------------------------------------------------------------
     def as_dict(self, short=True, minimal=False):
         """
-        Transforms the elements of the object into a dict
+        Transform the elements of the object into a dict.
 
         @param short: don't include local properties in resulting dict.
         @type short: bool
@@ -863,7 +863,6 @@ class PowerDNSRecordSetComment(FbBaseObject):
         @return: structure as dict
         @rtype:  dict
         """
-
         if minimal:
             return {
                 'account': self.account,
@@ -882,7 +881,7 @@ class PowerDNSRecordSetComment(FbBaseObject):
 
     # -------------------------------------------------------------------------
     def __copy__(self):
-
+        """Return a new PowerDNSRecordSetComment as a deep copy of the current object."""
         return PowerDNSRecordSetComment(
             appname=self.appname, verbose=self.verbose, base_dir=self.base_dir,
             initialized=self.initialized,
@@ -891,37 +890,34 @@ class PowerDNSRecordSetComment(FbBaseObject):
     # -------------------------------------------------------------------------
     def __str__(self):
         """
-        Typecasting function for translating object structure
-        into a string
+        Typecast for translating object structure into a string.
 
         @return: structure as string
         @rtype:  str
         """
-
         return pp(self.as_dict(minimal=True))
 
     # -------------------------------------------------------------------------
     def __repr__(self):
-        """Typecasting into a string for reproduction."""
-
-        out = "<%s(" % (self.__class__.__name__)
+        """Typecast into a string for reproduction."""
+        out = '<%s(' % (self.__class__.__name__)
 
         fields = []
-        fields.append("account={!r}".format(self.account))
-        fields.append("content={!r}".format(self.content))
-        fields.append("modified_at={!r}".format(self.modified_at))
-        fields.append("appname={!r}".format(self.appname))
-        fields.append("verbose={!r}".format(self.verbose))
-        fields.append("version={!r}".format(self.version))
+        fields.append('account={!r}'.format(self.account))
+        fields.append('content={!r}'.format(self.content))
+        fields.append('modified_at={!r}'.format(self.modified_at))
+        fields.append('appname={!r}'.format(self.appname))
+        fields.append('verbose={!r}'.format(self.verbose))
+        fields.append('version={!r}'.format(self.version))
 
-        out += ", ".join(fields) + ")>"
+        out += ', '.join(fields) + ')>'
         return out
 
     # -------------------------------------------------------------------------
     def __eq__(self, other):
-
+        """Magic method for using it as the '=='-operator."""
         if self.verbose > 4:
-            LOG.debug(_("Comparing {} objects ...").format(self.__class__.__name__))
+            LOG.debug(_('Comparing {} objects ...').format(self.__class__.__name__))
 
         if not isinstance(other, PowerDNSRecordSetComment):
             return False
@@ -940,6 +936,7 @@ class PowerDNSRecordSetComment(FbBaseObject):
 
 # =============================================================================
 class PowerDNSRecordSet(BasePowerDNSHandler):
+    """Encapsulates a set of DNS records wth the same name and the same type."""
 
     default_ttl = 3600
 
@@ -949,13 +946,12 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
             master_server=None, port=DEFAULT_PORT, key=None, use_https=False,
             timeout=None, path_prefix=DEFAULT_API_PREFIX, simulate=None, force=None,
             terminal_has_colors=False, initialized=None):
-
+        """Initialize a PowerDNSRecordSet object."""
         # {   'comments': [],
         #     'name': 'www.bmwi.tv.',
         #     'records': [{'content': '77.74.236.5', 'disabled': False}],
         #     'ttl': 3600,
         #     'type': 'A'},
-
         self.comments = []
         self._name = None
         self.ttl = self.default_ttl
@@ -975,18 +971,18 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
     # -----------------------------------------------------------
     @property
     def name(self):
-        "The name of this record set."
+        """Give the name of this record set."""
         return self._name
 
     @name.setter
     def name(self, value):
         if not isinstance(value, six.string_types):
-            msg = _("A {w} must be a string type, but is {v!r} instead.").format(
+            msg = _('A {w} must be a string type, but is {v!r} instead.').format(
                 w='PowerDNSRecordSet.name', v=value)
             raise TypeError(msg)
         v = to_str(value).strip().lower()
         if v == '':
-            msg = _("A {w} may not be empty: {v!r}.").format(
+            msg = _('A {w} may not be empty: {v!r}.').format(
                 w='PowerDNSRecordSet.name', v=value)
             raise ValueError(msg)
         self._name = v
@@ -994,7 +990,7 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
     # -----------------------------------------------------------
     @property
     def name_unicode(self):
-        """The name of the resource record set in unicode, if it is an IDNA encoded zone."""
+        """Give the name of the resource record set in unicode, if it is an IDNA encoded zone."""
         n = getattr(self, '_name', None)
         if n is None:
             return None
@@ -1004,19 +1000,19 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
 
     # -----------------------------------------------------------
     @property
-    def type(self):
-        "The type of this record set."
+    def type(self):                                                                 # noqa: A003
+        """Give the type of this record set."""
         return self._type
 
     @type.setter
-    def type(self, value):
+    def type(self, value):                                                          # noqa: A003
         if not isinstance(value, six.string_types):
-            msg = _("A {w} must be a string type, but is {v!r} instead.").format(
+            msg = _('A {w} must be a string type, but is {v!r} instead.').format(
                 w='PowerDNSRecordSet.type', v=value)
             raise TypeError(msg)
         v = to_str(value).strip().upper()
         if v == '':
-            msg = _("A {w} may not be empty: {v!r}.").format(
+            msg = _('A {w} may not be empty: {v!r}.').format(
                 w='PowerDNSRecordSet.type', v=value)
             raise ValueError(msg)
         v = self.verify_rrset_type(v)
@@ -1025,7 +1021,7 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
     # -----------------------------------------------------------
     @property
     def ttl(self):
-        "Return the TTL of this record set."
+        """Return the TTL of this record set."""
         return self._ttl
 
     @ttl.setter
@@ -1047,12 +1043,12 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
             master_server=None, port=DEFAULT_PORT, key=None, use_https=False, timeout=None,
             path_prefix=DEFAULT_API_PREFIX, simulate=None, force=None,
             terminal_has_colors=False, initialized=None):
-
+        """Create a new PowerDNSRecordSet object based on a given dict."""
         if not isinstance(data, dict):
-            raise PowerDNSRecordSetError(_("Given data {!r} is not a dict object.").format(data))
+            raise PowerDNSRecordSetError(_('Given data {!r} is not a dict object.').format(data))
 
         if verbose > 3:
-            LOG.debug(_("Creating {} object from data:").format(cls.__name__) + '\n' + pp(data))
+            LOG.debug(_('Creating {} object from data:').format(cls.__name__) + '\n' + pp(data))
 
         params = {
             'appname': appname,
@@ -1113,7 +1109,7 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
 
     # -------------------------------------------------------------------------
     def name_relative(self, reference):
-
+        """Extract the name from the current set name relative to the given reference."""
         # current name must be an absolute name
         if not self.name.endswith('.'):
             return self.name
@@ -1129,7 +1125,7 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
     # -------------------------------------------------------------------------
     def as_dict(self, short=True, minimal=False):
         """
-        Transforms the elements of the object into a dict
+        Transform the element of the object into a dict.
 
         @param short: don't include local properties in resulting dict.
         @type short: bool
@@ -1139,14 +1135,13 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
         @return: structure as dict
         @rtype:  dict
         """
-
         if minimal:
             ret = {
-                "comments": [],
-                "name": self.name,
-                "records": [],
-                "ttl": self.ttl,
-                "type": self.type,
+                'comments': [],
+                'name': self.name,
+                'records': [],
+                'ttl': self.ttl,
+                'type': self.type,
             }
             for comment in self.comments:
                 ret['comments'].append(comment.as_dict(minimal=True))
@@ -1174,18 +1169,16 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
     # -------------------------------------------------------------------------
     def __str__(self):
         """
-        Typecasting function for translating object structure
-        into a string
+        Typecast for translating object structure into a string.
 
         @return: structure as string
         @rtype:  str
         """
-
         return pp(self.as_dict(short=True))
 
     # -------------------------------------------------------------------------
     def __copy__(self):
-
+        """Return a new PowerDNSRecordSet as a deep copy of the current object."""
         rrset = PowerDNSRecordSet(
             appname=self.appname, verbose=self.verbose, base_dir=self.base_dir,
             master_server=self.master_server, port=self.port, key=self.key,
@@ -1204,9 +1197,9 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
 
     # -------------------------------------------------------------------------
     def __eq__(self, other):
-
+        """Magic method for using it as the '=='-operator."""
         if self.verbose > 4:
-            LOG.debug(_("Comparing {} objects ...").format(self.__class__.__name__))
+            LOG.debug(_('Comparing {} objects ...').format(self.__class__.__name__))
 
         if not isinstance(other, PowerDNSRecordSet):
             return False
@@ -1221,36 +1214,33 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
 
     # -------------------------------------------------------------------------
     def get_soa_data(self):
-
+        """Extract a PowerDnsSOAData object from record content, if current type is SOA."""
         if self.type != 'SOA':
-            msg = (_("Cannot create {o} from record set:") + "\n{rs}").format(
-                o='PowerDnsSOAData', rs=pp(self.as_dict()))
+            msg = _('Cannot create {o} from record set:').format(
+                o='PowerDnsSOAData') + '\n' + pp(self.as_dict())
             raise PowerDNSRecordSetError(msg)
 
         if not self.records:
-            msg = (_("RecordSet has no records:") + "\n{}").format(
-                pp(self.as_dict()))
+            msg = _('RecordSet has no records:') + '\n' + pp(self.as_dict())
             raise PowerDNSRecordSetError(msg)
 
         record = self.records[0]
         soa = PowerDnsSOAData.init_from_data(
             record.content, appname=self.appname, verbose=self.verbose, base_dir=self.base_dir)
         if self.verbose > 3:
-            LOG.debug((_("Got SOA:") + "\n{}").format(pp(soa.as_dict())))
+            LOG.debug(_('Got SOA:') + '\n' + pp(soa.as_dict()))
         return soa
 
 
 # =============================================================================
 class PowerDNSRecordSetList(MutableSequence):
-    """
-    A list containing Power DNS Record Sets (of a zone).
-    """
+    """A list containing Power DNS Record Sets (of a zone)."""
 
-    msg_no_pdns_rrset = _("Invalid type {t!r} as an item of a {c}, only {o} objects are allowed.")
+    msg_no_pdns_rrset = _('Invalid type {t!r} as an item of a {c}, only {o} objects are allowed.')
 
     # -------------------------------------------------------------------------
     def __init__(self, *rrsets):
-
+        """Initialize a PowerDNSRecordSetList object."""
         self._list = []
 
         for rrset in rrsets:
@@ -1258,13 +1248,13 @@ class PowerDNSRecordSetList(MutableSequence):
 
     # -------------------------------------------------------------------------
     def index(self, rrset, *args):
-
+        """Return the numeric index of the given record set in current list."""
         i = None
         j = None
 
         if len(args) > 0:
             if len(args) > 2:
-                raise TypeError(_("{m} takes at most {max} arguments ({n} given).").format(
+                raise TypeError(_('{m} takes at most {max} arguments ({n} given).').format(
                     m='index()', max=3, n=len(args) + 1))
             i = int(args[0])
             if len(args) > 1:
@@ -1302,13 +1292,13 @@ class PowerDNSRecordSetList(MutableSequence):
             if item == rrset:
                 return index
 
-        msg = _("RecordSet {n!r} ({n}) is not in RecordSet list.").format(
+        msg = _('RecordSet {n!r} ({n}) is not in RecordSet list.').format(
             n=rrset.name, t=rrset.type)
         raise ValueError(msg)
 
     # -------------------------------------------------------------------------
     def __contains__(self, rrset):
-
+        """Return whether the given record set is contained in current list."""
         if not isinstance(rrset, PowerDNSRecordSet):
             raise TypeError(self.msg_no_pdns_record.format(
                 t=rrset.__class__.__name__, c=self.__class__.__name__, o='PowerDNSRecordSet'))
@@ -1324,7 +1314,7 @@ class PowerDNSRecordSetList(MutableSequence):
 
     # -------------------------------------------------------------------------
     def count(self, rrset):
-
+        """Return the number of record sets which are equal to the given one in current list."""
         if not isinstance(rrset, PowerDNSRecordSet):
             raise TypeError(self.msg_no_pdns_record.format(
                 t=rrset.__class__.__name__, c=self.__class__.__name__, o='PowerDNSRecordSet'))
@@ -1340,20 +1330,22 @@ class PowerDNSRecordSetList(MutableSequence):
 
     # -------------------------------------------------------------------------
     def __len__(self):
+        """Return the number of record sets in current list."""
         return len(self._list)
 
     # -------------------------------------------------------------------------
     def __getitem__(self, key):
+        """Get a record set from current list by the given numeric index."""
         return self._list.__getitem__(key)
 
     # -------------------------------------------------------------------------
     def __reversed__(self):
-
+        """Reverse the record sets in list in place."""
         return reversed(self._list)
 
     # -------------------------------------------------------------------------
     def __setitem__(self, key, rrset):
-
+        """Replace the record set at the given numeric index by the given one."""
         if not isinstance(rrset, PowerDNSRecordSet):
             raise TypeError(self.msg_no_pdns_record.format(
                 t=rrset.__class__.__name__, c=self.__class__.__name__, o='PowerDNSRecordSet'))
@@ -1362,12 +1354,12 @@ class PowerDNSRecordSetList(MutableSequence):
 
     # -------------------------------------------------------------------------
     def __delitem__(self, key):
-
+        """Remove the record set at the given numeric index from list."""
         del self._list[key]
 
     # -------------------------------------------------------------------------
     def append(self, rrset):
-
+        """Append the given record set to the current list."""
         if not isinstance(rrset, PowerDNSRecordSet):
             raise TypeError(self.msg_no_pdns_record.format(
                 t=rrset.__class__.__name__, c=self.__class__.__name__, o='PowerDNSRecordSet'))
@@ -1376,7 +1368,7 @@ class PowerDNSRecordSetList(MutableSequence):
 
     # -------------------------------------------------------------------------
     def insert(self, index, rrset):
-
+        """Insert the given record set in current list at given index."""
         if not isinstance(rrset, PowerDNSRecordSet):
             raise TypeError(self.msg_no_pdns_record.format(
                 t=rrset.__class__.__name__, c=self.__class__.__name__, o='PowerDNSRecordSet'))
@@ -1385,7 +1377,7 @@ class PowerDNSRecordSetList(MutableSequence):
 
     # -------------------------------------------------------------------------
     def __copy__(self):
-
+        """Return a new PowerDNSRecordSetList as a deep copy of the current object."""
         new_list = self.__class__()
         for rrset in self._list:
             new_list.append(copy.copy(rrset))
@@ -1393,14 +1385,13 @@ class PowerDNSRecordSetList(MutableSequence):
 
     # -------------------------------------------------------------------------
     def clear(self):
-        "Remove all items from the PowerDNSRecordSetList."
-
+        """Remove all items from the PowerDNSRecordSetList."""
         self._list = []
 
 
 # =============================================================================
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     pass
 
