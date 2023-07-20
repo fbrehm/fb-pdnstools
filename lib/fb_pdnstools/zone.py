@@ -48,7 +48,7 @@ from .record import PowerDNSRecordSetList
 from .record import PowerDnsSOAData
 from .xlate import XLATOR
 
-__version__ = '0.11.5'
+__version__ = '0.11.6'
 
 LOG = logging.getLogger(__name__)
 
@@ -1207,7 +1207,7 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     # -------------------------------------------------------------------------
     def get_rrset(self, fqdn, rrset_type, raise_on_error=True):
-
+        """Searching a record set by given name and type."""
         fqdn_used = self.verify_fqdn(fqdn, raise_on_error=raise_on_error)
         if not fqdn_used:
             return None
@@ -1215,7 +1215,7 @@ class PowerDNSZone(BasePowerDNSHandler):
         if not rtype:
             return None
 
-        LOG.debug(_("Searching for RecordSet {f!r} of type {t!r} in zone {z!r}.").format(
+        LOG.debug(_('Searching for RecordSet {f!r} of type {t!r} in zone {z!r}.').format(
             f=fqdn_used, t=rtype, z=self.name))
 
         if not len(self.rrsets):
@@ -1224,21 +1224,21 @@ class PowerDNSZone(BasePowerDNSHandler):
         for rrset in self.rrsets:
             if rrset.name == fqdn_used and rrset.type == rtype:
                 if self.verbose > 2:
-                    msg = _("Found {} RecordSet:").format(rtype)
+                    msg = _('Found {} RecordSet:').format(rtype)
                     msg += '\n' + pp(rrset.as_dict(minimal=True))
                     LOG.debug(msg)
                 return rrset
 
-        LOG.debug(_("Did not found RecordSet {f!r} of type {t!r}.".format(
+        LOG.debug(_('Did not found RecordSet {f!r} of type {t!r}.'.format(
             f=fqdn_used, t=rtype)))
         return None
 
     # -------------------------------------------------------------------------
     def get_soa_rrset(self, raise_on_error=True):
-
+        """Searching for the SOA record set of current zone."""
         rrset = self.get_rrset(fqdn=self.name, rrset_type='SOA', raise_on_error=raise_on_error)
         if not rrset:
-            LOG.warning(_("Did not get SOA for zone {!r}.").format(self.name))
+            LOG.warning(_('Did not get SOA for zone {!r}.').format(self.name))
         return rrset
 
 
@@ -1246,6 +1246,7 @@ class PowerDNSZone(BasePowerDNSHandler):
 class PowerDNSZoneDict(MutableMapping):
     """
     A dictionary containing PDNS Zone objects.
+
     It works like a dict.
     i.e.:
     zones = PowerDNSZoneDict(PowerDNSZone(name='pp.com', ...))
@@ -1253,18 +1254,18 @@ class PowerDNSZoneDict(MutableMapping):
     zones['pp.com'] returns a PowerDNSZone object for zone 'pp.com'
     """
 
-    msg_invalid_zone_type = _("Invalid item type {{!r}} to set, only {} allowed.").format(
+    msg_invalid_zone_type = _('Invalid item type {{!r}} to set, only {} allowed.').format(
         'PowerDNSZone')
-    msg_key_not_name = _("The key {k!r} must be equal to the zone name {n!r}.")
-    msg_none_type_error = _("None type as key is not allowed.")
-    msg_empty_key_error = _("Empty key {!r} is not allowed.")
-    msg_no_zone_dict = _("Object {o!r} is not a {e} object.")
+    msg_key_not_name = _('The key {k!r} must be equal to the zone name {n!r}.')
+    msg_none_type_error = _('None type as key is not allowed.')
+    msg_empty_key_error = _('Empty key {!r} is not allowed.')
+    msg_no_zone_dict = _('Object {o!r} is not a {e} object.')
 
     # -------------------------------------------------------------------------
     # __init__() method required to create instance from class.
     def __init__(self, *args, **kwargs):
-        '''Use the object dict'''
-        self._map = dict()
+        """Initialize a PowerDNSZoneDict object."""
+        self._map = {}
 
         for arg in args:
             self.append(arg)
@@ -1283,7 +1284,7 @@ class PowerDNSZoneDict(MutableMapping):
 
     # -------------------------------------------------------------------------
     def append(self, zone):
-
+        """Append the given zone to the current dict."""
         if not isinstance(zone, PowerDNSZone):
             raise TypeError(self.msg_invalid_zone_type.format(zone.__class__.__name__))
         self._set_item(zone.name, zone)
@@ -1302,6 +1303,7 @@ class PowerDNSZoneDict(MutableMapping):
 
     # -------------------------------------------------------------------------
     def get(self, key):
+        """Get a zone from current dict by its zone name as key."""
         return self._get_item(key)
 
     # -------------------------------------------------------------------------
@@ -1322,35 +1324,39 @@ class PowerDNSZoneDict(MutableMapping):
     # -------------------------------------------------------------------------
     # The next five methods are requirements of the ABC.
     def __setitem__(self, key, value):
+        """Set a zone in current dict by its zone name as key."""
         self._set_item(key, value)
 
     # -------------------------------------------------------------------------
     def __getitem__(self, key):
+        """Get a zone from current dict by its zone name as key."""
         return self._get_item(key)
 
     # -------------------------------------------------------------------------
     def __delitem__(self, key):
+        """Remove the zone in dict with the given zone name as key."""
         self._del_item(key)
 
     # -------------------------------------------------------------------------
     def __iter__(self):
-
+        """Iterate through all zone names in current dict."""
         for zone_name in self.keys():
             yield zone_name
 
     # -------------------------------------------------------------------------
     def __len__(self):
+        """Return the number of zones in current dict."""
         return len(self._map)
 
     # -------------------------------------------------------------------------
     # The next methods aren't required, but nice for different purposes:
     def __str__(self):
-        '''returns simple dict representation of the mapping'''
+        """Return simple dict representation of the mapping."""
         return str(self._map)
 
     # -------------------------------------------------------------------------
     def __repr__(self):
-        '''echoes class, id, & reproducible representation in the REPL'''
+        """Echoes class, id, & reproducible representation in the REPL."""
         return '{}, {}({})'.format(
             super(PowerDNSZoneDict, self).__repr__(),
             self.__class__.__name__,
@@ -1358,6 +1364,7 @@ class PowerDNSZoneDict(MutableMapping):
 
     # -------------------------------------------------------------------------
     def __contains__(self, key):
+        """Return whether the given zone name is contained in current dict."""
         if key is None:
             raise TypeError(self.msg_none_type_error)
 
@@ -1369,14 +1376,14 @@ class PowerDNSZoneDict(MutableMapping):
 
     # -------------------------------------------------------------------------
     def keys(self):
-
+        """Return a sorted list of all zone names in this dict."""
         return sorted(
             self._map.keys(),
             key=lambda x: cmp_to_key(compare_fqdn)(self._map[x].name_unicode))
 
     # -------------------------------------------------------------------------
     def items(self):
-
+        """Return tuples (zone name + object as tuple) of this dict in a sorted manner."""
         item_list = []
 
         for zone_name in self.keys():
@@ -1386,7 +1393,7 @@ class PowerDNSZoneDict(MutableMapping):
 
     # -------------------------------------------------------------------------
     def values(self):
-
+        """Return all zone objects in this dict."""
         value_list = []
         for zone_name in self.keys():
             value_list.append(self._map[zone_name])
@@ -1394,7 +1401,7 @@ class PowerDNSZoneDict(MutableMapping):
 
     # -------------------------------------------------------------------------
     def __eq__(self, other):
-
+        """Magic method for using it as the '=='-operator."""
         if not isinstance(other, PowerDNSZoneDict):
             raise TypeError(self.msg_no_zone_dict.format(o=other, e='PowerDNSZoneDict'))
 
@@ -1402,7 +1409,7 @@ class PowerDNSZoneDict(MutableMapping):
 
     # -------------------------------------------------------------------------
     def __ne__(self, other):
-
+        """Magic method for using it as the '!='-operator."""
         if not isinstance(other, PowerDNSZoneDict):
             raise TypeError(self.msg_no_zone_dict.format(o=other, e='PowerDNSZoneDict'))
 
@@ -1410,7 +1417,7 @@ class PowerDNSZoneDict(MutableMapping):
 
     # -------------------------------------------------------------------------
     def pop(self, key, *args):
-
+        """Get and return the zone by its name and remove it in dict."""
         if key is None:
             raise TypeError(self.msg_none_type_error)
 
@@ -1422,7 +1429,7 @@ class PowerDNSZoneDict(MutableMapping):
 
     # -------------------------------------------------------------------------
     def popitem(self):
-
+        """Remove and return a arbitrary (zone name and object) pair from the dictionary."""
         if not len(self._map):
             return None
 
@@ -1433,11 +1440,16 @@ class PowerDNSZoneDict(MutableMapping):
 
     # -------------------------------------------------------------------------
     def clear(self):
-        self._map = dict()
+        """Remove all items from the dictionary."""
+        self._map = {}
 
     # -------------------------------------------------------------------------
     def setdefault(self, key, default):
+        """
+        Return the zone, if the key is in dict.
 
+        If not, insert key with a value of default and return default.
+        """
         if key is None:
             raise TypeError(self.msg_none_type_error)
 
@@ -1456,7 +1468,7 @@ class PowerDNSZoneDict(MutableMapping):
 
     # -------------------------------------------------------------------------
     def update(self, other):
-
+        """Update the dict with the key/value pairs from other, overwriting existing keys."""
         if isinstance(other, PowerDNSZoneDict) or isinstance(other, dict):
             for zone_name in other.keys():
                 self._set_item(zone_name, other[zone_name])
@@ -1469,7 +1481,7 @@ class PowerDNSZoneDict(MutableMapping):
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=True):
-
+        """Transform the elements of the object into a dict."""
         res = {}
         for zone_name in self._map:
             res[zone_name] = self._map[zone_name].as_dict(short)
@@ -1477,7 +1489,7 @@ class PowerDNSZoneDict(MutableMapping):
 
     # -------------------------------------------------------------------------
     def as_list(self, short=True):
-
+        """Return a list with all zones transformed to a dict."""
         res = []
         for zone_name in self.keys():
             res.append(self._map[zone_name].as_dict(short))
@@ -1486,7 +1498,7 @@ class PowerDNSZoneDict(MutableMapping):
 
 # =============================================================================
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     pass
 
