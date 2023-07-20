@@ -1,8 +1,8 @@
 #!/bin/bash
 
-cd $( dirname $0 )
+cd "$( dirname "$0" )" || exit 6
 
-VERSION=$( cat debian/changelog | head -n 1 | sed -e "s/^[^(]*(//" -e "s/).*//" )
+VERSION=$( head -n 1 debian/changelog | sed -e "s/^[^(]*(//" -e "s/).*//" )
 REVISION=1
 
 VERSION_FILE=".debian-version"
@@ -14,13 +14,16 @@ OLD_VERSION_FULL=
 OLD_VERSION=
 OLD_REVISION=
 if [[ -f "${VERSION_FILE}" ]] ; then
-    OLD_VERSION_FULL=$( cat "${VERSION_FILE}" | grep -P -v '^\s*(#.*|$)' | head -n 1 | sed -e 's/[ 	].*//' )
+    OLD_VERSION_FULL=$( grep -P -v '^\s*(#.*|$)' "${VERSION_FILE}" | head -n 1 | sed -e 's/[ 	].*//' )
 fi
 
 if [[ -n "${OLD_VERSION_FULL}" ]] ; then
 
-    OLD_VERSION=$( echo "${OLD_VERSION_FULL}" | sed -e 's/-.*//' )
-    OLD_REVISION=$( echo "${OLD_VERSION_FULL}" | sed -e 's/^[^-]*-//' )
+    # shellcheck disable=SC2001
+    {
+        OLD_VERSION=$( echo "${OLD_VERSION_FULL}" | sed -e 's/-.*//' )
+        OLD_REVISION=$( echo "${OLD_VERSION_FULL}" | sed -e 's/^[^-]*-//' )
+    }
 
     if [[ -z "${OLD_VERSION}" ]] ; then
         OLD_VERSION="${VERSION}"
@@ -33,7 +36,7 @@ if [[ -n "${OLD_VERSION_FULL}" ]] ; then
     if [[ "${OLD_VERSION}" != "${VERSION}" ]] ; then
         REVISION=1
     else
-        REVISION=$(( ${OLD_REVISION} + 1 ))
+        REVISION=$(( OLD_REVISION + 1 ))
     fi
 
 fi

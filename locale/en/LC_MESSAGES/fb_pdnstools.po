@@ -1,116 +1,118 @@
-# English (United States) translations for fb_pdnstools.
-# Copyright (C) 2022 Frank Brehm, Berlin
+# English translations for fb_pdnstools.
+# Copyright (C) 2023 Frank Brehm, Berlin
 # This file is distributed under the same license as the fb_pdnstools project.
-# Frank Brehm <frank.brehm@pixelpark.com>, 2022.
+# Frank Brehm <frank@brehm-online.com>, 2023.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: fb_pdnstools 0.5.2\n"
+"Project-Id-Version: fb_pdnstools 0.6.0\n"
 "Report-Msgid-Bugs-To: frank.brehm@pixelpark.com\n"
-"POT-Creation-Date: 2022-11-21 16:11+0100\n"
-"PO-Revision-Date: 2021-11-15 16:45+0100\n"
+"POT-Creation-Date: 2023-07-20 13:06+0200\n"
+"PO-Revision-Date: 2023-07-20 13:10+0200\n"
 "Last-Translator: Frank Brehm <frank.brehm@pixelpark.com>\n"
 "Language: en\n"
 "Language-Team: en <en@brehm-online.com>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.8.0\n"
+"Generated-By: Babel 2.12.1\n"
 
-#: lib/fb_pdnstools/__init__.py:117
-msgid "Setting Loglevel of the {m} module to {ll}."
+#: lib/fb_pdnstools/base_handler.py:116
+msgid "Setting loglevel of the {m} module to {ll}."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:155
-msgid "Invalid port number {!r} for the PowerDNS API, must be 0 < PORT < 65536."
+#: lib/fb_pdnstools/base_handler.py:154
+msgid "Invalid port number {port!r} for the PowerDNS API, must be greater than zero and less than {max}."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:220
+#: lib/fb_pdnstools/base_handler.py:218
 msgid "The path prefix {!r} must be an absolute path."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:236
-msgid "Invalid timeout {!r} for requesting the PowerDNS API, must be 0 < SECONDS < 3600."
+#: lib/fb_pdnstools/base_handler.py:234
+msgid ""
+"Invalid timeout {!r} for requesting the PowerDNS API, must be greater than zero and less or "
+"equal to  3600."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:253
+#: lib/fb_pdnstools/base_handler.py:251
 msgid "Invalid user agent {!r} given."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:265
+#: lib/fb_pdnstools/base_handler.py:263
 msgid "Invalid API server name {!r} given."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:313
+#: lib/fb_pdnstools/base_handler.py:310
 msgid "Failed to extract request ID from response header 'location': {!r}"
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:321
+#: lib/fb_pdnstools/base_handler.py:318
 msgid "The path {!r} must be an absolute path."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:341
+#: lib/fb_pdnstools/base_handler.py:338
 msgid "Used URL: {!r}"
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:357
+#: lib/fb_pdnstools/base_handler.py:353
 msgid "Request method: {!r}"
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:379
+#: lib/fb_pdnstools/base_handler.py:375
 msgid "Simulation mode, Request will not be sent."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:394
+#: lib/fb_pdnstools/base_handler.py:390
 msgid "Got a {c} on connecting to {h!r}: {e}."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:402
+#: lib/fb_pdnstools/base_handler.py:398
 msgid "Failed to parse the response"
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:427
+#: lib/fb_pdnstools/base_handler.py:423
 msgid "Got an error response code {code}: {msg}"
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:457
+#: lib/fb_pdnstools/base_handler.py:459
 msgid "Name {!r} is not a valid IP address."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:462 lib/fb_pdnstools/zone.py:1208
+#: lib/fb_pdnstools/base_handler.py:464 lib/fb_pdnstools/zone.py:1200
 msgid "Invalid FQDN {!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:477
+#: lib/fb_pdnstools/base_handler.py:479
 msgid "A rrset type must be a string type, but is {!r} instead."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:485
+#: lib/fb_pdnstools/base_handler.py:487
 msgid "Invalid, empty rrset type {!r} given."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:492
+#: lib/fb_pdnstools/base_handler.py:494
 msgid "Invalid rrset type {!r} given."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:506
+#: lib/fb_pdnstools/base_handler.py:508
 msgid "Preparing mocking ..."
 msgstr "Preparing mocking …"
 
-#: lib/fb_pdnstools/__init__.py:516
+#: lib/fb_pdnstools/base_handler.py:518
 msgid "Mocking path {p!r} is not a dictionary object, but a {c} object instead."
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:523
+#: lib/fb_pdnstools/base_handler.py:525
 msgid "Mocking path has no {!r} key defined:"
 msgstr ""
 
-#: lib/fb_pdnstools/__init__.py:528
+#: lib/fb_pdnstools/base_handler.py:530
 msgid "Adding mocking path:"
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:70
+#: lib/fb_pdnstools/bulk_rm_app.py:66
 msgid ""
 "Removes the given addresses (A-, AAAA- or CNAME-Records) completety from PowerDNS. If there are "
 "multiple entries to a DNS-Name, all appropriate records are removed. Additionally all "
@@ -118,166 +120,258 @@ msgid ""
 "given A- or AAAA-record."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:166
+#: lib/fb_pdnstools/bulk_rm_app.py:159
 msgid "No addresses to remove given."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:191 lib/fb_pdnstools/bulk_rm_app.py:238
+#: lib/fb_pdnstools/bulk_rm_app.py:181 lib/fb_pdnstools/bulk_rm_app.py:228
 msgid "FILE"
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:193
+#: lib/fb_pdnstools/bulk_rm_app.py:183
 msgid "Configuration file (default: {!r})"
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:196
+#: lib/fb_pdnstools/bulk_rm_app.py:186
 msgid "PowerDNS options"
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:199
+#: lib/fb_pdnstools/bulk_rm_app.py:189
 msgid "HOST"
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:200
+#: lib/fb_pdnstools/bulk_rm_app.py:190
 msgid "Address or hostname of the PowerDNS server providing the API (Default: {!r})."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:206
+#: lib/fb_pdnstools/bulk_rm_app.py:196
 msgid "PORT"
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:207
+#: lib/fb_pdnstools/bulk_rm_app.py:197
 msgid "Port on PowerDNS server for API on (Default: {})."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:211
+#: lib/fb_pdnstools/bulk_rm_app.py:201
 msgid "The API key for accessing the PowerDNS API."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:216
+#: lib/fb_pdnstools/bulk_rm_app.py:206
 msgid "Use HTTPS to access the PowerDNS API (Default: {})."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:222
+#: lib/fb_pdnstools/bulk_rm_app.py:212
 msgid "The global prefix for all paths for accessing the PowerDNS API (Default: {!r})."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:232
+#: lib/fb_pdnstools/bulk_rm_app.py:222
 msgid ""
 "Don't remove reverse DNS entries (PTR records) to the given addresses. (Default: False - reverse"
 " entries will be removed)."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:239
+#: lib/fb_pdnstools/bulk_rm_app.py:229
 msgid ""
 "File containing the addresses to remove. The addresses must be whitespace separeted, lines may "
 "be commented out by prepending them with a hash sign '#'. This option is mutually exclusive with"
 " giving the addresses as command line arguments."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:247
+#: lib/fb_pdnstools/bulk_rm_app.py:237
 msgid "ADDRESS"
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:248
+#: lib/fb_pdnstools/bulk_rm_app.py:238
 msgid "Addresses to remove. This option is mutually exclusive with the {!r} option."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:267
+#: lib/fb_pdnstools/bulk_rm_app.py:253
 msgid "The option {!r} is mutually exclusive with giving the addresses as command line arguments."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:277
+#: lib/fb_pdnstools/bulk_rm_app.py:263
 msgid "File {!r} does not exists."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:281
+#: lib/fb_pdnstools/bulk_rm_app.py:267
 msgid "File {!r} is not a regular file."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:285
+#: lib/fb_pdnstools/bulk_rm_app.py:271
 msgid "No read access to file {!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:334
+#: lib/fb_pdnstools/bulk_rm_app.py:301
+msgid "Content of {!r}:"
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:320
 msgid "No addresses to remove found in {!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:373
+#: lib/fb_pdnstools/bulk_rm_app.py:358
 msgid "Simulation mode - nothing will be removed in real."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:401
+#: lib/fb_pdnstools/bulk_rm_app.py:379
+msgid "Canonizing all given addresses."
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:386
 msgid "Address {!r} could not interpreted as a FQDN."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:421
+#: lib/fb_pdnstools/bulk_rm_app.py:392
+msgid "Canonized addresses:"
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:399
+msgid "Retrieve zones for canonized addresses."
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:406
 msgid "Did not found an appropriate zone for address {!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:497
+#: lib/fb_pdnstools/bulk_rm_app.py:415
+msgid "Zones of addresses:"
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:422
+msgid "Verifying FQDNs for zone {!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:430
+msgid "Found {c} resource record sets (RRSET) for zone {z!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:449
+msgid "Searching {f!r} ({p!r}) in zone {z!r} ..."
+msgstr "Searching {f!r} ({p!r}) in zone {z!r} …"
+
+#: lib/fb_pdnstools/bulk_rm_app.py:452
+msgid "Searching {f!r} in zone {z!r} ..."
+msgstr "Searching {f!r} in zone {z!r} …"
+
+#: lib/fb_pdnstools/bulk_rm_app.py:480
+msgid "Expexted PTR: {p!r} => {a!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:482
 msgid "PTR {p!r} does not pointing to expected {e!r}, but to {c!r} instead, ignoring for deletion."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:523
+#: lib/fb_pdnstools/bulk_rm_app.py:500
+msgid "Verifying all given DNS addresses."
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:508
 msgid "Did not found any addresses with an appropriate zone in PowerDNS."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:541
+#: lib/fb_pdnstools/bulk_rm_app.py:513
+msgid "Found zones for addresses:"
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:519
+msgid "The following FQDNs were found:"
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:526
 msgid "The following addresses (FQDNs) are not found:"
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:579
+#: lib/fb_pdnstools/bulk_rm_app.py:535
+msgid "Found resource record sets to remove:"
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:544
+msgid "Evaluating reverse PTR records of A and AAAA records."
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:558
+msgid "Try to get reverse address of {!r} ..."
+msgstr "Try to get reverse address of {!r} …"
+
+#: lib/fb_pdnstools/bulk_rm_app.py:566
 msgid "IP address {!r} seems not to be a valid IP address."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:599
+#: lib/fb_pdnstools/bulk_rm_app.py:570
+msgid "Found reverse address {!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:579
+msgid "Expected PTR records:"
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_app.py:586
 msgid "All DNS records to remove"
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:605
+#: lib/fb_pdnstools/bulk_rm_app.py:592
 msgid "Disabled."
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:607
+#: lib/fb_pdnstools/bulk_rm_app.py:594
 msgid "Name"
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:608
+#: lib/fb_pdnstools/bulk_rm_app.py:595
 msgid "Zone"
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:609
+#: lib/fb_pdnstools/bulk_rm_app.py:596
 msgid "Type"
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:610
+#: lib/fb_pdnstools/bulk_rm_app.py:597
 msgid "Record"
 msgstr ""
 
-#: lib/fb_pdnstools/bulk_rm_app.py:666
+#: lib/fb_pdnstools/bulk_rm_app.py:653
 msgid "Total one DNS record to remove."
 msgid_plural "Total {} DNS records to remove."
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/fb_pdnstools/errors.py:59
+#: lib/fb_pdnstools/bulk_rm_cfg.py:100
+msgid "Unhandled configuration section {!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/bulk_rm_cfg.py:106
+msgid "Checking config section {!r} ..."
+msgstr "Checking config section {!r} …"
+
+#: lib/fb_pdnstools/common.py:65
+msgid "A None type for seconds cannot be converted in seconds."
+msgstr ""
+
+#: lib/fb_pdnstools/common.py:71
+msgid "The value {val!r} cannot be interpreted as seconds: {e}"
+msgstr ""
+
+#: lib/fb_pdnstools/errors.py:50
+msgid "No Resource Record Sets found to remove from zone {!r}."
+msgstr ""
+
+#: lib/fb_pdnstools/errors.py:88
 msgid "Could not interprete SOA data: {!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/errors.py:77
+#: lib/fb_pdnstools/errors.py:107
 msgid "Got a {code} error code from {uri!r}: {msg}"
 msgstr ""
 
-#: lib/fb_pdnstools/errors.py:80
+#: lib/fb_pdnstools/errors.py:110
 msgid "Got a {code} error code: {msg}"
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:62 lib/fb_pdnstools/record.py:66
+#: lib/fb_pdnstools/record.py:66 lib/fb_pdnstools/record.py:70
 msgid "Argument {a} {v!r} must be a {o} object."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:205
+#: lib/fb_pdnstools/record.py:206
 msgid "Comparing equality of {} objects ..."
 msgstr "Comparing equality of {} objects …"
 
@@ -285,125 +379,125 @@ msgstr "Comparing equality of {} objects …"
 msgid "Comparing less than of {} objects ..."
 msgstr "Comparing less than of {} objects …"
 
-#: lib/fb_pdnstools/record.py:231 lib/fb_pdnstools/record.py:255
+#: lib/fb_pdnstools/record.py:231 lib/fb_pdnstools/record.py:254
 msgid "Wrong type {cls} of other parameter {other!r} for comparision."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:251
+#: lib/fb_pdnstools/record.py:250
 msgid "Comparing greater than of {} objects ..."
 msgstr "Comparing greater than of {} objects …"
 
-#: lib/fb_pdnstools/record.py:457
+#: lib/fb_pdnstools/record.py:533
 msgid "Copying current {}-object in a new one."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:469 lib/fb_pdnstools/record.py:850 lib/fb_pdnstools/record.py:1126
+#: lib/fb_pdnstools/record.py:545 lib/fb_pdnstools/record.py:920 lib/fb_pdnstools/record.py:1202
 msgid "Comparing {} objects ..."
 msgstr "Comparing {} objects …"
 
-#: lib/fb_pdnstools/record.py:512
+#: lib/fb_pdnstools/record.py:588
 msgid "Serial overflow - old serial {o} is in future, new serial {n} has reached its maximum value."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:528 lib/fb_pdnstools/record.py:1166
+#: lib/fb_pdnstools/record.py:602 lib/fb_pdnstools/record.py:1239
 msgid "Invalid type {t!r} as an item of a {c}, only {o} objects are allowed."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:546 lib/fb_pdnstools/record.py:1184
+#: lib/fb_pdnstools/record.py:620 lib/fb_pdnstools/record.py:1257
 msgid "{m} takes at most {max} arguments ({n} given)."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:584
+#: lib/fb_pdnstools/record.py:658
 msgid "Record {!r} is not in Record list."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:752
+#: lib/fb_pdnstools/record.py:827
 msgid "Invalid value for {w} of a {c} object - "
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:757
+#: lib/fb_pdnstools/record.py:832
 msgid "Invalid value for {w} {v!r} of a {c} object - must be greater than or equal to zero."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:910 lib/fb_pdnstools/record.py:940 lib/fb_pdnstools/zone.py:1168
+#: lib/fb_pdnstools/record.py:980 lib/fb_pdnstools/record.py:1010 lib/fb_pdnstools/zone.py:1160
 msgid "A {w} must be a string type, but is {v!r} instead."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:915 lib/fb_pdnstools/record.py:945
+#: lib/fb_pdnstools/record.py:985 lib/fb_pdnstools/record.py:1015
 msgid "A {w} may not be empty: {v!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:970 lib/fb_pdnstools/zone.py:160
+#: lib/fb_pdnstools/record.py:1048 lib/fb_pdnstools/zone.py:152
 msgid "Given data {!r} is not a dict object."
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:973
+#: lib/fb_pdnstools/record.py:1051
 msgid "Creating {} object from data:"
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:1143
+#: lib/fb_pdnstools/record.py:1219
 msgid "Cannot create {o} from record set:"
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:1148
+#: lib/fb_pdnstools/record.py:1224
 msgid "RecordSet has no records:"
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:1156
+#: lib/fb_pdnstools/record.py:1231
 msgid "Got SOA:"
 msgstr ""
 
-#: lib/fb_pdnstools/record.py:1222
+#: lib/fb_pdnstools/record.py:1295
 msgid "RecordSet {n!r} ({n}) is not in RecordSet list."
 msgstr ""
 
-#: lib/fb_pdnstools/server.py:75
+#: lib/fb_pdnstools/server.py:73
 msgid "Setting simulate of all subsequent objects to {!r} ..."
 msgstr "Setting simulate of all subsequent objects to {!r} …"
 
-#: lib/fb_pdnstools/server.py:106
+#: lib/fb_pdnstools/server.py:103
 msgid "Could not found server info."
 msgstr ""
 
-#: lib/fb_pdnstools/server.py:109 lib/fb_pdnstools/server.py:126
+#: lib/fb_pdnstools/server.py:106 lib/fb_pdnstools/server.py:123
 msgid "Got a response:"
 msgstr ""
 
-#: lib/fb_pdnstools/server.py:113
+#: lib/fb_pdnstools/server.py:110
 msgid "PowerDNS server version {!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/server.py:115
+#: lib/fb_pdnstools/server.py:112
 msgid "Did not found version info in server info:"
 msgstr ""
 
-#: lib/fb_pdnstools/server.py:121
+#: lib/fb_pdnstools/server.py:118
 msgid "Trying to get all zones from PDNS API ..."
 msgstr "Trying to get all zones from PDNS API …"
 
-#: lib/fb_pdnstools/server.py:141
+#: lib/fb_pdnstools/server.py:138
 msgid "Found a zone."
 msgid_plural "Found {n} zones."
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/fb_pdnstools/server.py:146 lib/fb_pdnstools/server.py:148
+#: lib/fb_pdnstools/server.py:143 lib/fb_pdnstools/server.py:145
 msgid "Zones:"
 msgstr ""
 
-#: lib/fb_pdnstools/server.py:163
+#: lib/fb_pdnstools/server.py:160
 msgid "Searching an appropriate zone for item {i!r} - FQDN {f!r} ..."
 msgstr "Searching an appropriate zone for item {i!r} - FQDN {f!r} …"
 
-#: lib/fb_pdnstools/server.py:169 lib/fb_pdnstools/server.py:200
+#: lib/fb_pdnstools/server.py:166 lib/fb_pdnstools/server.py:197
 msgid "Search pattern: {}"
 msgstr ""
 
-#: lib/fb_pdnstools/server.py:176 lib/fb_pdnstools/server.py:208
+#: lib/fb_pdnstools/server.py:173 lib/fb_pdnstools/server.py:205
 msgid "Search pattern Unicode: {}"
 msgstr ""
 
-#: lib/fb_pdnstools/server.py:193
+#: lib/fb_pdnstools/server.py:190
 msgid "Searching all appropriate zones for item {i!r} - FQDN {f!r} ..."
 msgstr "Searching all appropriate zones for item {i!r} - FQDN {f!r} …"
 
@@ -427,173 +521,169 @@ msgstr ""
 msgid "Found .mo-file: {!r}"
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:62
-msgid "No Resource Record Sets found to remove from zone {!r}."
-msgstr ""
-
-#: lib/fb_pdnstools/zone.py:133
+#: lib/fb_pdnstools/zone.py:125
 msgid "Got unknown init parameters:"
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:225
+#: lib/fb_pdnstools/zone.py:217
 msgid "Params initialisation:"
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:547
+#: lib/fb_pdnstools/zone.py:542
 msgid "Invalid source tuples for detecting IPv4-network: {!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:614
+#: lib/fb_pdnstools/zone.py:608
 msgid "Copying current {}-object into a new one."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:638
+#: lib/fb_pdnstools/zone.py:632
 msgid "Cannot update zone {!r}, no API URL defined."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:641
+#: lib/fb_pdnstools/zone.py:635
 msgid "Updating data of zone {n!r} from API path {u!r} ..."
 msgstr "Updating data of zone {n!r} from API path {u!r} …"
 
-#: lib/fb_pdnstools/zone.py:741
+#: lib/fb_pdnstools/zone.py:734
 msgid "Patching zone {!r} ..."
 msgstr "Patching zone {!r} …"
 
-#: lib/fb_pdnstools/zone.py:773
+#: lib/fb_pdnstools/zone.py:766
 msgid "Found invalid comment {!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:787
+#: lib/fb_pdnstools/zone.py:780
 msgid "New SOA must be of type {e}, given {t}: {s!r}"
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:798
+#: lib/fb_pdnstools/zone.py:791
 msgid "Got no SOA for zone {!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:819
+#: lib/fb_pdnstools/zone.py:812
 msgid "Setting new SOA {s!r} for zone {z!r}, TTL {t} ..."
 msgstr "Setting new SOA {s!r} for zone {z!r}, TTL {t} …"
 
-#: lib/fb_pdnstools/zone.py:836
+#: lib/fb_pdnstools/zone.py:828
 msgid "Increasing serial of zone {z!r} from {o} => {n}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:853 lib/fb_pdnstools/zone.py:882 lib/fb_pdnstools/zone.py:904
+#: lib/fb_pdnstools/zone.py:845 lib/fb_pdnstools/zone.py:874 lib/fb_pdnstools/zone.py:896
 msgid "Parameter {w!r} {a!r} is not a {e} object, but a {c} object instead."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:896
+#: lib/fb_pdnstools/zone.py:888
 msgid "Replacing record set in zone {!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:917
+#: lib/fb_pdnstools/zone.py:909
 msgid "Deleting record set in zone {!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:933
+#: lib/fb_pdnstools/zone.py:925
 msgid "Adding FQDN: {f!r}, type {t!r}, content: {c!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:943 lib/fb_pdnstools/zone.py:1000
+#: lib/fb_pdnstools/zone.py:935 lib/fb_pdnstools/zone.py:992
 msgid "Got an existing rrset for FQDN {f!r}, type {t!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:950 lib/fb_pdnstools/zone.py:1008
+#: lib/fb_pdnstools/zone.py:942 lib/fb_pdnstools/zone.py:1000
 msgid "Got no existing rrset for FQDN {f!r}, type {t!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:968
+#: lib/fb_pdnstools/zone.py:960
 msgid "Record {c!r} already contained in record set {f!r} type {t}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:990
+#: lib/fb_pdnstools/zone.py:982
 msgid "Replacing FQDN: {f!r}, type {t!r} by content: {c!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1038 lib/fb_pdnstools/zone.py:1064
+#: lib/fb_pdnstools/zone.py:1030 lib/fb_pdnstools/zone.py:1056
 msgid "Parameter address {a!r} is not an IPv4Address or IPv6Address object, but a {c} object instead."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1046 lib/fb_pdnstools/zone.py:1072 lib/fb_pdnstools/zone.py:1090
+#: lib/fb_pdnstools/zone.py:1038 lib/fb_pdnstools/zone.py:1064 lib/fb_pdnstools/zone.py:1082
 msgid "Trying to create {t}-record {f!r} => {a!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1123
+#: lib/fb_pdnstools/zone.py:1115
 msgid "Current zone:"
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1134
+#: lib/fb_pdnstools/zone.py:1126
 msgid "DNS {t!r}-record {n!r} is already deleted."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1144
+#: lib/fb_pdnstools/zone.py:1136
 msgid "Removing one resource record set from zone {z!r}."
 msgid_plural "Removing {c} resource record sets from zone {z!r}."
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/fb_pdnstools/zone.py:1150
+#: lib/fb_pdnstools/zone.py:1142
 msgid "Resorce record sets:"
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1153
+#: lib/fb_pdnstools/zone.py:1145
 msgid "Done."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1160
+#: lib/fb_pdnstools/zone.py:1152
 msgid "Notifying slave servers of zone {!r} ..."
 msgstr "Notifying slave servers of zone {!r} …"
 
-#: lib/fb_pdnstools/zone.py:1177
+#: lib/fb_pdnstools/zone.py:1169
 msgid "Invalid, empty FQDN {!r} given."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1191
+#: lib/fb_pdnstools/zone.py:1183
 msgid "Checking FQDN {f!r} for ending on {t!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1194
+#: lib/fb_pdnstools/zone.py:1186
 msgid "Invalid FQDN {f!r}, it must end up with {t!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1204
+#: lib/fb_pdnstools/zone.py:1196
 msgid "Basename of FQDN {f!r} is {h!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1226
+#: lib/fb_pdnstools/zone.py:1218
 msgid "Searching for RecordSet {f!r} of type {t!r} in zone {z!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1235
+#: lib/fb_pdnstools/zone.py:1227
 msgid "Found {} RecordSet:"
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1240
+#: lib/fb_pdnstools/zone.py:1232
 msgid "Did not found RecordSet {f!r} of type {t!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1249
+#: lib/fb_pdnstools/zone.py:1241
 msgid "Did not get SOA for zone {!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1264
+#: lib/fb_pdnstools/zone.py:1257
 msgid "Invalid item type {{!r}} to set, only {} allowed."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1266
+#: lib/fb_pdnstools/zone.py:1259
 msgid "The key {k!r} must be equal to the zone name {n!r}."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1267
+#: lib/fb_pdnstools/zone.py:1260
 msgid "None type as key is not allowed."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1268
+#: lib/fb_pdnstools/zone.py:1261
 msgid "Empty key {!r} is not allowed."
 msgstr ""
 
-#: lib/fb_pdnstools/zone.py:1269
+#: lib/fb_pdnstools/zone.py:1262
 msgid "Object {o!r} is not a {e} object."
 msgstr ""
 

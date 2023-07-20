@@ -1,26 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@author: Frank Brehm
-@contact: frank@brehm-online.com
-@copyright: © 2021 by Frank Brehm, Berlin
 @summary: The module for i18n.
+
           It provides translation object, usable from all other
           modules in this package.
+@author: Frank Brehm
+@contact: frank@brehm-online.com
+@copyright: © 2023 by Frank Brehm, Berlin
 """
 from __future__ import absolute_import, print_function
 
 # Standard modules
-import logging
-import gettext
 import copy
+import gettext
+import logging
 import sys
-
 try:
     from pathlib import Path
 except ImportError:
     from pathlib2 import Path
-
 try:
     from packaging.version import Version
 except ImportError:
@@ -35,7 +34,7 @@ DOMAIN = 'fb_pdnstools'
 
 LOG = logging.getLogger(__name__)
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 __me__ = Path(__file__).resolve()
 __module_dir__ = __me__.parent
@@ -81,6 +80,7 @@ _ = XLATOR.gettext
 def format_list(lst, do_repr=False, style='standard', locale=DEFAULT_LOCALE):
     """
     Format the items in `lst` as a list.
+
     :param lst: a sequence of items to format in to a list
     :param locale: the locale
     """
@@ -100,13 +100,13 @@ def format_list(lst, do_repr=False, style='standard', locale=DEFAULT_LOCALE):
 
 # =============================================================================
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
-    print(_("Module directory: {!r}").format(__module_dir__))
-    print(_("Base directory: {!r}").format(__base_dir__))
-    print(_("Locale directory: {!r}").format(LOCALE_DIR))
-    print(_("Locale domain: {!r}").format(DOMAIN))
-    print(_("Found .mo-file: {!r}").format(__mo_file__))
+    print(_('Module directory: {!r}').format(__module_dir__))
+    print(_('Base directory: {!r}').format(__base_dir__))
+    print(_('Locale directory: {!r}').format(LOCALE_DIR))
+    print(_('Locale domain: {!r}').format(DOMAIN))
+    print(_('Found .mo-file: {!r}').format(__mo_file__))
 
 # =============================================================================
 

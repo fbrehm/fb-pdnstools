@@ -2,7 +2,7 @@
 
 include:
   - project: 'python/packaging'
-    ref: v1.1
+    ref: v1.3
     file: 'gitlab/create-all.yaml'
 
 variables:
@@ -12,6 +12,7 @@ variables:
   PYTHON_ADDITIONAL_PACKAGES: 'python3-fb-logging python3-fb-tools'
   PYTHON_INIT_FILE: 'lib/fb_pdnstools/__init__.py'
   PYTHON_TEST_PATHS: 'bin lib setup.py'
+  SHELLSCRIPTS: 'compile-xlate-msgs.sh xtract-xlate-msgs.sh get-debian-release get-debian-version get-rpm-release get-rpm-version'
   SSH_PRIV_KEY_YUM_REPO: 'nada'
   TEST_LOCALES: 'en_US.UTF-8 de_DE.UTF-8'
   UPDATE_ALL_PIP_MODULES: 'n'

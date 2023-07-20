@@ -1,46 +1,43 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
+@summary: The module for the 'pdns-bulk-remove' application object.
+
 @author: Frank Brehm
 @contact: frank@brehm-online.com
-@copyright: © 2021 by Frank Brehm, Berlin
-@summary: The module for the 'pdns-bulk-remove' application object.
+@copyright: © 2023 by Frank Brehm, Berlin
 """
 from __future__ import absolute_import
 
 # Standard modules
-import logging
-import pathlib
-import sys
-import os
-import re
-import ipaddress
 import copy
-
+import ipaddress
+import logging
+import os
+import pathlib
+import re
+import sys
 from functools import cmp_to_key
 
 # Third party modules
-
-# Own modules
+from fb_tools.app import BaseApplication
+from fb_tools.common import compare_fqdn
+from fb_tools.common import pp
+from fb_tools.common import reverse_pointer
+from fb_tools.common import to_bool
+from fb_tools.common import to_str
+from fb_tools.config import CfgFileOptionAction
 from fb_tools.errors import FbAppError
 
-from fb_tools.common import pp, compare_fqdn, to_bool, reverse_pointer, to_str
-
-from fb_tools.app import BaseApplication
-
-from fb_tools.config import CfgFileOptionAction
-
+# Own modules
+from . import DEFAULT_API_PREFIX
+from . import DEFAULT_PORT
 from . import __version__ as GLOBAL_VERSION
-
+from .bulk_rm_cfg import PdnsBulkRmCfg
+from .server import PowerDNSServer
 from .xlate import XLATOR
 
-from .bulk_rm_cfg import PdnsBulkRmCfg
-
-from . import DEFAULT_PORT, DEFAULT_API_PREFIX
-
-from .server import PowerDNSServer
-
-__version__ = '0.7.1'
+__version__ = '0.7.2'
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -49,15 +46,14 @@ ngettext = XLATOR.ngettext
 
 # =============================================================================
 class PdnsBulkRmError(FbAppError):
-    """ Base exception class for all exceptions in this application."""
+    """Base exception class for all exceptions in this application."""
+
     pass
 
 
 # =============================================================================
 class PdnsBulkRmApp(BaseApplication):
-    """
-    Class for the application object.
-    """
+    """Class for the application object of the pdns-bulk-remove application."""
 
     show_simulate_option = True
 
@@ -66,12 +62,12 @@ class PdnsBulkRmApp(BaseApplication):
         self, appname=None, verbose=0, version=GLOBAL_VERSION, base_dir=None,
             initialized=False, usage=None, description=None,
             argparse_epilog=None, argparse_prefix_chars='-', env_prefix=None):
-
+        """Initialize the PdnsBulkRmApp object."""
         desc = _(
-            "Removes the given addresses (A-, AAAA- or CNAME-Records) completety from "
-            "PowerDNS. If there are multiple entries to a DNS-Name, all appropriate "
-            "records are removed. Additionally all appropriate reverse entries (PTR-records) "
-            "were also removed, if they are pointing back to the given A- or AAAA-record.")
+            'Removes the given addresses (A-, AAAA- or CNAME-Records) completety from '
+            'PowerDNS. If there are multiple entries to a DNS-Name, all appropriate '
+            'records are removed. Additionally all appropriate reverse entries (PTR-records) '
+            'were also removed, if they are pointing back to the given A- or AAAA-record.')
 
         self._cfg_file = None
         self.config = None
@@ -94,14 +90,13 @@ class PdnsBulkRmApp(BaseApplication):
     # -------------------------------------------------------------------------
     @property
     def cfg_file(self):
-        """Configuration file."""
+        """Return the onfiguration file."""
         return self._cfg_file
 
     # -------------------------------------------------------------------------
     @property
     def rm_reverse(self):
-        """Flag indicating, that the reverse DNS entries (PTR records)
-            should not be removed."""
+        """Return, whether the reverse DNS entries (PTR records) should not be removed."""
         return self._rm_reverse
 
     @rm_reverse.setter
@@ -111,7 +106,7 @@ class PdnsBulkRmApp(BaseApplication):
     # -------------------------------------------------------------------------
     def as_dict(self, short=True):
         """
-        Transforms the elements of the object into a dict
+        Transform the elements of the object into a dict.
 
         @param short: don't include local properties in resulting dict.
         @type short: bool
@@ -119,7 +114,6 @@ class PdnsBulkRmApp(BaseApplication):
         @return: structure as dict
         @rtype:  dict
         """
-
         res = super(PdnsBulkRmApp, self).as_dict(short=short)
         res['cfg_file'] = self.cfg_file
         res['rm_reverse'] = self.rm_reverse
@@ -129,16 +123,15 @@ class PdnsBulkRmApp(BaseApplication):
     # -------------------------------------------------------------------------
     def post_init(self):
         """
-        Method to execute before calling run(). Here could be done some
-        finishing actions after reading in commandline parameters,
-        configuration a.s.o.
+        Execute this method before calling run().
+
+        Here could be done some finishing actions after reading in commandline
+        parameters, configuration a.s.o.
 
         This method could be overwritten by descendant classes, these
         methhods should allways include a call to post_init() of the
         parent class.
-
         """
-
         self.initialized = False
 
         self.init_logging()
@@ -155,7 +148,7 @@ class PdnsBulkRmApp(BaseApplication):
         self.config.initialized = True
 
         if self.verbose > 3:
-            LOG.debug("Read configuration:\n{}".format(pp(self.config.as_dict())))
+            LOG.debug('Read configuration:\n{}'.format(pp(self.config.as_dict())))
 
         self.perform_arg_parser_pdns()
 
@@ -163,7 +156,7 @@ class PdnsBulkRmApp(BaseApplication):
             self.read_address_file()
 
         if not self.addresses:
-            LOG.error(_("No addresses to remove given."))
+            LOG.error(_('No addresses to remove given.'))
             self.exit(1)
 
         self.pdns = PowerDNSServer(
@@ -179,10 +172,7 @@ class PdnsBulkRmApp(BaseApplication):
 
     # -------------------------------------------------------------------------
     def init_arg_parser(self):
-        """
-        Public available method to initiate the argument parser.
-        """
-
+        """Public available method to initiate the argument parser."""
         super(PdnsBulkRmApp, self).init_arg_parser()
 
         default_cfg_file = self.base_dir.joinpath('etc').joinpath(self.appname + '.ini')
@@ -190,7 +180,7 @@ class PdnsBulkRmApp(BaseApplication):
         self.arg_parser.add_argument(
             '-c', '--config', '--config-file', dest='cfg_file', metavar=_('FILE'),
             action=CfgFileOptionAction,
-            help=_("Configuration file (default: {!r})").format(default_cfg_file)
+            help=_('Configuration file (default: {!r})').format(default_cfg_file)
         )
 
         pdns_group = self.arg_parser.add_argument_group(_('PowerDNS options'))
@@ -198,75 +188,71 @@ class PdnsBulkRmApp(BaseApplication):
         pdns_group.add_argument(
             '-H', '--host', dest='host', metavar=_('HOST'),
             help=_(
-                "Address or hostname of the PowerDNS server providing "
-                "the API (Default: {!r}).").format(PdnsBulkRmCfg.default_pdns_master)
+                'Address or hostname of the PowerDNS server providing '
+                'the API (Default: {!r}).').format(PdnsBulkRmCfg.default_pdns_master)
         )
 
         pdns_group.add_argument(
             '-P', '--port', dest='port', type=int, metavar=_('PORT'),
-            help=_("Port on PowerDNS server for API on (Default: {}).").format(DEFAULT_PORT))
+            help=_('Port on PowerDNS server for API on (Default: {}).').format(DEFAULT_PORT))
 
         pdns_group.add_argument(
             '-K', '--key', '--api-key', metavar='KEY', dest='api_key',
-            help=_("The API key for accessing the PowerDNS API.")
+            help=_('The API key for accessing the PowerDNS API.')
         )
 
         pdns_group.add_argument(
-            '--https', action="store_true", dest='https',
-            help=_("Use HTTPS to access the PowerDNS API (Default: {}).").format(
+            '--https', action='store_true', dest='https',
+            help=_('Use HTTPS to access the PowerDNS API (Default: {}).').format(
                 PdnsBulkRmCfg.default_pdns_api_https),
         )
 
         pdns_group.add_argument(
             '--prefix', dest='api_path_prefix',
             help=_(
-                "The global prefix for all paths for accessing the PowerDNS API "
-                "(Default: {!r}).").format(DEFAULT_API_PREFIX)
+                'The global prefix for all paths for accessing the PowerDNS API '
+                '(Default: {!r}).').format(DEFAULT_API_PREFIX)
         )
 
         # Source of the addresses - file or cmdline arguments
         # source_group = self.arg_parser.add_mutually_exclusive_group()
 
         self.arg_parser.add_argument(
-            '-N', '--no-reverse', action="store_true", dest='no_reverse',
+            '-N', '--no-reverse', action='store_true', dest='no_reverse',
             help=_(
                 "Don't remove reverse DNS entries (PTR records) to the given addresses. "
-                "(Default: False - reverse entries will be removed).")
+                '(Default: False - reverse entries will be removed).')
         )
 
         self.arg_parser.add_argument(
             '-F', '--file', metavar=_('FILE'), dest='addr_file', type=pathlib.Path,
             help=_(
-                "File containing the addresses to remove. The addresses must be "
-                "whitespace separeted, lines may be commented out by prepending them "
+                'File containing the addresses to remove. The addresses must be '
+                'whitespace separeted, lines may be commented out by prepending them '
                 "with a hash sign '#'. This option is mutually exclusive with "
-                "giving the addresses as command line arguments.")
+                'giving the addresses as command line arguments.')
         )
 
         self.arg_parser.add_argument(
             'addresses', metavar=_('ADDRESS'), type=str, nargs='*',
             help=_(
-                "Addresses to remove. This option is mutually exclusive with "
-                "the {!r} option.").format('-F/--file'),
+                'Addresses to remove. This option is mutually exclusive with '
+                'the {!r} option.').format('-F/--file'),
         )
 
     # -------------------------------------------------------------------------
     def perform_arg_parser(self):
-
+        """Parse the command line options."""
         if self.args.cfg_file:
             self._cfg_file = self.args.cfg_file
 
     # -------------------------------------------------------------------------
     def perform_arg_parser_pdns(self):
-        """
-        Public available method to execute some actions after parsing
-        the command line parameters.
-        """
-
+        """Execute some actions after parsing the command line parameters."""
         if self.args.addr_file and self.args.addresses:
             msg = _(
-                "The option {!r} is mutually exclusive with giving the addresses "
-                "as command line arguments.").format('-F/--file')
+                'The option {!r} is mutually exclusive with giving the addresses '
+                'as command line arguments.').format('-F/--file')
             LOG.error(msg)
             self.arg_parser.print_usage(sys.stderr)
             self.exit(1)
@@ -274,15 +260,15 @@ class PdnsBulkRmApp(BaseApplication):
         if self.args.addr_file:
             afile = self.args.addr_file
             if not afile.exists():
-                msg = _("File {!r} does not exists.").format(str(afile))
+                msg = _('File {!r} does not exists.').format(str(afile))
                 LOG.error(msg)
                 self.exit(1)
             if not afile.is_file():
-                msg = _("File {!r} is not a regular file.").format(str(afile))
+                msg = _('File {!r} is not a regular file.').format(str(afile))
                 LOG.error(msg)
                 self.exit(1)
             if not os.access(str(afile), os.R_OK):
-                msg = _("No read access to file {!r}.").format(str(afile))
+                msg = _('No read access to file {!r}.').format(str(afile))
                 LOG.error(msg)
                 self.exit(1)
             self.address_file = afile
@@ -309,10 +295,10 @@ class PdnsBulkRmApp(BaseApplication):
 
     # -------------------------------------------------------------------------
     def read_address_file(self):
-
+        """Read the file containing all addresses to remove."""
         content = self.read_file(self.address_file)
         if self.verbose > 2:
-            LOG.debug("Content of {f!r}:\n{c}".format(f=str(self.address_file), c=content))
+            LOG.debug(_('Content of {!r}:').format(str(self.address_file)) + '\n' + content)
 
         re_comment = re.compile(r'\s*#.*')
         re_whitespace = re.compile(r'\s+')
@@ -331,13 +317,12 @@ class PdnsBulkRmApp(BaseApplication):
             self.addresses = addresses
 
         if not self.addresses:
-            LOG.error(_("No addresses to remove found in {!r}.").format(str(self.address_file)))
+            LOG.error(_('No addresses to remove found in {!r}.').format(str(self.address_file)))
             self.exit(1)
 
     # -------------------------------------------------------------------------
     def __del__(self):
         """Destructor."""
-
         if self.pdns:
             self.pdns = None
 
@@ -345,7 +330,7 @@ class PdnsBulkRmApp(BaseApplication):
     def _run(self):
 
         print()
-        LOG.debug("Starting {a!r}, version {v!r} ...".format(
+        LOG.debug('Starting {a!r}, version {v!r} ...'.format(
             a=self.appname, v=self.version))
 
         ret = 0
@@ -367,15 +352,15 @@ class PdnsBulkRmApp(BaseApplication):
 
     # -------------------------------------------------------------------------
     def show_simulation(self):
-
+        """Display the informotion to t screen about simulation mode."""
         if not self.simulate:
             return
-        print(self.colored(_("Simulation mode - nothing will be removed in real."), 'YELLOW'))
+        print(self.colored(_('Simulation mode - nothing will be removed in real.'), 'YELLOW'))
         print()
 
     # -------------------------------------------------------------------------
     def do_remove(self):
-
+        """Remove finally all addresses in DNS."""
         for zone_name in sorted(
                 self.records2remove.keys(), key=lambda x: cmp_to_key(compare_fqdn)(x)):
             print()
@@ -391,34 +376,34 @@ class PdnsBulkRmApp(BaseApplication):
     def _canon_addresses(self, addresses):
 
         if self.verbose > 1:
-            LOG.debug("Canonizing all given addresses.")
+            LOG.debug(_('Canonizing all given addresses.'))
         all_fqdns = []
 
         for addr in addresses:
 
             fqdn = self.pdns.name2fqdn(addr)
             if not fqdn:
-                LOG.warning(_("Address {!r} could not interpreted as a FQDN.").format(addr))
+                LOG.warning(_('Address {!r} could not interpreted as a FQDN.').format(addr))
                 continue
             if fqdn not in all_fqdns:
                 all_fqdns.append(fqdn)
 
         if self.verbose > 2:
-            LOG.debug("Canonized addresses:\n{}".format(pp(all_fqdns)))
+            LOG.debug(_('Canonized addresses:') + '\n' + pp(all_fqdns))
         return all_fqdns
 
     # -------------------------------------------------------------------------
     def _get_zones_of_addresses(self, fqdns):
 
         if self.verbose > 1:
-            LOG.debug("Retrieve zones for canonized addresses.")
+            LOG.debug(_('Retrieve zones for canonized addresses.'))
         zones_of_records = {}
 
         for fqdn in fqdns:
 
             zones = self.pdns.get_all_zones_for_item(fqdn)
             if not zones:
-                LOG.warning(_("Did not found an appropriate zone for address {!r}.").format(fqdn))
+                LOG.warning(_('Did not found an appropriate zone for address {!r}.').format(fqdn))
                 continue
 
             for zone_name in zones:
@@ -427,14 +412,14 @@ class PdnsBulkRmApp(BaseApplication):
                 zones_of_records[zone_name][fqdn] = {}
 
         if self.verbose > 2:
-            LOG.debug("Zones of addresses:\n{}".format(pp(zones_of_records)))
+            LOG.debug(_('Zones of addresses:') + '\n' + pp(zones_of_records))
         return zones_of_records
 
     # -------------------------------------------------------------------------
     def _verify_fqdns_in_pdns_zones(self, zone_name, zones_of_records, fqdns_found=None):
 
         if self.verbose > 1:
-            LOG.debug("Verifying FQDNs for zone {!r}.".format(zone_name))
+            LOG.debug(_('Verifying FQDNs for zone {!r}.').format(zone_name))
 
         if fqdns_found is None:
             fqdns_found = []
@@ -442,7 +427,7 @@ class PdnsBulkRmApp(BaseApplication):
         zone = self.pdns.zones[zone_name]
         zone.update()
         if self.verbose > 1:
-            LOG.debug("Found {c} resource record sets (RRSET) for zone {z!r}.".format(
+            LOG.debug(_('Found {c} resource record sets (RRSET) for zone {z!r}.').format(
                 c=len(zone.rrsets), z=zone_name))
 
         for fqdn in zones_of_records[zone_name]:
@@ -461,10 +446,10 @@ class PdnsBulkRmApp(BaseApplication):
         fqdn_puny = to_str(fqdn.encode('idna'))
         if self.verbose > 1:
             if fqdn != fqdn_puny:
-                LOG.debug("Searching {f!r} ({p!r}) in zone {z!r} ...".format(
+                LOG.debug(_('Searching {f!r} ({p!r}) in zone {z!r} ...').format(
                     f=fqdn, p=fqdn_puny, z=zone_name))
             else:
-                LOG.debug("Searching {f!r} in zone {z!r} ...".format(f=fqdn, z=zone_name))
+                LOG.debug(_('Searching {f!r} in zone {z!r} ...').format(f=fqdn, z=zone_name))
 
         for rrset in zone.rrsets:
 
@@ -492,11 +477,11 @@ class PdnsBulkRmApp(BaseApplication):
                         exp = self.pdns.decanon_name(self.expected_ptr[fqdn_puny])
                         addr = self.pdns.decanon_name(record.content)
                         if self.verbose > 1:
-                            LOG.debug("Expexted PTR: {p!r} => {a!r}.".format(p=ptr, a=exp))
+                            LOG.debug(_('Expexted PTR: {p!r} => {a!r}.').format(p=ptr, a=exp))
                         if record.content != self.expected_ptr[fqdn_puny]:
                             LOG.warning(_(
-                                "PTR {p!r} does not pointing to expected {e!r}, "
-                                "but to {c!r} instead, ignoring for deletion.").format(
+                                'PTR {p!r} does not pointing to expected {e!r}, '
+                                'but to {c!r} instead, ignoring for deletion.').format(
                                 p=ptr, e=exp, c=addr))
                             continue
                 record2remove = {'content': record.content, 'disabled': record.disabled}
@@ -511,8 +496,8 @@ class PdnsBulkRmApp(BaseApplication):
 
     # -------------------------------------------------------------------------
     def verify_addresses(self, addresses):
-
-        LOG.debug("Verifying all given DNS addresses.")
+        """Verify all given DNS addresses."""
+        LOG.debug(_('Verifying all given DNS addresses.'))
 
         fqdns_found = []
 
@@ -520,25 +505,25 @@ class PdnsBulkRmApp(BaseApplication):
         zones_of_records = self._get_zones_of_addresses(all_fqdns)
 
         if not zones_of_records:
-            msg = _("Did not found any addresses with an appropriate zone in PowerDNS.")
+            msg = _('Did not found any addresses with an appropriate zone in PowerDNS.')
             LOG.error(msg)
             return 1
 
         if self.verbose > 1:
-            LOG.debug("Found zones for addresses:\n{}".format(pp(zones_of_records)))
+            LOG.debug(_('Found zones for addresses:') + '\n' + pp(zones_of_records))
 
         for zone_name in zones_of_records:
             fqdns_found = self._verify_fqdns_in_pdns_zones(
                 zone_name, zones_of_records, fqdns_found)
         if self.verbose > 2:
-            LOG.debug("The following FQDNs were found:\n{}".format(pp(fqdns_found)))
+            LOG.debug(_('The following FQDNs were found:') + '\n' + pp(fqdns_found))
 
         fqdns_not_found = []
         for fqdn in all_fqdns:
             if fqdn not in fqdns_found:
                 fqdns_not_found.append(fqdn)
         if fqdns_not_found:
-            msg = _("The following addresses (FQDNs) are not found:")
+            msg = _('The following addresses (FQDNs) are not found:')
             for fqdn in fqdns_not_found:
                 msg += '\n  * {!r}'.format(fqdn)
             LOG.warning(msg)
@@ -547,14 +532,16 @@ class PdnsBulkRmApp(BaseApplication):
             return 1
 
         if self.verbose > 2:
-            LOG.debug("Found resource record sets to remove:\n{}".format(pp(self.records2remove)))
+            msg = _('Found resource record sets to remove:')
+            msg += '\n' + pp(self.records2remove)
+            LOG.debug(msg)
 
         return 0
 
     # -------------------------------------------------------------------------
     def get_reverse_records(self):
-
-        LOG.debug("Retrieving reverse records of A and AAAA records.")
+        """Evaluate reverse PTR records of A and AAAA records."""
+        LOG.debug(_('Evaluating reverse PTR records of A and AAAA records.'))
 
         addresses = []
         self.expected_ptr = {}
@@ -568,7 +555,7 @@ class PdnsBulkRmApp(BaseApplication):
 
                 for record in rrset['records']:
                     addr_str = record['content']
-                    LOG.debug("Trying to get reverse address of {!r} ...".format(addr_str))
+                    LOG.debug(_('Try to get reverse address of {!r} ...').format(addr_str))
                     addr = None
                     fqdn = None
 
@@ -576,11 +563,11 @@ class PdnsBulkRmApp(BaseApplication):
                         addr = ipaddress.ip_address(addr_str)
                         fqdn = self.pdns.canon_name(reverse_pointer(addr))
                     except ValueError:
-                        msg = _("IP address {!r} seems not to be a valid IP address.").format(
+                        msg = _('IP address {!r} seems not to be a valid IP address.').format(
                             addr_str)
                         LOG.error(msg)
                         continue
-                    LOG.debug("Found reverse address {!r}.".format(fqdn))
+                    LOG.debug(_('Found reverse address {!r}.').format(fqdn))
                     if fqdn not in addresses:
                         addresses.append(fqdn)
                     self.expected_ptr[fqdn] = rrset['fqdn']
@@ -589,25 +576,25 @@ class PdnsBulkRmApp(BaseApplication):
             return 0
 
         if self.verbose > 1:
-            LOG.debug("Expected PTR records:\n{}".format(pp(self.expected_ptr)))
+            LOG.debug(_('Expected PTR records:') + '\n' + pp(self.expected_ptr))
 
         return self.verify_addresses(addresses)
 
     # -------------------------------------------------------------------------
     def show_records(self):
-
-        title = _("All DNS records to remove")
+        """Display all DNS records to remove on screen."""
+        title = _('All DNS records to remove')
         print()
         print(title)
-        print("=" * len(title))
+        print('=' * len(title))
         print()
 
         disabled = _('Disabled.')
         headers = {
-            'fqdn': _("Name"),
+            'fqdn': _('Name'),
             'z': _('Zone'),
-            'type': _("Type"),
-            'rec': _("Record"),
+            'type': _('Type'),
+            'rec': _('Record'),
             'dis': '',
         }
         lengths = {
@@ -637,11 +624,11 @@ class PdnsBulkRmApp(BaseApplication):
                     if len(content) > lengths['rec']:
                         lengths['rec'] = len(content)
 
-        tpl = "{{fqdn:<{}}}  ".format(lengths['fqdn'])
-        tpl += "{{z:<{}}}  ".format(lengths['z'])
-        tpl += "{{type:<{}}}  ".format(lengths['type'])
-        tpl += "{{rec:<{}}}  ".format(lengths['rec'])
-        tpl += "{{dis:<{}}}".format(lengths['dis'])
+        tpl = '{{fqdn:<{}}}  '.format(lengths['fqdn'])
+        tpl += '{{z:<{}}}  '.format(lengths['z'])
+        tpl += '{{type:<{}}}  '.format(lengths['type'])
+        tpl += '{{rec:<{}}}  '.format(lengths['rec'])
+        tpl += '{{dis:<{}}}'.format(lengths['dis'])
 
         header = tpl.format(**headers)
         print(header)
@@ -663,13 +650,13 @@ class PdnsBulkRmApp(BaseApplication):
                         out['dis'] = ''
                     print(tpl.format(**out))
         print()
-        msg = ngettext("Total one DNS record to remove.", "Total {} DNS records to remove.", count)
+        msg = ngettext('Total one DNS record to remove.', 'Total {} DNS records to remove.', count)
         print(msg.format(count))
         print()
 
 
 # =============================================================================
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     pass
 

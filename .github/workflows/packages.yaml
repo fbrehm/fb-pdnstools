@@ -58,10 +58,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Executing Linters
     container: python:3.11
-    env:
-      FLAKE8_MAX_LINE_LENGTH: 99
-      FLAKE8_MAX_COMPLEXITY: 20
-      FLAKE8_IGNORE_ERRORS: 'E226,E302,E41,E402'
     needs:
       - test
     steps:
@@ -74,7 +70,11 @@ jobs:
       - name: Install flake8 and pylint
         shell: bash
         run: |
-          pip install --upgrade --upgrade-strategy eager flake8 pylint
+          if [[ -f requirements-lint.txt ]] ; then
+              pip install --upgrade --upgrade-strategy eager --requirement requirements-lint.txt
+          else
+              pip install --upgrade --upgrade-strategy eager flake8 pylint
+          fi
           pip list --format columns
       - name: "Checking module version against tag."
         shell: bash
@@ -93,7 +93,7 @@ jobs:
       - name: Execute Flake 8
         shell: bash
         run: |
-          flake8 --max-line-length=$FLAKE8_MAX_LINE_LENGTH --max-complexity=$FLAKE8_MAX_COMPLEXITY --ignore=$FLAKE8_IGNORE_ERRORS bin lib setup.py
+          flake8 bin/* lib setup.py test
       - name: Execute Shellcheck
         shell: bash
         run: >
@@ -107,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Building Debian Source Packages
     if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/test') || startsWith(github.ref, 'refs/tags/') }}
-    container: debian:bullseye
+    container: debian:bookworm
     needs:
       - linter
     steps:
@@ -115,7 +115,7 @@ jobs:
       - uses: ./.github/actions/add-fb-debian-repo
         with:
           vendor: Debian
-          distro: bullseye
+          distro: bookworm
       - uses: ./.github/actions/prepare-debian-container
       - uses: ./.github/actions/debian-install-buildenv
       - uses: ./.github/actions/setup-gpg
@@ -190,6 +190,12 @@ jobs:
             os_release: '11'
             container: 'debian:bullseye'
             version_prefix: 'deb11'
+            compat: '12'
+          - distributor: 'Debian'
+            os_codename: 'bookworm'
+            os_release: '12'
+            container: 'debian:bookworm'
+            version_prefix: 'deb12'
             compat: '12'
           - distributor: 'Ubuntu'
             os_codename: 'bionic'
