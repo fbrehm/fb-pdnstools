@@ -37,7 +37,7 @@ from .bulk_rm_cfg import PdnsBulkRmCfg
 from .server import PowerDNSServer
 from .xlate import XLATOR
 
-__version__ = '0.7.2'
+__version__ = '0.7.3'
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -58,10 +58,7 @@ class PdnsBulkRmApp(BaseApplication):
     show_simulate_option = True
 
     # -------------------------------------------------------------------------
-    def __init__(
-        self, appname=None, verbose=0, version=GLOBAL_VERSION, base_dir=None,
-            initialized=False, usage=None, description=None,
-            argparse_epilog=None, argparse_prefix_chars='-', env_prefix=None):
+    def __init__(self, appname=None, verbose=0, version=GLOBAL_VERSION, *args, **kwargs):
         """Initialize the PdnsBulkRmApp object."""
         desc = _(
             'Removes the given addresses (A-, AAAA- or CNAME-Records) completety from '
@@ -81,8 +78,10 @@ class PdnsBulkRmApp(BaseApplication):
         self.expected_ptr = None
 
         super(PdnsBulkRmApp, self).__init__(
-            appname=appname, verbose=verbose, version=version, base_dir=base_dir,
-            description=desc, initialized=False,
+            description=desc,
+            verbose=verbose,
+            version=version,
+            *args, **kwargs
         )
 
         self.initialized = True

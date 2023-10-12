@@ -55,7 +55,7 @@ from .errors import PowerDNSHandlerError
 from .xlate import XLATOR
 
 
-__version__ = '0.6.1'
+__version__ = '0.6.2'
 LOG = logging.getLogger(__name__)
 
 LOGLEVEL_REQUESTS_SET = False
@@ -84,10 +84,9 @@ class BasePowerDNSHandler(HandlingObject):
 
     # -------------------------------------------------------------------------
     def __init__(
-        self, appname=None, verbose=0, version=__version__, base_dir=None, master_server=None,
-            port=DEFAULT_PORT, key=None, use_https=DEFAULT_USE_HTTPS, timeout=None,
-            path_prefix=DEFAULT_API_PREFIX, simulate=None, force=None, terminal_has_colors=False,
-            initialized=False,):
+        self, version=__version__, master_server=None, port=DEFAULT_PORT, key=None,
+            use_https=DEFAULT_USE_HTTPS, timeout=None, path_prefix=DEFAULT_API_PREFIX,
+            *args, **kwargs):
         """Initialize a BasePowerDNSHandler object."""
         self._master_server = master_server
         self._port = self.default_port
@@ -100,11 +99,7 @@ class BasePowerDNSHandler(HandlingObject):
         self._mocked = False
         self.mocking_paths = []
 
-        super(BasePowerDNSHandler, self).__init__(
-            appname=appname, verbose=verbose, version=version, base_dir=base_dir,
-            simulate=simulate, force=force, terminal_has_colors=terminal_has_colors,
-            initialized=False,
-        )
+        super(BasePowerDNSHandler, self).__init__(version=version, *args, **kwargs)
 
         self.use_https = use_https
         self.port = port
@@ -119,7 +114,8 @@ class BasePowerDNSHandler(HandlingObject):
             logging.getLogger('requests').setLevel(logging.WARNING)
             LOGLEVEL_REQUESTS_SET = True
 
-        self.initialized = initialized
+        if 'initialized' in kwargs:
+            self.initialized = kwargs['initialized']
 
     # -----------------------------------------------------------
     @property
