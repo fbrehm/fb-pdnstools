@@ -34,6 +34,12 @@ class TestPdnsCommon(FbPdnsToolsTestcase):
     """Testcase for tests on fb_pdnstools.common."""
 
     # -------------------------------------------------------------------------
+    def setUp(self):
+        """Execute this on seting up before calling each particular test method."""
+        if self.verbose >= 1:
+            print()
+
+    # -------------------------------------------------------------------------
     def test_import(self):
         """Testing import of module fb_pdnstools.common ..."""
         LOG.info('Test importing fb_pdnstools.common ...')

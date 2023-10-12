@@ -37,7 +37,8 @@ class TestPdnsZone(FbPdnsToolsTestcase):
     # -------------------------------------------------------------------------
     def setUp(self):
         """Hook for setup actions on each test method call."""
-        pass
+        if self.verbose >= 1:
+            print()
 
     # -------------------------------------------------------------------------
     def tearDown(self):

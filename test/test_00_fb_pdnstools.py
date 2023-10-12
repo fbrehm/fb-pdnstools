@@ -35,6 +35,12 @@ class TestPdnsToolsBase(FbPdnsToolsTestcase):
     """Testcase for tests on fb_pdnstools/__init__.py and fb_pdnstools.errors."""
 
     # -------------------------------------------------------------------------
+    def setUp(self):
+        """Execute this on seting up before calling each particular test method."""
+        if self.verbose >= 1:
+            print()
+
+    # -------------------------------------------------------------------------
     def test_import_modules(self):
         """Testing import of modules fb_pdnstools/__init__.py and fb_pdnstools.errors ..."""
         LOG.info('Test importing main module ...')
