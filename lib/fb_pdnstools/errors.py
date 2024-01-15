@@ -18,7 +18,7 @@ from .xlate import XLATOR
 
 _ = XLATOR.gettext
 
-__version__ = '0.4.0'
+__version__ = '0.4.1'
 
 
 # =============================================================================
@@ -174,12 +174,12 @@ class PDNSRequestError(PowerDNSHandlerError):
             cls = ''
             if not isinstance(self.request, str):
                 cls = self.request.__class__.__name__ + ' - '
-            msg += '\nRequest: {c}{e}'.format(c=cls, e=self.request)
+            msg += ' / Request: {c}{e}'.format(c=cls, e=self.request)
         if self.response:
             cls = ''
             if not isinstance(self.response, str):
                 cls = self.response.__class__.__name__ + ' - '
-            msg += '\nResponse: {c}{e}'.format(c=cls, e=self.response)
+            msg += ' / Response: {c}{e}'.format(c=cls, e=self.response)
 
         return msg
 

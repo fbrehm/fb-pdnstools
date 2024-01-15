@@ -142,6 +142,24 @@ class TestPdnsToolsBase(FbPdnsToolsTestcase):
         e = cm.exception
         LOG.debug('Got a {c}: {e}'.format(c=e.__class__.__name__, e=e))
 
+        LOG.debug('Testing PDNSRequestError from fb_pdnstools.errors ...')
+        from requests.exceptions import RequestException
+        from fb_pdnstools.errors import PDNSRequestError
+        from http.client import RemoteDisconnected
+        url = 'https://pdnsmaster.uhu-banane.eu'
+        msg = 'Some strange requests error #{}'
+        errors = []
+        errors.append(RequestException(msg.format(1)))
+        errors.append(RequestException(
+            msg.format(2),
+            request=RemoteDisconnected('Remote end closed connection without response')))
+
+        for req_err in errors:
+            with self.assertRaises(PDNSRequestError) as cm:
+                raise PDNSRequestError(str(req_err), url, req_err.request, req_err.response)
+            e = cm.exception
+            LOG.debug('Got a {c}: {e}'.format(c=e.__class__.__name__, e=e))
+
 
 # =============================================================================
 if __name__ == '__main__':
