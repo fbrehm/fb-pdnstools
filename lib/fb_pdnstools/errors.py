@@ -18,7 +18,7 @@ from .xlate import XLATOR
 
 _ = XLATOR.gettext
 
-__version__ = '0.3.1'
+__version__ = '0.4.0'
 
 
 # =============================================================================
@@ -152,6 +152,36 @@ class PDNSApiTimeoutError(PDNSApiRequestError):
     """Raised when a request does not finish in the given time span."""
 
     pass
+
+
+# =============================================================================
+class PDNSRequestError(PowerDNSHandlerError):
+    """Raised, when some other exceptions occured on a HTTP(S) request."""
+
+    # -------------------------------------------------------------------------
+    def __init__(self, msg, uri=None, request=None, response=None):
+        """Initialize the PDNSRequestError object."""
+        self.msg = msg
+        self.uri = uri
+        self.request = request
+        self.response = response
+
+    # -------------------------------------------------------------------------
+    def __str__(self):
+        """Typecast into a string."""
+        msg = _('Got an error requesting {uri!r}: {msg}').format(uri=self.uri, msg=self.msg)
+        if self.request:
+            cls = ''
+            if not isinstance(self.request, str):
+                cls = self.request.__class__.__name__ + ' - '
+            msg += '\nRequest: {c}{e}'.format(c=cls, e=self.request)
+        if self.response:
+            cls = ''
+            if not isinstance(self.response, str):
+                cls = self.response.__class__.__name__ + ' - '
+            msg += '\nResponse: {c}{e}'.format(c=cls, e=self.response)
+
+        return msg
 
 
 # =============================================================================

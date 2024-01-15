@@ -32,6 +32,7 @@ from fb_tools.common import to_str
 from fb_tools.handling_obj import HandlingObject
 
 import requests
+from requests.exceptions import RequestException
 
 import six
 from six import add_metaclass
@@ -51,11 +52,12 @@ from .errors import PDNSApiNotAuthorizedError
 from .errors import PDNSApiNotFoundError
 from .errors import PDNSApiRateLimitExceededError
 from .errors import PDNSApiValidationError
+from .errors import PDNSRequestError
 from .errors import PowerDNSHandlerError
 from .xlate import XLATOR
 
 
-__version__ = '0.6.2'
+__version__ = '0.7.0'
 LOG = logging.getLogger(__name__)
 
 LOGLEVEL_REQUESTS_SET = False
@@ -335,7 +337,7 @@ class BasePowerDNSHandler(HandlingObject):
         return url
 
     # -------------------------------------------------------------------------
-    def perform_request(
+    def perform_request(                                                        # noqa: C901
         self, path, no_prefix=False, method='GET',
             data=None, headers=None, may_simulate=False):
         """Perform the underlying API request."""
@@ -378,6 +380,9 @@ class BasePowerDNSHandler(HandlingObject):
                 self.start_mocking(session)
             response = session.request(
                 method, url, data=data, headers=headers, timeout=self.timeout)
+
+        except RequestException as e:
+            raise PDNSRequestError(str(e), url, e.request, e.response)
 
         except (
                 socket.timeout, urllib3.exceptions.ConnectTimeoutError,
