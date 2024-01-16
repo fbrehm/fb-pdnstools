@@ -1,4 +1,4 @@
-fb-pdnstools (0.6.1) UNRELEASED; urgency=medium
+fb-pdnstools (0.6.1) all; urgency=medium
 
   * Simplyfication of init of some classes.
   * Changing output of test scripts.
