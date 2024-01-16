@@ -35,6 +35,12 @@ class TestPdnsBaseHandler(FbPdnsToolsTestcase):
     """Testcase for tests on fb_pdnstools.base_handler."""
 
     # -------------------------------------------------------------------------
+    def setUp(self):
+        """Execute this on seting up before calling each particular test method."""
+        if self.verbose >= 1:
+            print()
+
+    # -------------------------------------------------------------------------
     def test_import_modules(self):
         """Testing import of modules fb_pdnstools.base_handler ..."""
         LOG.info('Test importing base handler module ...')

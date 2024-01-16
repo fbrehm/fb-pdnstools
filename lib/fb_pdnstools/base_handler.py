@@ -32,6 +32,7 @@ from fb_tools.common import to_str
 from fb_tools.handling_obj import HandlingObject
 
 import requests
+from requests.exceptions import RequestException
 
 import six
 from six import add_metaclass
@@ -51,11 +52,12 @@ from .errors import PDNSApiNotAuthorizedError
 from .errors import PDNSApiNotFoundError
 from .errors import PDNSApiRateLimitExceededError
 from .errors import PDNSApiValidationError
+from .errors import PDNSRequestError
 from .errors import PowerDNSHandlerError
 from .xlate import XLATOR
 
 
-__version__ = '0.6.1'
+__version__ = '0.7.0'
 LOG = logging.getLogger(__name__)
 
 LOGLEVEL_REQUESTS_SET = False
@@ -84,10 +86,9 @@ class BasePowerDNSHandler(HandlingObject):
 
     # -------------------------------------------------------------------------
     def __init__(
-        self, appname=None, verbose=0, version=__version__, base_dir=None, master_server=None,
-            port=DEFAULT_PORT, key=None, use_https=DEFAULT_USE_HTTPS, timeout=None,
-            path_prefix=DEFAULT_API_PREFIX, simulate=None, force=None, terminal_has_colors=False,
-            initialized=False,):
+        self, version=__version__, master_server=None, port=DEFAULT_PORT, key=None,
+            use_https=DEFAULT_USE_HTTPS, timeout=None, path_prefix=DEFAULT_API_PREFIX,
+            *args, **kwargs):
         """Initialize a BasePowerDNSHandler object."""
         self._master_server = master_server
         self._port = self.default_port
@@ -100,11 +101,7 @@ class BasePowerDNSHandler(HandlingObject):
         self._mocked = False
         self.mocking_paths = []
 
-        super(BasePowerDNSHandler, self).__init__(
-            appname=appname, verbose=verbose, version=version, base_dir=base_dir,
-            simulate=simulate, force=force, terminal_has_colors=terminal_has_colors,
-            initialized=False,
-        )
+        super(BasePowerDNSHandler, self).__init__(version=version, *args, **kwargs)
 
         self.use_https = use_https
         self.port = port
@@ -119,7 +116,8 @@ class BasePowerDNSHandler(HandlingObject):
             logging.getLogger('requests').setLevel(logging.WARNING)
             LOGLEVEL_REQUESTS_SET = True
 
-        self.initialized = initialized
+        if 'initialized' in kwargs:
+            self.initialized = kwargs['initialized']
 
     # -----------------------------------------------------------
     @property
@@ -339,7 +337,7 @@ class BasePowerDNSHandler(HandlingObject):
         return url
 
     # -------------------------------------------------------------------------
-    def perform_request(
+    def perform_request(                                                        # noqa: C901
         self, path, no_prefix=False, method='GET',
             data=None, headers=None, may_simulate=False):
         """Perform the underlying API request."""
@@ -382,6 +380,9 @@ class BasePowerDNSHandler(HandlingObject):
                 self.start_mocking(session)
             response = session.request(
                 method, url, data=data, headers=headers, timeout=self.timeout)
+
+        except RequestException as e:
+            raise PDNSRequestError(str(e), url, e.request, e.response)
 
         except (
                 socket.timeout, urllib3.exceptions.ConnectTimeoutError,

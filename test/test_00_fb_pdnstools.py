@@ -35,6 +35,12 @@ class TestPdnsToolsBase(FbPdnsToolsTestcase):
     """Testcase for tests on fb_pdnstools/__init__.py and fb_pdnstools.errors."""
 
     # -------------------------------------------------------------------------
+    def setUp(self):
+        """Execute this on seting up before calling each particular test method."""
+        if self.verbose >= 1:
+            print()
+
+    # -------------------------------------------------------------------------
     def test_import_modules(self):
         """Testing import of modules fb_pdnstools/__init__.py and fb_pdnstools.errors ..."""
         LOG.info('Test importing main module ...')
@@ -135,6 +141,24 @@ class TestPdnsToolsBase(FbPdnsToolsTestcase):
             raise PDNSApiRequestError(419, 'I am not a tea pot.')
         e = cm.exception
         LOG.debug('Got a {c}: {e}'.format(c=e.__class__.__name__, e=e))
+
+        LOG.debug('Testing PDNSRequestError from fb_pdnstools.errors ...')
+        from requests.exceptions import RequestException
+        from fb_pdnstools.errors import PDNSRequestError
+        from http.client import RemoteDisconnected
+        url = 'https://pdnsmaster.uhu-banane.eu'
+        msg = 'Some strange requests error #{}'
+        errors = []
+        errors.append(RequestException(msg.format(1)))
+        errors.append(RequestException(
+            msg.format(2),
+            request=RemoteDisconnected('Remote end closed connection without response')))
+
+        for req_err in errors:
+            with self.assertRaises(PDNSRequestError) as cm:
+                raise PDNSRequestError(str(req_err), url, req_err.request, req_err.response)
+            e = cm.exception
+            LOG.debug('Got a {c}: {e}'.format(c=e.__class__.__name__, e=e))
 
 
 # =============================================================================
