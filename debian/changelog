@@ -1,3 +1,12 @@
+fb-pdnstools (0.6.1) UNRELEASED; urgency=medium
+
+  * Simplyfication of init of some classes.
+  * Changing output of test scripts.
+  * Adding and using exception PDNSRequestError for exceptions
+    originating from Python requests.
+
+ -- Frank Brehm <frank.brehm@pixelpark.com>  Tue, 16 Jan 2024 11:30:27 +0100
+
 fb-pdnstools (0.6.0) all; urgency=medium
 
   * Shifting class BasePowerDNSHandler into new module
