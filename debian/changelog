@@ -1,3 +1,9 @@
+fb-pdnstools (1.0.0) UNRELEASED; urgency=medium
+
+  * Updating .gitlab-ci.yml to use Python 3.12 for tests and linting.
+
+ -- Frank Brehm <frank.brehm@pixelpark.com>  Sun, 04 Feb 2024 12:52:13 +0100
+
 fb-pdnstools (0.6.1) all; urgency=medium
 
   * Simplyfication of init of some classes.
