@@ -1,4 +1,4 @@
-fb-pdnstools (1.0.0) UNRELEASED; urgency=medium
+fb-pdnstools (1.0.0) all; urgency=medium
 
   * Updating .gitlab-ci.yml to use Python 3.12 for tests and linting.
   * Using Python 3.12 for CI linter tests.
