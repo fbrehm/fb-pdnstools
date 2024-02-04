@@ -5,7 +5,7 @@
 
 @author: Frank Brehm
 @contact: frank@brehm-online.com
-@copyright: © 2023 by Frank Brehm, Berlin
+@copyright: © 2024 by Frank Brehm, Berlin
 """
 
 from __future__ import print_function
@@ -49,7 +49,7 @@ if os.path.exists(module_dir):
 from fb_pdnstools.bulk_rm_app import PdnsBulkRmApp
 
 __author__ = 'Frank Brehm <frank@brehm-online.com>'
-__copyright__ = '(C) 2023 by Frank Brehm, Berlin'
+__copyright__ = '(C) 2024 by Frank Brehm, Berlin'
 
 appname = os.path.basename(sys.argv[0])
 

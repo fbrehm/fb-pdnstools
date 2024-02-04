@@ -7,7 +7,7 @@
           modules in this package.
 @author: Frank Brehm
 @contact: frank@brehm-online.com
-@copyright: © 2023 by Frank Brehm, Berlin
+@copyright: © 2024 by Frank Brehm, Berlin
 """
 from __future__ import absolute_import, print_function
 

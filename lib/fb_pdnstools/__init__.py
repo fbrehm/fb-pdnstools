@@ -5,14 +5,14 @@
 
 @author: Frank Brehm
 @contact: frank@brehm-online.com
-@copyright: © 2023 Frank Brehm, Berlin
+@copyright: © 2024 Frank Brehm, Berlin
 """
 from __future__ import absolute_import
 
 # Standard modules
 import re
 
-__version__ = '0.6.1'
+__version__ = '1.0.0'
 
 # This library name will be used as a part of the user agent in HTTP(S) requests
 LIBRARY_NAME = 'fb-pdns-api-client'

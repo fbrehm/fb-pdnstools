@@ -38,10 +38,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_version: [ '3.6', '3.7', '3.8', '3.9', '3.10', '3.11' ]
+        python_version: [ '3.6', '3.7', '3.8', '3.9', '3.10', '3.11', '3.12' ]
     container: python:${{ matrix.python_version }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Show Environment
         run: python --version
       - uses: ./.github/actions/prepare-debian-container
@@ -57,7 +57,7 @@ jobs:
   linter:
     runs-on: ubuntu-latest
     name: Executing Linters
-    container: python:3.11
+    container: python:3.12
     needs:
       - test
     steps:
@@ -111,7 +111,7 @@ jobs:
     needs:
       - linter
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/add-fb-debian-repo
         with:
           vendor: Debian
@@ -162,7 +162,7 @@ jobs:
           mv -vi ../*.dsc ../*.tar.* ../*.build* ../*.changes debian/pkgs/src
           ls -lA --color=always debian/pkgs/*/*
       - name: 'Upload Source Package'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: debian_sources
           path: debian/pkgs/*/*
@@ -197,12 +197,12 @@ jobs:
             container: 'debian:bookworm'
             version_prefix: 'deb12'
             compat: '12'
-          - distributor: 'Ubuntu'
-            os_codename: 'bionic'
-            os_release: '18.04'
-            container: 'ubuntu:bionic'
-            version_prefix: 'ubuntu18.04'
-            compat: '11'
+          - distributor: 'Debian'
+            os_codename: 'trixie'
+            os_release: '13'
+            container: 'debian:trixie'
+            version_prefix: 'deb13'
+            compat: '13'
           - distributor: 'Ubuntu'
             os_codename: 'focal'
             os_release: '20.04'
@@ -215,6 +215,12 @@ jobs:
             container: 'ubuntu:jammy'
             version_prefix: 'ubuntu22.04'
             compat: '12'
+          - distributor: 'Ubuntu'
+            os_codename: 'noble'
+            os_release: '24.04'
+            container: 'ubuntu:noble'
+            version_prefix: 'ubuntu24.04'
+            compat: '12'
     env:
       COMPAT: ${{ matrix.compat }}
       DISTRIBUTOR: ${{ matrix.distributor }}
@@ -223,7 +229,7 @@ jobs:
       VERSION_PREFIX: ${{ matrix.version_prefix }}
     container: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setting timezone
         if: ${{ matrix.distributor == 'Ubuntu' }}
         run: |
@@ -283,7 +289,7 @@ jobs:
           mv -vi ../*.deb ../*.build* debian/pkgs/${VERSION_PREFIX}
           ls -lA --color=always debian/pkgs/*/*
       - name: 'Upload Binary Package'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: debian_bin_pkgs_${{ matrix.version_prefix }}
           path: debian/pkgs/*/*
@@ -300,13 +306,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - el_version: '7'
-            yum: 'yum'
-            py_minor_version: '6'
-            py_version_dot: '3.6'
-            py_version_nodot: '36'
-            image: centos:7
-            epel_package: epel-release
           - el_version: '8'
             yum: 'dnf'
             py_minor_version: '8'
@@ -333,7 +332,7 @@ jobs:
       USED_LC: 'en_US.utf8'
       YUM: ${{ matrix.yum }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Checking locales
         shell: bash
         run: |
@@ -482,7 +481,7 @@ jobs:
           echo "Results:"
           find rpmdir/*RPMS -type f -print0 | xargs --null --no-run-if-empty ls -l -d --color=always
       - name: 'Upload RPM Packages'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: rpm_pkgs_el${{ matrix.el_version }}
           path: |
@@ -494,11 +493,11 @@ jobs:
   deploy_to_pypi:
     runs-on: ubuntu-latest
     name: "Deployment of the Python package to PyPi"
-    container: python:3.11
+    container: python:3.12
     needs:
       - linter
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/add-fb-debian-repo
         with:
           vendor: Debian
@@ -517,7 +516,7 @@ jobs:
         shell: bash
         run: ls -l --color=always dist/
       - name: 'Upload Python Package'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: python_pkgs
           path: dist/*
@@ -533,9 +532,9 @@ jobs:
       - 'build_debian_bin'
       - 'build_rpm'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Downloading all artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
       - name: Sorting all artifacts
@@ -543,10 +542,12 @@ jobs:
           mv -vi artifacts/debian_bin_pkgs_*/* artifacts/
           mv -vi artifacts/debian_sources/src artifacts/
           rmdir -v artifacts/debian_bin_pkgs_* artifacts/debian_sources
-          mkdir -pv artifacts/el-7 artifacts/el-8 artifacts/el-9
-          mv -vi artifacts/rpm_pkgs_el7/*/*/*.rpm artifacts/rpm_pkgs_el7/*/*.rpm artifacts/el-7/
-          mv -vi artifacts/rpm_pkgs_el8/*/*/*.rpm artifacts/rpm_pkgs_el8/*/*.rpm artifacts/el-8/
-          mv -vi artifacts/rpm_pkgs_el9/*/*/*.rpm artifacts/rpm_pkgs_el9/*/*.rpm artifacts/el-9/
+          for el_version in 7 8 9 10 ; do
+            if [[ -d artifacts/rpm_pkgs_el${el_version} ]]; then
+              mkdir -pv artifacts/el-${el_version}
+              mv -vi artifacts/rpm_pkgs_el${el_version}/*/*/*.rpm artifacts/rpm_pkgs_el${el_version}/*/*.rpm artifacts/el-${el_version}/
+            fi
+          done
           rm -rv artifacts/rpm_pkgs_el*
       - name: Show all artifacts
         run: |
