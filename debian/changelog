@@ -1,6 +1,12 @@
 fb-pdnstools (1.0.0) UNRELEASED; urgency=medium
 
   * Updating .gitlab-ci.yml to use Python 3.12 for tests and linting.
+  * Using Python 3.12 for CI linter tests.
+  * Adding distros Debian 13 (trixie) and Ubuntu 24.04 (Noble Numbat) to
+    Github workflow packages for building OS packages.
+  * Removing deprecated OS versions Ubuntu 18.04 (Bionic Beaver) and
+    Enterprise Linux 7 from Github workflow.
+  * Updating external Guthub actions.
 
  -- Frank Brehm <frank.brehm@pixelpark.com>  Sun, 04 Feb 2024 12:52:13 +0100
 
