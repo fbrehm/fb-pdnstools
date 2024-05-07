@@ -24,9 +24,9 @@ variables:
   YUM_REPO_GPG_ID: 'C0E73F70'
   YUM_REPO_GPG_PASSWD: 'secret'
   # YUM_REPO_HOST: 'repo.pixelpark.com'
-  YUM_REPO_USER: 'rpm-repo'
-  YUM_REPO_DIR_HTTP: '/Linux/yum/pixelpark'
-  YUM_REPO_DIR: "/srv/www/repo${YUM_REPO_DIR_HTTP}"
+  # YUM_REPO_USER: 'rpm-repo'
+  # YUM_REPO_DIR_HTTP: '/Linux/yum/pixelpark'
+  # YUM_REPO_DIR: "/srv/www/repo${YUM_REPO_DIR_HTTP}"
   YUM_REPO_GPG_KEY_PUB: 'nada'
   YUM_REPO_GPG_KEY_SEC: 'nada'
 
