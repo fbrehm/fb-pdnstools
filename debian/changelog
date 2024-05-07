@@ -1,3 +1,10 @@
+fb-pdnstools (1.0.1) UNRELEASED; urgency=medium
+
+  * Updating .gitlab-ci.yml to the latest version of Digitas packaging
+    tools.
+
+ -- Frank Brehm <frank.brehm@pixelpark.com>  Tue, 07 May 2024 12:19:00 +0200
+
 fb-pdnstools (1.0.0) all; urgency=medium
 
   * Updating .gitlab-ci.yml to use Python 3.12 for tests and linting.
