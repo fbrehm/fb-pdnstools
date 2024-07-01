@@ -1,9 +1,11 @@
-fb-pdnstools (1.0.1) UNRELEASED; urgency=medium
+fb-pdnstools (1.0.2) UNRELEASED; urgency=medium
 
-  * Updating .gitlab-ci.yml to the latest version of Digitas packaging
-    tools.
+  * Setting shared Github workflow to branch main.
+  * Updating dependencies to fb_tools >= 2.6.0.
+  * Disabling Github workflow packages
+  * Adding GitHub workflow build-packages for using a shared workflow.
 
- -- Frank Brehm <frank.brehm@pixelpark.com>  Tue, 07 May 2024 12:19:00 +0200
+ -- Frank Brehm <frank.brehm@pixelpark.com>  Mon, 01 Jul 2024 11:42:00 +0200
 
 fb-pdnstools (1.0.0) all; urgency=medium
 
