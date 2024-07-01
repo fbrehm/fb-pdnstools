@@ -6,14 +6,15 @@ name: "Building OS packages."
 on:
   push:
     branches:
-      - '**'
-      - '!dev-**'
-      - '!dev/**'
-      - '!hf**'
-      - '!old**'
-      - '!feature**'
-    tags:
-      - '**'
+      - 'Never'
+    #   - '**'
+    #   - '!dev-**'
+    #   - '!dev/**'
+    #   - '!hf**'
+    #   - '!old**'
+    #   - '!feature**'
+    # tags:
+    #   - '**'
 
 env:
   DEBFULLNAME: 'Frank Brehm'
