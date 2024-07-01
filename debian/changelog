@@ -1,4 +1,4 @@
-fb-pdnstools (1.0.2) UNRELEASED; urgency=medium
+fb-pdnstools (1.0.2) all; urgency=medium
 
   * Setting shared Github workflow to branch main.
   * Updating dependencies to fb_tools >= 2.6.0.
