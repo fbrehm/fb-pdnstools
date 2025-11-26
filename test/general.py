@@ -130,23 +130,31 @@ class FbPdnsToolsTestcase(unittest.TestCase):
     # -------------------------------------------------------------------------
     @property
     def verbose(self):
-        """The verbosity level."""
+        """Return the verbosity level."""
         return getattr(self, '_verbose', 0)
 
     # -------------------------------------------------------------------------
     @property
     def appname(self):
-        """The name of the current running application."""
+        """Return the name of the current running application."""
         return self._appname
 
     # -------------------------------------------------------------------------
     def setUp(self):
-        """Overridable hook for setup actions on each test method call."""
+        """
+        Do nothing.
+
+        Overridable hook for setup actions on each test method call.
+        """
         pass
 
     # -------------------------------------------------------------------------
     def tearDown(self):
-        """Overridable hook for finishing actions on each test method call."""
+        """
+        Do nothing.
+
+        Overridable hook for finishing actions on each test method call.
+        """
         pass
 
     # -------------------------------------------------------------------------

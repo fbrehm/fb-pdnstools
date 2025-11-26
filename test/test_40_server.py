@@ -19,7 +19,7 @@ try:
 except ImportError:
     import unittest
 
-libdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'lib'))
+libdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src'))
 sys.path.insert(0, libdir)
 
 # Third party modules
@@ -40,18 +40,18 @@ class TestPdnsServer(FbPdnsToolsTestcase):
 
     # -------------------------------------------------------------------------
     def setUp(self):
-        """Hook for setup actions on each test method call."""
+        """Print an empty line on each test method call."""
         if self.verbose >= 1:
             print()
 
     # -------------------------------------------------------------------------
     def tearDown(self):
-        """Hook for finishing actions on each test method call."""
+        """Do nothing. Hook for finishing actions on each test method call."""
         pass
 
     # -------------------------------------------------------------------------
     def test_import_modules(self):
-        """Testing import of module fb_pdnstools.server ..."""
+        """Test import of module fb_pdnstools.server ..."""
         if self.verbose:
             print()
         LOG.info('Test importing server module ...')
@@ -70,7 +70,7 @@ class TestPdnsServer(FbPdnsToolsTestcase):
     # -------------------------------------------------------------------------
     def set_mocking(self, obj):
         """
-        Setting mocking mode in the given server object.
+        Set mocking mode in the given server object.
 
         Also responses for some HTTP requests are prepared.
         """

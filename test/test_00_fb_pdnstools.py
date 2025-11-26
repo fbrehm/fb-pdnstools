@@ -18,7 +18,7 @@ try:
 except ImportError:
     import unittest
 
-libdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'lib'))
+libdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src'))
 sys.path.insert(0, libdir)
 
 # Third party modules
@@ -42,7 +42,7 @@ class TestPdnsToolsBase(FbPdnsToolsTestcase):
 
     # -------------------------------------------------------------------------
     def test_import_modules(self):
-        """Testing import of modules fb_pdnstools/__init__.py and fb_pdnstools.errors ..."""
+        """Test import of modules fb_pdnstools/__init__.py and fb_pdnstools.errors ..."""
         LOG.info('Test importing main module ...')
 
         LOG.debug('Importing fb_pdnstools ...')
