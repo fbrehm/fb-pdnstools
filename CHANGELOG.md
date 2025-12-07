@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Updating `update-env.sh` for refactored virtual env.
 * Transforming `src/fb_pdnstools/bulk_rm_app.py into` an entrypoint.
 
+### Removed
+
+* Removed `bin/pdns-bulk-remove` - it's an entrypoint now.
+
 ### Fixed
 
 *  Fixing `src/fb_vmware/xlate.py`.
