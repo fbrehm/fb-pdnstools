@@ -45,8 +45,8 @@ name = "fb_pdnstools"
 [tool.flit.external-data]
 directory = "data"
 
-# [project.scripts]
-# get-vsphere-host-list = "fb_vmware.app.get_host_list:main"
+[project.scripts]
+pdns-bulk-remove = "fb_pdnstools.bulk_rm_app:main"
 
 [project.optional-dependencies]
 development = [
