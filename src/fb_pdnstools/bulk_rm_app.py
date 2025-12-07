@@ -35,9 +35,15 @@ from . import DEFAULT_PORT
 from . import __version__ as GLOBAL_VERSION
 from .bulk_rm_cfg import PdnsBulkRmCfg
 from .server import PowerDNSServer
+from .xlate import DOMAIN
+from .xlate import LOCALE_DIR
 from .xlate import XLATOR
+from .xlate import __base_dir__ as __xlate_base_dir__
+from .xlate import __lib_dir__ as __xlate_lib_dir__
+from .xlate import __mo_file__ as __xlate_mo_file__
+from .xlate import __module_dir__ as __xlate_module_dir__
 
-__version__ = '0.7.3'
+__version__ = '0.8.0'
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -116,6 +122,18 @@ class PdnsBulkRmApp(BaseApplication):
         res = super(PdnsBulkRmApp, self).as_dict(short=short)
         res['cfg_file'] = self.cfg_file
         res['rm_reverse'] = self.rm_reverse
+
+        if "xlate" not in res:
+            res["xlate"] = {}
+
+        res["xlate"]["fb_vmware"] = {
+            "__module_dir__": __xlate_module_dir__,
+            "__lib_dir__": __xlate_lib_dir__,
+            "__base_dir__": __xlate_base_dir__,
+            "LOCALE_DIR": LOCALE_DIR,
+            "DOMAIN": DOMAIN,
+            "__mo_file__": __xlate_mo_file__,
+        }
 
         return res
 
