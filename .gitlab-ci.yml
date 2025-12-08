@@ -2,7 +2,7 @@
 
 include:
   - project: 'python/packaging'
-    ref: main
+    ref: develop
     file: 'gitlab/pyproject-create-all.yaml'
 
 variables:
@@ -23,7 +23,7 @@ variables:
     update-env.sh
     xtract-xlate-msgs.sh
   SSH_PRIV_KEY_YUM_REPO: 'nada'
-  TEST_LOCALES: 'en_US.UTF-8 de_DE.UTF-8'
+  TEST_LOCALES: 'en_US.utf8 de_DE.utf8'
   UPDATE_ALL_PIP_MODULES: 'n'
   USED_SSH_PRIV_KEY_YUM_REPO: "${SSH_PRIV_KEY_YUM_REPO}"
   USED_TIMEZONE: 'Europe/Berlin'
