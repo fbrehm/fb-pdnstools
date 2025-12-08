@@ -40,7 +40,7 @@ from .errors import PowerDNSWrongRecordTypeError
 from .errors import PowerDNSWrongSoaDataError
 from .xlate import XLATOR
 
-__version__ = "0.8.0"
+__version__ = "1.0.0"
 
 LOG = logging.getLogger(__name__)
 

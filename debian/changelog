@@ -1,4 +1,4 @@
-fb-pdnstools (1.1.0) UNRELEASED; urgency=medium
+fb-pdnstools (1.1.0) all; urgency=medium
 
   * Refactoring for package build with pyproject.toml and flit.
   * See CHANGELOG.md for details.

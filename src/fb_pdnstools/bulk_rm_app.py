@@ -44,7 +44,7 @@ from .xlate import __lib_dir__ as __xlate_lib_dir__
 from .xlate import __mo_file__ as __xlate_mo_file__
 from .xlate import __module_dir__ as __xlate_module_dir__
 
-__version__ = "0.9.1"
+__version__ = "1.0.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext

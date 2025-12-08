@@ -49,7 +49,7 @@ from .record import PowerDNSRecordSetList
 from .record import PowerDnsSOAData
 from .xlate import XLATOR
 
-__version__ = "0.12.1"
+__version__ = "1.0.0"
 
 LOG = logging.getLogger(__name__)
 

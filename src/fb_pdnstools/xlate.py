@@ -31,7 +31,7 @@ DOMAIN = "fb_pdnstools"
 
 LOG = logging.getLogger(__name__)
 
-__version__ = "0.3.0"
+__version__ = "1.0.0"
 
 __me__ = Path(__file__).resolve()
 __module_dir__ = __me__.parent

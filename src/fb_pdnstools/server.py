@@ -26,7 +26,7 @@ from .errors import PDNSApiNotFoundError, PDNSApiValidationError
 from .xlate import XLATOR
 from .zone import PowerDNSZone, PowerDNSZoneDict
 
-__version__ = "0.9.0"
+__version__ = "1.0.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext

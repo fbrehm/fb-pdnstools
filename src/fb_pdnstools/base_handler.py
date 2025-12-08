@@ -58,7 +58,7 @@ from .errors import PowerDNSHandlerError
 from .xlate import XLATOR
 
 
-__version__ = "0.8.1"
+__version__ = "1.0.0"
 LOG = logging.getLogger(__name__)
 
 LOGLEVEL_REQUESTS_SET = False

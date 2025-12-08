@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-12-07
+## [1.1.0] - 2025-12-08
 
 ### Added
 
@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Updating `update-env.sh` for refactored virtual env.
 * Transforming `src/fb_pdnstools/bulk_rm_app.py into` an entrypoint.
 * Applying black to all Python files.
+* Updating Gitlab and Github CI workflows for the changes in build process.
 
 ### Removed
 
@@ -186,7 +187,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Initial release.
 
-[Unreleased]: https://github.com/fbrehm/fb-pdnstools/compare/1.0.2...HEAD
+[1.1.0]: https://github.com/fbrehm/fb-pdnstools/compare/1.0.2...1.1.0
 [1.0.2]: https://github.com/fbrehm/fb-pdnstools/compare/1.0.0...1.0.2
 [1.0.0]: https://github.com/fbrehm/fb-pdnstools/compare/0.6.1...1.0.0
 [0.6.1]: https://github.com/fbrehm/fb-pdnstools/compare/0.6.0...0.6.1

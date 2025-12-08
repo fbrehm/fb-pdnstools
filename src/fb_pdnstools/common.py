@@ -16,7 +16,7 @@ import logging
 # Own modules
 from .xlate import XLATOR
 
-__version__ = "0.2.0"
+__version__ = "1.0.0"
 
 _ = XLATOR.gettext
 
