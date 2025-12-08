@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Cleaning up no more used stuff.
 * Updating `update-env.sh` for refactored virtual env.
 * Transforming `src/fb_pdnstools/bulk_rm_app.py into` an entrypoint.
+* Applying black to all Python files.
 
 ### Removed
 
