@@ -58,7 +58,7 @@ from .errors import PowerDNSHandlerError
 from .xlate import XLATOR
 
 
-__version__ = "0.8.0"
+__version__ = "0.8.1"
 LOG = logging.getLogger(__name__)
 
 LOGLEVEL_REQUESTS_SET = False
@@ -110,7 +110,7 @@ class BasePowerDNSHandler(HandlingObject):
         self._mocked = False
         self.mocking_paths = []
 
-        super(BasePowerDNSHandler, self).__init__(version=version, *args, **kwargs)
+        super(BasePowerDNSHandler, self).__init__(*args, **kwargs, version=version)
 
         self.use_https = use_https
         self.port = port
@@ -132,7 +132,7 @@ class BasePowerDNSHandler(HandlingObject):
     # -----------------------------------------------------------
     @property
     def master_server(self):
-        """The hostname or address of the PowerDNS master server."""
+        """Return the hostname or address of the PowerDNS master server."""
         return self._master_server
 
     @master_server.setter
@@ -150,7 +150,7 @@ class BasePowerDNSHandler(HandlingObject):
     # -----------------------------------------------------------
     @property
     def port(self):
-        """The TCP port number of the PowerDNS API."""
+        """Return the TCP port number of the PowerDNS API."""
         return self._port
 
     @port.setter
@@ -170,7 +170,7 @@ class BasePowerDNSHandler(HandlingObject):
     # -----------------------------------------------------------
     @property
     def key(self):
-        """The key used to authenticate against the PowerDNS API."""
+        """Return the key used to authenticate against the PowerDNS API."""
         return self._key
 
     @key.setter
@@ -210,7 +210,7 @@ class BasePowerDNSHandler(HandlingObject):
     # -----------------------------------------------------------
     @property
     def path_prefix(self):
-        """The hostname or address of the PowerDNS master server."""
+        """Return the hostname or address of the PowerDNS master server."""
         return self._path_prefix
 
     @path_prefix.setter
@@ -231,7 +231,7 @@ class BasePowerDNSHandler(HandlingObject):
     # -----------------------------------------------------------
     @property
     def timeout(self):
-        """The timeout in seconds for requesting the PowerDNS API."""
+        """Return the timeout in seconds for requesting the PowerDNS API."""
         return self._timeout
 
     @timeout.setter
@@ -252,7 +252,7 @@ class BasePowerDNSHandler(HandlingObject):
     # -----------------------------------------------------------
     @property
     def user_agent(self):
-        """The name of the user agent used in API calls."""
+        """Return the name of the user agent used in API calls."""
         return self._user_agent
 
     @user_agent.setter
@@ -264,7 +264,7 @@ class BasePowerDNSHandler(HandlingObject):
     # -----------------------------------------------------------
     @property
     def api_servername(self):
-        """The (virtual) name of the PowerDNS server used in API calls."""
+        """Return the (virtual) name of the PowerDNS server used in API calls."""
         return self._api_servername
 
     @api_servername.setter

@@ -49,7 +49,7 @@ from .record import PowerDNSRecordSetList
 from .record import PowerDnsSOAData
 from .xlate import XLATOR
 
-__version__ = "0.12.0"
+__version__ = "0.12.1"
 
 LOG = logging.getLogger(__name__)
 
@@ -76,7 +76,7 @@ class PowerDNSZone(BasePowerDNSHandler):
         account=None,
         dnssec=False,
         edited_serial=None,
-        id=None,
+        zone_id=None,
         kind=None,  # noqa: A002
         last_check=None,
         master_tsig_key_ids=None,
@@ -107,7 +107,7 @@ class PowerDNSZone(BasePowerDNSHandler):
         """Initialize a PowerDNSZone record."""
         self._account = account
         self._dnssec = dnssec
-        self._id = id
+        self._zone_id = zone_id
         self._kind = kind
         self._last_check = last_check
         self.masters = []
@@ -205,7 +205,7 @@ class PowerDNSZone(BasePowerDNSHandler):
         # {   'account': 'local',
         #     'api_rectify': False,
         #     'dnssec': False,
-        #     'id': 'bla.ai.',
+        #     'zone_id': 'bla.ai.',
         #     'kind': 'Master',
         #     'last_check': 0,
         #     'masters': [],
@@ -297,7 +297,7 @@ class PowerDNSZone(BasePowerDNSHandler):
     @property
     def account(self):
         """
-        Gives the name of the owning account of the zone.
+        Give the name of the owning account of the zone.
 
         Using `internal` to differ local visible zones from all other zones.
         """
@@ -326,25 +326,25 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     # -----------------------------------------------------------
     @property
-    def id(self):  # noqa: A003
-        """Gives the unique idendity of the zone."""
-        return getattr(self, "_id", None)
+    def zone_id(self):  # noqa: A003
+        """Give the unique idendity of the zone."""
+        return getattr(self, "_zone_id", None)
 
-    @id.setter
-    def id(self, value):  # noqa: A003
+    @zone_id.setter
+    def zone_id(self, value):  # noqa: A003
         if value:
             v = to_str(str(value).strip())
             if v:
-                self._id = v
+                self._zone_id = v
             else:
-                self._id = None
+                self._zone_id = None
         else:
-            self._id = None
+            self._zone_id = None
 
     # -----------------------------------------------------------
     @property
     def kind(self):
-        """Gives the kind or type of the zone."""
+        """Give the kind or type of the zone."""
         return getattr(self, "_kind", None)
 
     @kind.setter
@@ -361,13 +361,13 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -----------------------------------------------------------
     @property
     def last_check(self):
-        """Gives the timestamp of the last check of the zone."""
+        """Give the timestamp of the last check of the zone."""
         return getattr(self, "_last_check", None)
 
     # -----------------------------------------------------------
     @property
     def name(self):
-        """Gives the name of the zone."""
+        """Give the name of the zone."""
         return getattr(self, "_name", None)
 
     @name.setter
@@ -406,13 +406,13 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -----------------------------------------------------------
     @property
     def reverse_net(self):
-        """Gives an IP network object for the network, for which this is the reverse zone."""
+        """Give an IP network object for the network, for which this is the reverse zone."""
         return self._reverse_net
 
     # -----------------------------------------------------------
     @property
     def name_unicode(self):
-        """Gives name of the zone in unicode, if it is an IDNA encoded zone."""
+        """Give name of the zone in unicode, if it is an IDNA encoded zone."""
         n = getattr(self, "_name", None)
         if n is None:
             return None
@@ -423,20 +423,20 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -----------------------------------------------------------
     @property
     def notified_serial(self):
-        """Gives the notified serial number of the zone."""
+        """Give the notified serial number of the zone."""
         return getattr(self, "_notified_serial", None)
 
     # -----------------------------------------------------------
     @property
     def serial(self):
-        """Gives the serial number of the zone."""
+        """Give the serial number of the zone."""
         return getattr(self, "_serial", None)
 
     # -----------------------------------------------------------
     @property
     def edited_serial(self):
         """
-        Gives the SOA serial as seen in query responses.
+        Give the SOA serial as seen in query responses.
 
         Calculated using the SOA-EDIT metadata, default-soa-edit and
         default-soa-edit-signed settings.
@@ -446,55 +446,55 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -----------------------------------------------------------
     @property
     def url(self):
-        """Gives the URL in the API to get the zone object."""
+        """Give the URL in the API to get the zone object."""
         return getattr(self, "_url", None)
 
     # -----------------------------------------------------------
     @property
     def soa_edit(self):
-        """Gives the SOA edit property of the zone object."""
+        """Give the SOA edit property of the zone object."""
         return getattr(self, "_soa_edit", None)
 
     # -----------------------------------------------------------
     @property
     def soa_edit_api(self):
-        """Gives the SOA edit property (API) of the zone object."""
+        """Give the SOA edit property (API) of the zone object."""
         return getattr(self, "_soa_edit_api", None)
 
     # -----------------------------------------------------------
     @property
     def nsec3narrow(self):
-        """Gives some stuff belonging to DNSSEC."""
+        """Give some stuff belonging to DNSSEC."""
         return getattr(self, "_nsec3narrow", None)
 
     # -----------------------------------------------------------
     @property
     def nsec3param(self):
-        """Gives some stuff belonging to DNSSEC."""
+        """Give some stuff belonging to DNSSEC."""
         return getattr(self, "_nsec3param", None)
 
     # -----------------------------------------------------------
     @property
     def presigned(self):
-        """Gives some stuff belonging to PowerDNS >= 4.1."""
+        """Give some stuff belonging to PowerDNS >= 4.1."""
         return getattr(self, "_presigned", None)
 
     # -----------------------------------------------------------
     @property
     def api_rectify(self):
-        """Gives some stuff belonging to PowerDNS >= 4.1."""
+        """Give some stuff belonging to PowerDNS >= 4.1."""
         return getattr(self, "_api_rectify", None)
 
     # -----------------------------------------------------------
     @property
     def add_keys(self):
-        """Gives additional, unexpected keys on initialisation."""
+        """Give additional, unexpected keys on initialisation."""
         return copy.copy(self._add_keys)
 
     # -----------------------------------------------------------
     @property
     def master_tsig_key_ids(self):
-        """Gives the id of the TSIG keys used for master operation in this zone."""
+        """Give the id of the TSIG keys used for master operation in this zone."""
         return copy.copy(self._master_tsig_key_ids)
 
     @master_tsig_key_ids.setter
@@ -510,7 +510,7 @@ class PowerDNSZone(BasePowerDNSHandler):
     # -----------------------------------------------------------
     @property
     def slave_tsig_key_ids(self):
-        """The id of the TSIG keys used for slave operation in this zone."""
+        """Return the id of the TSIG keys used for slave operation in this zone."""
         return copy.copy(self._slave_tsig_key_ids)
 
     @slave_tsig_key_ids.setter
@@ -538,7 +538,7 @@ class PowerDNSZone(BasePowerDNSHandler):
 
         res["account"] = self.account
         res["dnssec"] = copy.copy(self.dnssec)
-        res["id"] = self.id
+        res["zone_id"] = self.zone_id
         res["kind"] = self.kind
         res["last_check"] = self.last_check
         res["masters"] = copy.copy(self.masters)
@@ -678,7 +678,7 @@ class PowerDNSZone(BasePowerDNSHandler):
             account=self.account,
             dnssec=self.dnssec,
             edited_serial=self.edited_serial,
-            id=self.id,
+            zone_id=self.zone_id,
             kind=self.kind,
             last_check=self.last_check,
             masters=self.masters,
@@ -732,9 +732,9 @@ class PowerDNSZone(BasePowerDNSHandler):
             self.dnssec = False
 
         if "id" in json_response:
-            self.id = json_response["id"]
+            self.zone_id = json_response["id"]
         else:
-            self.id = None
+            self.zone_id = None
 
         if "kind" in json_response:
             self.kind = json_response["kind"]
@@ -1436,7 +1436,7 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     # -------------------------------------------------------------------------
     def get_rrset(self, fqdn, rrset_type, raise_on_error=True):
-        """Searching a record set by given name and type."""
+        """Search a record set by given name and type."""
         fqdn_used = self.verify_fqdn(fqdn, raise_on_error=raise_on_error)
         if not fqdn_used:
             return None
@@ -1466,7 +1466,7 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     # -------------------------------------------------------------------------
     def get_soa_rrset(self, raise_on_error=True):
-        """Searching for the SOA record set of current zone."""
+        """Search for the SOA record set of current zone."""
         rrset = self.get_rrset(fqdn=self.name, rrset_type="SOA", raise_on_error=raise_on_error)
         if not rrset:
             LOG.warning(_("Did not get SOA for zone {!r}.").format(self.name))
@@ -1588,7 +1588,7 @@ class PowerDNSZoneDict(MutableMapping):
 
     # -------------------------------------------------------------------------
     def __repr__(self):
-        """Echoes class, id, & reproducible representation in the REPL."""
+        """Echoes class, zone_id, & reproducible representation in the REPL."""
         return "{}, {}({})".format(
             super(PowerDNSZoneDict, self).__repr__(), self.__class__.__name__, self._map
         )
