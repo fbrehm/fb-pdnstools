@@ -1,3 +1,10 @@
+fb-pdnstools (1.1.0) all; urgency=medium
+
+  * Refactoring for package build with pyproject.toml and flit.
+  * See CHANGELOG.md for details.
+
+ -- Frank Brehm <frank.brehm@pixelpark.com>  Mon, 08 Dec 2025 14:24:53 +0100
+
 fb-pdnstools (1.0.2) all; urgency=medium
 
   * Setting shared Github workflow to branch main.

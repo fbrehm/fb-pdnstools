@@ -18,7 +18,7 @@ from .xlate import XLATOR
 
 _ = XLATOR.gettext
 
-__version__ = '0.4.1'
+__version__ = "1.0.0"
 
 
 # =============================================================================
@@ -47,8 +47,7 @@ class PDNSNoRecordsToRemove(PowerDNSZoneError):
     # -------------------------------------------------------------------------
     def __str__(self):
         """Typecast into a string."""
-        msg = _('No Resource Record Sets found to remove from zone {!r}.').format(
-            self.zone_name)
+        msg = _("No Resource Record Sets found to remove from zone {!r}.").format(self.zone_name)
         return msg
 
 
@@ -85,7 +84,7 @@ class PowerDNSWrongSoaDataError(PowerDNSRecordSetError):
     # -------------------------------------------------------------------------
     def __str__(self):
         """Typecast into a string."""
-        msg = _('Could not interprete SOA data: {!r}.').format(self.data)
+        msg = _("Could not interprete SOA data: {!r}.").format(self.data)
         return msg
 
 
@@ -104,10 +103,11 @@ class PDNSApiError(PowerDNSHandlerError):
     def __str__(self):
         """Typecast into a string."""
         if self.uri:
-            msg = _('Got a {code} error code from {uri!r}: {msg}').format(
-                code=self.code, uri=self.uri, msg=self.msg)
+            msg = _("Got a {code} error code from {uri!r}: {msg}").format(
+                code=self.code, uri=self.uri, msg=self.msg
+            )
         else:
-            msg = _('Got a {code} error code: {msg}').format(code=self.code, msg=self.msg)
+            msg = _("Got a {code} error code: {msg}").format(code=self.code, msg=self.msg)
 
         return msg
 
@@ -169,24 +169,24 @@ class PDNSRequestError(PowerDNSHandlerError):
     # -------------------------------------------------------------------------
     def __str__(self):
         """Typecast into a string."""
-        msg = _('Got an error requesting {uri!r}: {msg}').format(uri=self.uri, msg=self.msg)
+        msg = _("Got an error requesting {uri!r}: {msg}").format(uri=self.uri, msg=self.msg)
         if self.request:
-            cls = ''
+            cls = ""
             if not isinstance(self.request, str):
-                cls = self.request.__class__.__name__ + ' - '
-            msg += ' / Request: {c}{e}'.format(c=cls, e=self.request)
+                cls = self.request.__class__.__name__ + " - "
+            msg += " / Request: {c}{e}".format(c=cls, e=self.request)
         if self.response:
-            cls = ''
+            cls = ""
             if not isinstance(self.response, str):
-                cls = self.response.__class__.__name__ + ' - '
-            msg += ' / Response: {c}{e}'.format(c=cls, e=self.response)
+                cls = self.response.__class__.__name__ + " - "
+            msg += " / Response: {c}{e}".format(c=cls, e=self.response)
 
         return msg
 
 
 # =============================================================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     pass
 

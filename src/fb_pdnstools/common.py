@@ -16,7 +16,7 @@ import logging
 # Own modules
 from .xlate import XLATOR
 
-__version__ = '0.1.2'
+__version__ = "1.0.0"
 
 _ = XLATOR.gettext
 
@@ -28,7 +28,7 @@ SECONDS_PER_MINUTE = 60
 
 
 # =============================================================================
-def seconds2human(value, fs=' ', all_fields=False):
+def seconds2human(value, fs=" ", all_fields=False):
     """
     Convert the given value as seconds into a human readable format.
 
@@ -62,24 +62,24 @@ def seconds2human(value, fs=' ', all_fields=False):
     elif isinstance(value, float):
         int_val = int(value + 0.5)
     elif value is None:
-        msg = _('A None type for seconds cannot be converted in seconds.')
+        msg = _("A None type for seconds cannot be converted in seconds.")
         raise TypeError(msg)
     else:
         try:
             int_val = int(value)
         except (TypeError, ValueError) as e:
-            msg = _('The value {val!r} cannot be interpreted as seconds: {e}')
+            msg = _("The value {val!r} cannot be interpreted as seconds: {e}")
             raise ValueError(msg.format(val=value, e=e))
 
     if int_val == 0:
         if all_fields:
-            return '0d' + fs + '0h' + fs + '0m' + fs + '0s'
+            return "0d" + fs + "0h" + fs + "0m" + fs + "0s"
         else:
-            return '0s'
+            return "0s"
 
-    result = ''
+    result = ""
     if int_val < 0:
-        result = '-'
+        result = "-"
         int_val *= -1
 
     days = int_val // SECONDS_PER_DAY
@@ -88,7 +88,7 @@ def seconds2human(value, fs=' ', all_fields=False):
     if days or all_fields:
         if result:
             result += fs
-        result += '{}d'.format(days)
+        result += "{}d".format(days)
 
     hours = rest_days // SECONDS_PER_HOUR
     rest_hours = rest_days % SECONDS_PER_HOUR
@@ -96,7 +96,7 @@ def seconds2human(value, fs=' ', all_fields=False):
     if hours or all_fields:
         if result:
             result += fs
-        result += '{}h'.format(hours)
+        result += "{}h".format(hours)
 
     minutes = rest_hours // SECONDS_PER_MINUTE
     seconds = rest_hours % SECONDS_PER_MINUTE
@@ -104,19 +104,19 @@ def seconds2human(value, fs=' ', all_fields=False):
     if minutes or all_fields:
         if result:
             result += fs
-        result += '{}m'.format(minutes)
+        result += "{}m".format(minutes)
 
     if seconds or all_fields:
         if result:
             result += fs
-        result += '{}s'.format(seconds)
+        result += "{}s".format(seconds)
 
     return result
 
 
 # =============================================================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     pass
 

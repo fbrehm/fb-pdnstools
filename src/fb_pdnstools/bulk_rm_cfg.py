@@ -23,7 +23,7 @@ from . import DEFAULT_API_PREFIX
 from . import DEFAULT_PORT
 from .xlate import XLATOR
 
-__version__ = '0.2.1'
+__version__ = "1.0.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -41,15 +41,23 @@ class PdnsBulkRmConfigError(ConfigError):
 class PdnsBulkRmCfg(BaseConfiguration):
     """A class for providing a configuration for the GetVmApplication class."""
 
-    default_pdns_master = 'master.pp-dns.com'
+    default_pdns_master = "master.pp-dns.com"
     default_pdns_api_port = DEFAULT_PORT
     default_pdns_api_https = False
     default_pdns_api_prefix = DEFAULT_API_PREFIX
 
     # -------------------------------------------------------------------------
     def __init__(
-        self, appname=None, verbose=0, version=__version__, base_dir=None,
-            encoding=None, config_dir=None, config_file=None, initialized=False):
+        self,
+        appname=None,
+        verbose=0,
+        version=__version__,
+        base_dir=None,
+        encoding=None,
+        config_dir=None,
+        config_file=None,
+        initialized=False,
+    ):
         """Initialize the PdnsBulkRmCfg object."""
         self.pdns_master = self.default_pdns_master
         self.pdns_api_port = self.default_pdns_api_port
@@ -58,8 +66,14 @@ class PdnsBulkRmCfg(BaseConfiguration):
         self.pdns_api_prefix = self.default_pdns_api_prefix
 
         super(PdnsBulkRmCfg, self).__init__(
-            appname=appname, verbose=verbose, version=version, base_dir=base_dir,
-            encoding=encoding, config_dir=config_dir, config_file=config_file, initialized=False,
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            encoding=encoding,
+            config_dir=config_dir,
+            config_file=config_file,
+            initialized=False,
         )
 
         if initialized:
@@ -78,12 +92,12 @@ class PdnsBulkRmCfg(BaseConfiguration):
         """
         res = super(PdnsBulkRmCfg, self).as_dict(short=short)
 
-        res['pdns_api_key'] = None
+        res["pdns_api_key"] = None
         if self.pdns_api_key:
             if self.verbose > 4:
-                res['pdns_api_key'] = self.pdns_api_key
+                res["pdns_api_key"] = self.pdns_api_key
             else:
-                res['pdns_api_key'] = '*******'
+                res["pdns_api_key"] = "*******"
 
         return res
 
@@ -92,34 +106,34 @@ class PdnsBulkRmCfg(BaseConfiguration):
         """Evaluate configuration in the section with the given name."""
         super(PdnsBulkRmCfg, self).eval_config_section(config, section_name)
 
-        if section_name.lower() in ('pdns', 'powerdns'):
+        if section_name.lower() in ("pdns", "powerdns"):
             self._eval_config_pdns(config, section_name)
             return
 
         if self.verbose > 1:
-            LOG.debug(_('Unhandled configuration section {!r}.').format(section_name))
+            LOG.debug(_("Unhandled configuration section {!r}.").format(section_name))
 
     # -------------------------------------------------------------------------
     def _eval_config_pdns(self, config, section_name):
 
         if self.verbose > 1:
-            LOG.debug(_('Checking config section {!r} ...').format(section_name))
+            LOG.debug(_("Checking config section {!r} ...").format(section_name))
 
-        re_api_key = re.compile(r'^\s*(?:api[_-]?)?key\s*', re.IGNORECASE)
-        re_api_prefix = re.compile(r'^\s*(?:api[_-]?)?prefix\s*', re.IGNORECASE)
+        re_api_key = re.compile(r"^\s*(?:api[_-]?)?key\s*", re.IGNORECASE)
+        re_api_prefix = re.compile(r"^\s*(?:api[_-]?)?prefix\s*", re.IGNORECASE)
 
-        for (key, value) in config.items(section_name):
+        for key, value in config.items(section_name):
 
-            if key.lower() == 'master':
+            if key.lower() == "master":
                 self.pdns_master = value
                 continue
-            elif key.lower() == 'port':
+            elif key.lower() == "port":
                 self.pdns_api_port = int(value)
                 continue
             elif re_api_key.match(key) and str(value).strip():
                 self.pdns_api_key = str(value).strip()
                 continue
-            elif key.lower() == 'https':
+            elif key.lower() == "https":
                 self.pdns_api_https = to_bool(value)
                 continue
             elif re_api_prefix.match(key):
@@ -130,7 +144,7 @@ class PdnsBulkRmCfg(BaseConfiguration):
 
 # =============================================================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     pass
 
