@@ -12,6 +12,7 @@ from __future__ import absolute_import
 # Standard modules
 import copy
 import ipaddress
+import locale
 import logging
 import os
 import pathlib
@@ -21,12 +22,12 @@ from functools import cmp_to_key
 
 # Third party modules
 from fb_tools.app import BaseApplication
+from fb_tools.argparse_actions import CfgFileOptionAction
 from fb_tools.common import compare_fqdn
 from fb_tools.common import pp
 from fb_tools.common import reverse_pointer
 from fb_tools.common import to_bool
 from fb_tools.common import to_str
-from fb_tools.config import CfgFileOptionAction
 from fb_tools.errors import FbAppError
 
 # Own modules
@@ -35,9 +36,15 @@ from . import DEFAULT_PORT
 from . import __version__ as GLOBAL_VERSION
 from .bulk_rm_cfg import PdnsBulkRmCfg
 from .server import PowerDNSServer
+from .xlate import DOMAIN
+from .xlate import LOCALE_DIR
 from .xlate import XLATOR
+from .xlate import __base_dir__ as __xlate_base_dir__
+from .xlate import __lib_dir__ as __xlate_lib_dir__
+from .xlate import __mo_file__ as __xlate_mo_file__
+from .xlate import __module_dir__ as __xlate_module_dir__
 
-__version__ = '0.7.3'
+__version__ = '0.8.1'
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -116,6 +123,18 @@ class PdnsBulkRmApp(BaseApplication):
         res = super(PdnsBulkRmApp, self).as_dict(short=short)
         res['cfg_file'] = self.cfg_file
         res['rm_reverse'] = self.rm_reverse
+
+        if "xlate" not in res:
+            res["xlate"] = {}
+
+        res["xlate"]["fb_vmware"] = {
+            "__module_dir__": __xlate_module_dir__,
+            "__lib_dir__": __xlate_lib_dir__,
+            "__base_dir__": __xlate_base_dir__,
+            "LOCALE_DIR": LOCALE_DIR,
+            "DOMAIN": DOMAIN,
+            "__mo_file__": __xlate_mo_file__,
+        }
 
         return res
 
@@ -652,6 +671,25 @@ class PdnsBulkRmApp(BaseApplication):
         msg = ngettext('Total one DNS record to remove.', 'Total {} DNS records to remove.', count)
         print(msg.format(count))
         print()
+
+
+# =============================================================================
+def main():
+    """Entrypoint for pdns-bulk-remove."""
+    my_path = pathlib.Path(__file__)
+    appname = my_path.name
+
+    locale.setlocale(locale.LC_ALL, "")
+
+    app = PdnsBulkRmApp(appname=appname)
+    app.initialized = True
+
+    if app.verbose > 2:
+        print(_("{c}-Object:\n{a}").format(c=app.__class__.__name__, a=app), file=sys.stderr)
+
+    app()
+
+    sys.exit(0)
 
 
 # =============================================================================
