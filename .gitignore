@@ -30,8 +30,6 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-lib/fb_pdnstools/local_version.py
-tmp/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -133,3 +131,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Other stuff, loke editors a.s.o.
+tmp/
+etc/*.ini
+etc/*.yaml
+rpmdir/*
+.rpm-version*
+/get*.awk

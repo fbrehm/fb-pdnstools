@@ -55,35 +55,24 @@ jobs:
     name: "Calling shared build workflow"
     needs:
       - prepare-image
-    uses: fbrehm/actions/.github/workflows/pyproject-build-packages.yaml@main
+    uses: fbrehm/actions/.github/workflows/build-python-packages.yaml@main
     with:
       has_i18n: true
-      # test_python_versions: '["3.8", "3.9", "3.12", "3.13"]'
-      libdir: src/fb_pdnstools
+      # test_python_versions: '["3.8", "3.9", "3.10", "3.11", "3.12"]'
+      # test_python_versions: '["3.8", "3.10", "3.11", "3.12"]'
+      libdir: 'lib/fb_pdnstools'
       # debian_versions: 'Debian-Bullseye Debian-Bookworm Ubuntu-Focal Ubuntu-Jammy'
-      el_versions: 'el-9 el-10'
-      additional_debian_build_packages: >-
-        flit
-        pybuild-plugin-pyproject
-        python3-fb-logging
-        python3-fb-tools
-        python3-requests
-        python3-semver
-        python3-yaml
-      additional_rpm_build_packages: >-
-        python3-fb-logging
-        python3-fb-tools
-        python3-requests
-        python3-pyyaml
+      # el_versions: 'el-8 el-9'
+      additional_debian_build_packages: 'python3-fb-logging python3-fb-tools'
+      additional_rpm_build_packages: 'python3X-fb-logging python3X-fb-tools'
       password_file: ${{ needs.prepare-image.outputs.password_file }}
       key_id: ${{ needs.prepare-image.outputs.key_id }}
-      # do_help2man: true
+      do_help2man: true
       repo_dir: ${{ needs.prepare-image.outputs.repo_dir }}
       smtp_server_address: ${{ needs.prepare-image.outputs.smtp_server_address }}
       smtp_server_port: ${{ needs.prepare-image.outputs.smtp_server_port }}
       smtp_sender_address: ${{ needs.prepare-image.outputs.smtp_sender_address }}
       smtp_recipient_addresses: ${{ needs.prepare-image.outputs.smtp_recipient_addresses }}
-      revision: 1
     secrets:
       pypi_token: ${{ secrets.PYPI_TOKEN }}
       public_key: ${{ secrets.GPG_PUBLIC_KEY }}
