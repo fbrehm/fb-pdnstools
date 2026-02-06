@@ -12,7 +12,7 @@ from __future__ import absolute_import
 # Standard modules
 import re
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 # This library name will be used as a part of the user agent in HTTP(S) requests
 LIBRARY_NAME = "fb-pdns-api-client"
@@ -23,6 +23,7 @@ VALID_RRSET_TYPES = [
     "AAAA",
     "AFSDB",
     "APL",
+    "ALIAS",
     "CAA",
     "CDNSKEY",
     "CDS",

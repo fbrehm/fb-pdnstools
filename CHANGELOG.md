@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-02-06
+
+### Added
+
+* Adding `ALIAS` as a valid Resource record type.
+
+### Changed
+
+* Non change release for triggering build pipelines.
+
 ## [1.1.0] - 2025-12-08
 
 ### Added
@@ -167,7 +177,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Adding Github workflow and actions for a complete workchain for
   creating PyPi, Debian and RPM packages and deploying them.
 
-## [0.4.0} - 2021-11-15
+## [0.4.0] - 2021-11-15
 
 ### Added
 
@@ -187,6 +197,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Initial release.
 
+[1.1.1]: https://github.com/fbrehm/fb-pdnstools/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/fbrehm/fb-pdnstools/compare/1.0.2...1.1.0
 [1.0.2]: https://github.com/fbrehm/fb-pdnstools/compare/1.0.0...1.0.2
 [1.0.0]: https://github.com/fbrehm/fb-pdnstools/compare/0.6.1...1.0.0
