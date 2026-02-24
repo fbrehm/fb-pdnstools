@@ -1,3 +1,9 @@
+fb-pdnstools (1.1.2) all; urgency=medium
+
+  * Renaming directory test => tests.
+
+ -- Frank Brehm <frank.brehm@pixelpark.com>  Tue, 24 Feb 2026 09:54:46 +0100
+
 fb-pdnstools (1.1.1) all; urgency=medium
 
   * Non change release for triggering build pipelines.
