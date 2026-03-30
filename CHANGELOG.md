@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * Ensure build environment to create two Debian packages. 
+* Setting the copyright year to 2026.
 
 ## [1.1.2] - 2026-02-24
 
