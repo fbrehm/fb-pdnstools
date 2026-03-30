@@ -26,14 +26,11 @@ readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
     "babel",
-    "chardet",
-    "fb_logging",
     "fb_tools",
-    "pytz",
-    "PyYAML",
     "requests",
     "semver",
     "six",
+    "urllib3",
 ]
 
 [project.urls]

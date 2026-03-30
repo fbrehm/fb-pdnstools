@@ -5,7 +5,7 @@
 
 @author: Frank Brehm
 @contact: frank@brehm-online.com
-@copyright: © 2024 by Frank Brehm, Berlin
+@copyright: © 2019 - 2026 by Frank Brehm, Berlin
 """
 from __future__ import absolute_import
 
@@ -44,7 +44,7 @@ from .xlate import __lib_dir__ as __xlate_lib_dir__
 from .xlate import __mo_file__ as __xlate_mo_file__
 from .xlate import __module_dir__ as __xlate_module_dir__
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -728,7 +728,7 @@ class PdnsBulkRmApp(BaseApplication):
 # =============================================================================
 def main():
     """Entrypoint for pdns-bulk-remove."""
-    my_path = pathlib.Path(__file__)
+    my_path = pathlib.Path(sys.argv[0])
     appname = my_path.name
 
     locale.setlocale(locale.LC_ALL, "")

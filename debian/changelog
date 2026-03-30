@@ -1,3 +1,9 @@
+fb-pdnstools (1.2.0) all; urgency=medium
+
+  * Ensure build environment to create two Debian packages.
+
+ -- Frank Brehm <frank@brehm-online.com>  Mon, 30 Mar 2026 15:30:05 +0200
+
 fb-pdnstools (1.1.2) all; urgency=medium
 
   * Renaming directory test => tests.
