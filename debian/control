@@ -8,11 +8,9 @@ Build-Depends: debhelper (>= 9),
                help2man,
                python3-all,
                python3-babel,
-               python3-fb-tools (>=2.6.0),
-               python3-pip,
-               python3-setuptools,
-               python3-six,
-               python3-tz
+               python3-fb-tools (>=3.0.0),
+               python3-semver,
+               python3-six
 Standards-Version: 3.9.6
 Homepage: https://github.com/fbrehm/fb-pdnstools
 Vcs-Browser: https://github.com/fbrehm/fb-pdnstools
@@ -31,11 +29,12 @@ Description: Python modules for handling with the PowerDNS API.
 
 Package: python3-fb-pdnstools
 Architecture: all
-Depends: python3-six,
-         python3-babel,
-         python3-fb-tools (>=2.6.0),
+Depends: python3-babel,
+         python3-fb-tools (>=3.0.0),
          python3-requests,
-         python3-tz,
+         python3-semver,
+         python3-six,
+         python3-urllib3,
          ${misc:Depends},
          ${python3:Depends}
 Description: Python modules for handling with the PowerDNS API.

@@ -65,16 +65,19 @@ jobs:
       additional_debian_build_packages: >-
         flit
         pybuild-plugin-pyproject
-        python3-fb-logging
+        python3-babel
         python3-fb-tools
         python3-requests
         python3-semver
-        python3-yaml
+        python3-six
+        python3-urllib3
       additional_rpm_build_packages: >-
-        python3-fb-logging
+        python3-babel
         python3-fb-tools
         python3-requests
-        python3-pyyaml
+        python3-semver
+        python3-six
+        python3-urllib3
       password_file: ${{ needs.prepare-image.outputs.password_file }}
       key_id: ${{ needs.prepare-image.outputs.key_id }}
       # do_help2man: true

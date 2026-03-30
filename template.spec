@@ -17,28 +17,21 @@ Source0:        fb-pdnstools.%{version}.tar.gz
 BuildRequires:	gettext
 BuildRequires:  python%{python3_pkgversion}
 BuildRequires:  python%{python3_pkgversion}-babel
-BuildRequires:  python%{python3_pkgversion}-chardet
 BuildRequires:  python%{python3_pkgversion}-devel
-BuildRequires:  python%{python3_pkgversion}-fb-logging >= 1.0.0
-BuildRequires:  python%{python3_pkgversion}-fb-tools >= 2.6.2
+BuildRequires:  python%{python3_pkgversion}-fb-tools >= 3.0.0
 BuildRequires:  python%{python3_pkgversion}-libs
-BuildRequires:  python%{python3_pkgversion}-pytz
-BuildRequires:  python%{python3_pkgversion}-pyyaml
 BuildRequires:  python%{python3_pkgversion}-semver
 BuildRequires:  python%{python3_pkgversion}-six
 BuildRequires:  pyproject-rpm-macros
 
 Requires:       python%{python3_pkgversion}
 Requires:       python%{python3_pkgversion}-babel
-Requires:       python%{python3_pkgversion}-chardet
-Requires:       python%{python3_pkgversion}-fb-logging >= 1.0.0
-Requires:       python%{python3_pkgversion}-fb-tools >= 2.6.2
+Requires:       python%{python3_pkgversion}-fb-tools >= 3.0.0
 Requires:       python%{python3_pkgversion}-libs
-Requires:       python%{python3_pkgversion}-pytz
-Requires:       python%{python3_pkgversion}-pyyaml
 Requires:       python%{python3_pkgversion}-requests
 Requires:       python%{python3_pkgversion}-semver
 Requires:       python%{python3_pkgversion}-six
+Requires:       python%{python3_pkgversion}-urllib3
 BuildArch:      noarch
 
 %description
