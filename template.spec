@@ -20,6 +20,7 @@ BuildRequires:  python%{python3_pkgversion}-babel
 BuildRequires:  python%{python3_pkgversion}-devel
 BuildRequires:  python%{python3_pkgversion}-fb-tools >= 3.0.0
 BuildRequires:  python%{python3_pkgversion}-libs
+BuildRequires:  python%{python3_pkgversion}-pyyaml
 BuildRequires:  python%{python3_pkgversion}-semver
 BuildRequires:  python%{python3_pkgversion}-six
 BuildRequires:  pyproject-rpm-macros
@@ -39,9 +40,6 @@ Python module to handle with PowerDNS
 
 This is the Python%{python3_pkgversion} version.
 
-In this package are contained the following scripts:
- * pdns-bulk-remove
-
 %prep
 echo "Preparing '${builddir}-' ..."
 echo "Pwd: $( pwd )"
@@ -55,19 +53,29 @@ echo "Pwd: $( pwd )"
 
 %install
 %pyproject_install
-%pyproject_save_files fb_pdnstools
 
-echo "Whats in '%{builddir}':"
-ls -lA '%{builddir}'
-
-echo "Whats in '%{buildroot}':"
-ls -lA '%{buildroot}'
-
-%files -f %{pyproject_files}
+%files
 %defattr(-,root,root,-)
 %license LICENSE
-%doc LICENSE README.md CHANGELOG.md pyproject.toml debian/changelog
+%doc README.md CHANGELOG.md pyproject.toml debian/changelog
+%{python3_sitelib}/*
+%{_datadir}/locale/*
+
+%package -n fb-pdnstools
+
+Summary:  Python module to handle with PowerDNS
+Group:    Applications/System
+
+Requires: python%{python3_pkgversion}-fb-pdnstools = %{version}
+
+%description
+Python module to handle with PowerDNS
+
+In this package are contained the following scripts:
+ * pdns-bulk-remove
+
+%files -n fb-pdnstools
 %{_bindir}/*
-%{_datadir}/*
+%{_mandir}/*
 
 %changelog
