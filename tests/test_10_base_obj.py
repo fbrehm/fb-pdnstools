@@ -43,8 +43,8 @@ class TestPdnsBaseHandler(FbPdnsToolsTestcase):
 
     # -------------------------------------------------------------------------
     def test_import_modules(self):
-        """Testing import of modules fb_pdnstools.base ..."""
-        LOG.info("Test importing base handler module ...")
+        """Test import of modules fb_pdnstools.base."""
+        LOG.info(self.get_method_doc())
 
         LOG.debug("Importing fb_pdnstools.base ...")
         import fb_pdnstools.base
@@ -58,7 +58,7 @@ class TestPdnsBaseHandler(FbPdnsToolsTestcase):
     # -------------------------------------------------------------------------
     def test_base_handler_class(self):
         """Test instantiating of a BasePdnsObject with valid parameters."""
-        LOG.info("Testing base class BasePdnsObject ...")
+        LOG.info(self.get_method_doc())
 
         from fb_pdnstools.base import BasePdnsObject
 

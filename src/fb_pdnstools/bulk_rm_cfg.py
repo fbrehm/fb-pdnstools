@@ -23,7 +23,7 @@ from . import DEFAULT_API_PREFIX
 from . import DEFAULT_PORT
 from .xlate import XLATOR
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -40,6 +40,8 @@ class PdnsBulkRmConfigError(ConfigError):
 # =============================================================================
 class PdnsBulkRmCfg(BaseConfiguration):
     """A class for providing a configuration for the GetVmApplication class."""
+
+    show_simulate_option = True
 
     default_pdns_master = "master.pp-dns.com"
     default_pdns_api_port = DEFAULT_PORT
