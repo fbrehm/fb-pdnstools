@@ -165,6 +165,20 @@ class TestPdnsZone(FbPdnsToolsTestcase):
             LOG.debug("Zone: %%s: {}".format(zone))
             LOG.debug("zone.as_dict():\n{}".format(pp(zone.as_dict())))
 
+        exp_zone_id = js_zone["id"]
+        LOG.debug(f"Testing for property zone id == {exp_zone_id!r}, got {zone.zone_id!r}.")
+        self.assertEqual(exp_zone_id, zone.zone_id)
+
+        for key in ("account", "api_rectify", "catalog", "dnssec", "edited_serial", "kind",
+                    "last_check", "master_tsig_key_ids", "masters", "name", "notified_serial",
+                    "nsec3narrow", "nsec3param", "serial", "slave_tsig_key_ids", "soa_edit",
+                    "soa_edit_api", "url"):
+            if key in js_zone:
+                exp_val = js_zone[key]
+                got_val = getattr(zone, key)
+                LOG.debug(f"Testing for property {key!r} == {exp_val!r}, got {got_val!r}.")
+                self.assertEqual(exp_val, got_val)
+
     # -------------------------------------------------------------------------
     def test_zone_get_soa(self):
         """Test getting the SOA record from a PowerDNSZone object."""

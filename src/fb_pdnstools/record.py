@@ -40,7 +40,7 @@ from .errors import PowerDNSWrongRecordTypeError
 from .errors import PowerDNSWrongSoaDataError
 from .xlate import XLATOR
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 
 LOG = logging.getLogger(__name__)
 
@@ -1041,7 +1041,7 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
         base_dir=None,
         master_server=None,
         port=DEFAULT_PORT,
-        key=None,
+        api_key=None,
         use_https=False,
         timeout=None,
         path_prefix=DEFAULT_API_PREFIX,
@@ -1069,7 +1069,7 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
             base_dir=base_dir,
             master_server=master_server,
             port=port,
-            key=key,
+            api_key=api_key,
             use_https=use_https,
             timeout=timeout,
             path_prefix=path_prefix,
@@ -1161,7 +1161,7 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
         base_dir=None,
         master_server=None,
         port=DEFAULT_PORT,
-        key=None,
+        api_key=None,
         use_https=False,
         timeout=None,
         path_prefix=DEFAULT_API_PREFIX,
@@ -1184,7 +1184,7 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
             "base_dir": base_dir,
             "master_server": master_server,
             "port": port,
-            "key": key,
+            "api_key": api_key,
             "use_https": use_https,
             "timeout": timeout,
             "path_prefix": path_prefix,
@@ -1319,7 +1319,7 @@ class PowerDNSRecordSet(BasePowerDNSHandler):
             base_dir=self.base_dir,
             master_server=self.master_server,
             port=self.port,
-            key=self.key,
+            api_key=self.api_key,
             use_https=self.use_https,
             timeout=self.timeout,
             path_prefix=self.path_prefix,

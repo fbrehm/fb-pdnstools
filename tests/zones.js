@@ -1,6 +1,7 @@
 [
   {
     "account": "local",
+    "catalog": "",
     "dnssec": false,
     "edited_serial": 2021120201,
     "id": "222.40.10.in-addr.arpa.",
@@ -14,6 +15,7 @@
   },
   {
     "account": "Verisign",
+    "catalog": "",
     "dnssec": false,
     "edited_serial": 2021120201,
     "id": "testing.com.",

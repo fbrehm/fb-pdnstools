@@ -1,6 +1,7 @@
 {
   "account": "Verisign",
   "api_rectify": false,
+  "catalog": "",
   "dnssec": false,
   "edited_serial": 2021120201,
   "id": "testing.com.",

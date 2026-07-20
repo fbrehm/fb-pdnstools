@@ -58,7 +58,7 @@ from .errors import PowerDNSHandlerError
 from .xlate import XLATOR
 
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 LOG = logging.getLogger(__name__)
 
 LOGLEVEL_REQUESTS_SET = False
@@ -91,7 +91,7 @@ class BasePowerDNSHandler(HandlingObject):
         version=__version__,
         master_server=None,
         port=DEFAULT_PORT,
-        key=None,
+        api_key=None,
         use_https=DEFAULT_USE_HTTPS,
         timeout=None,
         path_prefix=DEFAULT_API_PREFIX,
@@ -101,7 +101,7 @@ class BasePowerDNSHandler(HandlingObject):
         """Initialize a BasePowerDNSHandler object."""
         self._master_server = master_server
         self._port = self.default_port
-        self._key = key
+        self._api_key = api_key
         self._use_https = False
         self._path_prefix = path_prefix
         self._timeout = self.default_timeout
@@ -169,21 +169,21 @@ class BasePowerDNSHandler(HandlingObject):
 
     # -----------------------------------------------------------
     @property
-    def key(self):
-        """Return the key used to authenticate against the PowerDNS API."""
-        return self._key
+    def api_key(self):
+        """Return the API key used to authenticate against the PowerDNS API."""
+        return self._api_key
 
-    @key.setter
-    def key(self, value):
+    @api_key.setter
+    def api_key(self, value):
         if value is None:
-            self._key = None
+            self._api_key = None
             return
 
         val = str(value)
         if val == "":
-            self._key = None
+            self._api_key = None
         else:
-            self._key = val
+            self._api_key = val
 
     # -----------------------------------------------------------
     @property
@@ -296,12 +296,12 @@ class BasePowerDNSHandler(HandlingObject):
         res["timeout"] = self.timeout
         res["user_agent"] = self.user_agent
         res["api_servername"] = self.api_servername
-        res["key"] = None
-        if self.key:
+        res["api_key"] = None
+        if self.api_key:
             if self.verbose > 4:
-                res["key"] = self.key
+                res["api_key"] = self.api_key
             else:
-                res["key"] = "*******"
+                res["api_key"] = "*******"
 
         return res
 
@@ -356,8 +356,8 @@ class BasePowerDNSHandler(HandlingObject):
         """Perform the underlying API request."""
         if headers is None:
             headers = {}
-        if self.key:
-            headers["X-API-Key"] = self.key
+        if self.api_key:
+            headers["X-API-Key"] = self.api_key
 
         url = self._build_url(path, no_prefix=no_prefix)
         if self.verbose > 1:
