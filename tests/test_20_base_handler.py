@@ -43,37 +43,59 @@ class TestPdnsBaseHandler(FbPdnsToolsTestcase):
 
     # -------------------------------------------------------------------------
     def test_import_modules(self):
-        """Testing import of modules fb_pdnstools.base ..."""
+        """Testing import of modules fb_pdnstools.base_handler ..."""
         LOG.info("Test importing base handler module ...")
 
-        LOG.debug("Importing fb_pdnstools.base ...")
-        import fb_pdnstools.base
+        LOG.debug("Importing fb_pdnstools.base_handler ...")
+        import fb_pdnstools.base_handler
 
         LOG.debug(
-            "Version of fb_pdnstools.base: {!r}.".format(
-                fb_pdnstools.base.__version__
+            "Version of fb_pdnstools.base_handler: {!r}.".format(
+                fb_pdnstools.base_handler.__version__
             )
         )
 
     # -------------------------------------------------------------------------
     def test_base_handler_class(self):
-        """Test instantiating of a BasePdnsObject with valid parameters."""
-        LOG.info("Testing base class BasePdnsObject ...")
+        """Test instantiating of a BasePowerDNSHandler with valid parameters."""
+        LOG.info("Testing base class BasePowerDNSHandler ...")
 
-        from fb_pdnstools.base import BasePdnsObject
+        from fb_pdnstools.base_handler import BasePowerDNSHandler
 
-        LOG.debug("Creating dummy PDNS handler on base of BasePdnsObject ...")
+        LOG.debug("Creating dummy PDNS handler on base of BasePowerDNSHandler ...")
 
         # Creating dummy class
-        class DummyPowerDNSHandler(BasePdnsObject):
-
-            def __repr__(self):
-                """Typecast into a string for reproduction."""
-                return "<{}()>".format(self.__class__.__name__)
+        class DummyPowerDNSHandler(BasePowerDNSHandler):
+            pass
 
         test_handler = DummyPowerDNSHandler(appname=self.appname, verbose=self.verbose)
 
         LOG.debug("Dummy PDNS handler:\n{}".format(pp(test_handler.as_dict())))
+
+    # -------------------------------------------------------------------------
+    def test_base_handler_wrong_params(self):
+        """Test instantiating of a BasePowerDNSHandler with invalid parameters."""
+        LOG.info("Testing base class BasePowerDNSHandler with wrong parameters ...")
+
+        from fb_pdnstools.base_handler import BasePowerDNSHandler
+
+        LOG.debug("Creating dummy PDNS handler on base of BasePowerDNSHandler ...")
+
+        # Creating dummy class
+        class DummyPowerDNSHandler(BasePowerDNSHandler):
+            pass
+
+        wrong_ports = ("uhu", 0, -10, 123456)
+
+        for wrong_port in wrong_ports:
+            LOG.debug("Testing with port {!r} ...".format(wrong_port))
+            with self.assertRaises(ValueError) as cm:
+                test_handler = DummyPowerDNSHandler(
+                    appname=self.appname, verbose=self.verbose, port=wrong_port
+                )
+                LOG.debug("Dummy PDNS handler:\n{}".format(pp(test_handler.as_dict())))
+            e = cm.exception
+            LOG.debug("Got a {c}: {e}".format(c=e.__class__.__name__, e=e))
 
 
 # =============================================================================
@@ -91,6 +113,7 @@ if __name__ == "__main__":
 
     suite.addTest(TestPdnsBaseHandler("test_import_modules", verbose))
     suite.addTest(TestPdnsBaseHandler("test_base_handler_class", verbose))
+    suite.addTest(TestPdnsBaseHandler("test_base_handler_wrong_params", verbose))
 
     runner = unittest.TextTestRunner(verbosity=verbose)
 

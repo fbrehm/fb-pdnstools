@@ -13,50 +13,114 @@ from __future__ import absolute_import
 
 # Standard modules
 import ipaddress
-from abc import ABCMeta
-
-try:
-    from collections.abc import MutableMapping
-except ImportError:
-    from collections import MutableMapping
+import logging
+from abc import ABCMeta, abstractmethod
 
 # Third party modules
 from fb_tools.common import RE_DOT_AT_END
-from fb_tools.common import pp
+from fb_tools.common import is_sequence
 from fb_tools.common import reverse_pointer
-from fb_tools.common import to_bool
 from fb_tools.common import to_str
 from fb_tools.handling_obj import HandlingObject
-
-import requests
-from requests.exceptions import RequestException
 
 import six
 from six import add_metaclass
 
-import urllib3
-
 # Own modules
-from . import DEFAULT_API_PREFIX
-from . import DEFAULT_PORT
-from . import DEFAULT_TIMEOUT
-from . import DEFAULT_USE_HTTPS
-from . import LIBRARY_NAME
-from . import MAX_PORT_NUMBER
 from . import VALID_RRSET_TYPES
-from .errors import PDNSApiError
-from .errors import PDNSApiNotAuthorizedError
-from .errors import PDNSApiNotFoundError
-from .errors import PDNSApiRateLimitExceededError
-from .errors import PDNSApiValidationError
-from .errors import PDNSRequestError
-from .errors import PowerDNSHandlerError
 from .xlate import XLATOR
 
-__version__ = "2.0.0"
+__version__ = "0.2.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
+
+
+# =============================================================================
+class IntegerField():
+    """Descriptor for an integer field."""
+
+    # -------------------------------------------------------------------------
+    def __set_name__(self, owner, name):
+        """Keep the name of teh descriptor."""
+        self.public_name = name
+        self.private_name = '_' + name
+
+    # -------------------------------------------------------------------------
+    def __get__(self, instance, owner):
+        """Get the data from instance object by the private name."""
+        return getattr(instance, self.private_name, 0)
+
+    # -------------------------------------------------------------------------
+    def __set__(self, instance, value):
+        """Set the data in the instance object by the private name as an integer value."""
+        if value is None:
+            setattr(instance, self.private_name, 0)
+            return
+
+        val = int(value)
+        # LOG.debug(f"Setting {self.public_name!r} to {val}.")
+        setattr(instance, self.private_name, val)
+
+
+# =============================================================================
+class StringField():
+    """Descriptor for an string field."""
+
+    # -------------------------------------------------------------------------
+    def __set_name__(self, owner, name):
+        """Keep the name of teh descriptor."""
+        self.public_name = name
+        self.private_name = '_' + name
+
+    # -------------------------------------------------------------------------
+    def __get__(self, instance, owner):
+        """Get the data from instance object by the private name."""
+        return getattr(instance, self.private_name, "")
+
+    # -------------------------------------------------------------------------
+    def __set__(self, instance, value):
+        """Set the data in the instance object by the private name as a string value."""
+        if value is None:
+            setattr(instance, self.private_name, "")
+            return
+
+        val = str(value)
+        # LOG.debug(f"Setting {self.public_name!r} to {val!r}.")
+        setattr(instance, self.private_name, val)
+
+
+# =============================================================================
+class StringArrayField():
+    """Descriptor for an field of an array of strings."""
+
+    # -------------------------------------------------------------------------
+    def __set_name__(self, owner, name):
+        """Keep the name of teh descriptor."""
+        self.public_name = name
+        self.private_name = '_' + name
+
+    # -------------------------------------------------------------------------
+    def __get__(self, instance, owner):
+        """Get the data from instance object by the private name."""
+        return getattr(instance, self.private_name, [])
+
+    # -------------------------------------------------------------------------
+    def __set__(self, instance, value):
+        """Set the data in the instance object by the private name as an array of strings."""
+        if value is None:
+            setattr(instance, self.private_name, [])
+            return
+
+        array = []
+        if is_sequence(value):
+            for val in value:
+                array.append(str(val))
+        else:
+            array.append(str(value))
+
+        # LOG.debug(f"Setting {self.public_name!r} to {array!r}.")
+        setattr(instance, self.private_name, array)
 
 
 # =============================================================================
@@ -66,34 +130,79 @@ class BasePdnsObject(HandlingObject):
     Base class for a PowerDNS object.
 
     Properties:
-    * address_family      (str or int   - rw)
+    * address_family      (str or int   - rw) (inherited from HandlingObject)
     * appname             (str          - rw) (inherited from FbBaseObject)
-    * assumed_answer      (None or bool - rw)
+    * assumed_answer      (None or bool - rw) (inherited from HandlingObject)
     * base_dir            (pathlib.Path - rw) (inherited from FbBaseObject)
-    * cache_dir           (pathlib.Path - rw)
-    * data_dir            (pathlib.Path - rw)
-    * force               (bool         - rw)
+    * cache_dir           (pathlib.Path - rw) (inherited from HandlingObject)
+    * data_dir            (pathlib.Path - rw) (inherited from HandlingObject)
+    * force               (bool         - rw) (inherited from HandlingObject)
     * initialized         (bool         - rw) (inherited from FbBaseObject)
-    * interrupted         (bool         - rw)
-    * is_venv             (bool         - ro)
-    * project_name        (str)         - rw)
-    * prompt_timeout      (int          - rw)
-    * quiet               (bool         - rw)
-    * simulate            (bool         - rw)
-    * state_dir           (pathlib.Path - rw)
-    * terminal_has_colors (bool         - rw)
+    * interrupted         (bool         - rw) (inherited from HandlingObject)
+    * is_venv             (bool         - ro) (inherited from HandlingObject)
+    * project_name        (str)         - rw) (inherited from HandlingObject)
+    * prompt_timeout      (int          - rw) (inherited from HandlingObject)
+    * quiet               (bool         - rw) (inherited from HandlingObject)
+    * simulate            (bool         - rw) (inherited from HandlingObject)
+    * state_dir           (pathlib.Path - rw) (inherited from HandlingObject)
+    * terminal_has_colors (bool         - rw) (inherited from HandlingObject)
     * verbose             (int          - rw) (inherited from FbBaseObject)
     * version             (str          - ro) (inherited from FbBaseObject)
 
     Public attributes:
     * add_search_paths       Array of Path
     * signals_dont_interrupt Array of int
+
      Must not be instantiated directly.
     """
 
     fields = {
-        "description": "",
+        "description": {
+            "type": "str",
+            "desc": "Bogus field",
+            "default": "Senseless stuff."
+        }
     }
+
+    base_init_args = (
+        "appname",
+        "assumed_answer",
+        "base_dir",
+        "cache_dir",
+        "data_dir",
+        "force",
+        "initialized",
+        "project_name",
+        "quiet",
+        "runtime_dir",
+        "simulate",
+        "state_dir",
+        "terminal_has_colors",
+        "verbose",
+        "version",
+    )
+
+    # -------------------------------------------------------------------------
+    @classmethod
+    def init_field_objects(cls):
+        """Initialise all API fields as attributes."""
+        for field_name in cls.fields:
+            ftype = cls.fields[field_name]["type"]
+
+            if ftype == "int":
+                desriptor_class = IntegerField
+            elif ftype == "str":
+                desriptor_class = StringField
+            elif ftype == "array_of_str":
+                desriptor_class = StringArrayField
+            else:
+                msg = _("Unknown field type {!r}.").format(ftype)
+                raise RuntimeError(msg)
+
+            desriptor = desriptor_class()
+            desriptor.__set_name__(cls, field_name)
+
+            setattr(cls, field_name, desriptor)
 
     # -------------------------------------------------------------------------
     def __init__(
@@ -103,10 +212,49 @@ class BasePdnsObject(HandlingObject):
         **kwargs,
     ):
         """Initialize a BasePdnsObject object."""
-        super(BasePdnsObject, self).__init__(*args, **kwargs, version=version)
+        self.init_field_objects()
+
+        for field_name in self.fields:
+            default = self.fields[field_name]["default"]
+            cls = self.__class__.__name__
+            LOG.debug(f"Setting default of {cls}.{field_name} to {default!r}.")
+            setattr(self, field_name, default)
+
+        base_kwargs = {}
+        for key in kwargs.keys():
+            if key in self.base_init_args:
+                base_kwargs[key] = kwargs[key]
+
+        for key in self.base_init_args:
+            if key in kwargs:
+                del kwargs[key]
+
+        # LOG.debug("base_kwargs:" + "\n" + pp(base_kwargs))
+        # LOG.debug("Remaining kwargs:" + "\n" + pp(kwargs))
+
+        super(BasePdnsObject, self).__init__(*args, **base_kwargs, version=version)
 
         if "initialized" in kwargs:
             self.initialized = kwargs["initialized"]
+
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=True):
+        """
+        Transform the elements of the object into a dict.
+
+        @param short: don't include local properties in resulting dict.
+        @type short: bool
+
+        @return: structure as dict
+        @rtype:  dict
+        """
+        res = super(BasePdnsObject, self).as_dict(short=short)
+
+        for field_name in self.fields:
+            value = getattr(self, field_name)
+            res[field_name] = value
+
+        return res
 
     # -------------------------------------------------------------------------
     @abstractmethod
@@ -182,3 +330,12 @@ class BasePdnsObject(HandlingObject):
 
         return type_used
 
+
+# =============================================================================
+if __name__ == "__main__":
+
+    pass
+
+# =============================================================================
+
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 list
