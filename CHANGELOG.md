@@ -149,6 +149,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.5.1] - 2022-04-24
 
+### Added
+
 * Adding support for Ubuntu 22.04 Jammy Jellyfish.
 
 ## [0.5.0] - 2022-02-10
