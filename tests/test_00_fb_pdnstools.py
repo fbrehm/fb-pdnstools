@@ -43,8 +43,8 @@ class TestPdnsToolsBase(FbPdnsToolsTestcase):
 
     # -------------------------------------------------------------------------
     def test_import_modules(self):
-        """Test import of modules fb_pdnstools/__init__.py and fb_pdnstools.errors ..."""
-        LOG.info("Test importing main module ...")
+        """Test import of modules fb_pdnstools/__init__.py and fb_pdnstools.errors."""
+        LOG.info(self.get_method_doc())
 
         LOG.debug("Importing fb_pdnstools ...")
         import fb_pdnstools
@@ -59,7 +59,7 @@ class TestPdnsToolsBase(FbPdnsToolsTestcase):
     # -------------------------------------------------------------------------
     def test_error_classes(self):
         """Test instantiating of different exception classes in fb_pdnstools.errors."""
-        LOG.info("Testing loading and function of different error handler classes ...")
+        LOG.info(self.get_method_doc())
 
         LOG.debug("Testing PowerDNSHandlerError from fb_pdnstools.errors ...")
         from fb_pdnstools.errors import PowerDNSHandlerError

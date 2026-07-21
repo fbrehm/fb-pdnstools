@@ -55,7 +55,7 @@ class TestPdnsServer(FbPdnsToolsTestcase):
         """Test import of module fb_pdnstools.server ..."""
         if self.verbose:
             print()
-        LOG.info("Test importing server module ...")
+        LOG.info(self.get_method_doc())
 
         LOG.debug("Importing fb_pdnstools.server ...")
         import fb_pdnstools.server
@@ -123,7 +123,7 @@ class TestPdnsServer(FbPdnsToolsTestcase):
     # -------------------------------------------------------------------------
     def test_get_zone(self):
         """Testing getting a zone from a mocked PDNS API."""
-        LOG.info("Testing getting a zone from a mocked PDNS API ...")
+        LOG.info(self.get_method_doc())
 
         adapter = requests_mock.Adapter()
         session = requests.Session()

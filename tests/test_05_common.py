@@ -52,8 +52,8 @@ class TestPdnsCommon(FbPdnsToolsTestcase):
 
     # -------------------------------------------------------------------------
     def test_seconds2human(self):
-        """Testing public function seconds2human() from fb_pdnstools.common."""
-        LOG.info("Testing seconds2human() from fb_pdnstools.common ...")
+        """Test public function seconds2human() from fb_pdnstools.common."""
+        LOG.info(self.get_method_doc())
 
         from fb_pdnstools.common import seconds2human
 

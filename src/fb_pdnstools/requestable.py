@@ -43,10 +43,10 @@ from . import DEFAULT_USE_HTTPS
 from . import LIBRARY_NAME
 from . import MAX_PORT_NUMBER
 from .base import BasePdnsObject
-from .base import BooleanField
-from .base import IntegerField
-from .base import PosixPathField
-from .base import StringField
+from .descriptors import BooleanDescriptor
+from .descriptors import IntegerDescriptor
+from .descriptors import PosixPathDescriptor
+from .descriptors import StringDescriptor
 from .errors import PDNSApiError
 from .errors import PDNSApiNotAuthorizedError
 from .errors import PDNSApiNotFoundError
@@ -56,7 +56,7 @@ from .errors import PDNSRequestError
 from .errors import PowerDNSHandlerError
 from .xlate import XLATOR
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 LOG = logging.getLogger(__name__)
 
 LOGLEVEL_REQUESTS_SET = False
@@ -81,16 +81,16 @@ class BasePdnsRequestableObject(BasePdnsObject):
 
     re_request_id = re.compile(r"/requests/([-a-f0-9]+)/", re.IGNORECASE)
 
-    master_server = StringField(name="master_server", lowcase=True, stripped=True)
-    api_key = StringField(name="api_key")
-    use_https = BooleanField(name="use_https")
-    mocked = BooleanField(name="mocked")
-    path_prefix = PosixPathField(name="path_prefix", must_absolute=True)
-    timeout = IntegerField(name="timeout", lower_limit=1, upper_limit=3600)
-    user_agent = StringField(name="user_agent", stripped=True)
-    api_servername = StringField(name="api_servername", stripped=True)
+    master_server = StringDescriptor(name="master_server", lowcase=True, stripped=True)
+    api_key = StringDescriptor(name="api_key")
+    use_https = BooleanDescriptor(name="use_https")
+    mocked = BooleanDescriptor(name="mocked")
+    path_prefix = PosixPathDescriptor(name="path_prefix", must_absolute=True, maybe_none=True)
+    timeout = IntegerDescriptor(name="timeout", lower_limit=1, upper_limit=3600)
+    user_agent = StringDescriptor(name="user_agent", stripped=True)
+    api_servername = StringDescriptor(name="api_servername", stripped=True)
 
-    port = IntegerField(name="port", lower_limit=1, upper_limit=MAX_PORT_NUMBER)
+    port = IntegerDescriptor(name="port", lower_limit=1, upper_limit=MAX_PORT_NUMBER)
     port.lower_limit_msg = _(
         "Invalid port number {v} for the PowerDNS API, must be greater than zero."
     )
@@ -102,9 +102,9 @@ class BasePdnsRequestableObject(BasePdnsObject):
     def __init__(
         self,
         version=__version__,
-        master_server=None,
+        master_server="",
         port=DEFAULT_PORT,
-        api_key=None,
+        api_key="",
         use_https=DEFAULT_USE_HTTPS,
         timeout=DEFAULT_TIMEOUT,
         path_prefix=DEFAULT_API_PREFIX,
@@ -151,7 +151,7 @@ class BasePdnsRequestableObject(BasePdnsObject):
         @rtype:  dict
         """
         res = super(BasePdnsRequestableObject, self).as_dict(short=short)
-        res["api_key"] = None
+        res["api_key"] = ""
         res["api_servername"] = self.api_servername
         res["default_api_servername"] = self.default_api_servername
         res["default_port"] = self.default_port
@@ -212,7 +212,7 @@ class BasePdnsRequestableObject(BasePdnsObject):
                 url += ":{}".format(self.port)
 
         if self.path_prefix and not no_prefix:
-            url += self.path_prefix
+            url += str(self.path_prefix)
 
         url += path
 

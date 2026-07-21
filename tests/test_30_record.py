@@ -49,10 +49,10 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
 
     # -------------------------------------------------------------------------
     def test_import_modules(self):
-        """Test import of module fb_pdnstools.record ..."""
+        """Test import of module fb_pdnstools.record."""
         if self.verbose:
             print()
-        LOG.info("Test importing record module ...")
+        LOG.info(self.get_method_doc())
 
         LOG.debug("Importing fb_pdnstools.record ...")
         import fb_pdnstools.record
@@ -70,7 +70,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         """Test instantiating of class PowerDNSRecord with different parameters."""
         if self.verbose:
             print()
-        LOG.info("Testing class PowerDNSRecord ...")
+        LOG.info(self.get_method_doc())
 
         test_content = "www.testing.com."
 
@@ -110,10 +110,10 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
 
     # -------------------------------------------------------------------------
     def test_pdns_record_equality(self):
-        """Testing equal operator of class PowerDNSRecord."""
+        """Test equal operator of class PowerDNSRecord."""
         if self.verbose:
             print()
-        LOG.info("Testing equal operator of class PowerDNSRecord ...")
+        LOG.info(self.get_method_doc())
 
         test_content = "www.testing.com."
         test_content2 = "www.uhu-banane.com."
@@ -150,10 +150,10 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
 
     # -------------------------------------------------------------------------
     def test_pdns_record_gt(self):
-        """Testing the greater than operator of class PowerDNSRecord."""
+        """Test the greater than operator of class PowerDNSRecord."""
         if self.verbose:
             print()
-        LOG.info("Testing the greater than operator of class PowerDNSRecord ...")
+        LOG.info(self.get_method_doc())
 
         test_content = "www.1testing.com."
         test_content2 = "www.2uhu-banane.com."
@@ -205,10 +205,10 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
 
     # -------------------------------------------------------------------------
     def test_pdns_record_lt(self):
-        """Testing the less than operator of class PowerDNSRecord."""
+        """Test the less than operator of class PowerDNSRecord."""
         if self.verbose:
             print()
-        LOG.info("Testing the less than operator of class PowerDNSRecord ...")
+        LOG.info(self.get_method_doc())
 
         test_content = "www.1testing.com."
         test_content2 = "www.2uhu-banane.com."
@@ -263,7 +263,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         """Test instantiating of class PowerDNSRecordSetComment."""
         if self.verbose:
             print()
-        LOG.info("Testing class PowerDNSRecordSetComment ...")
+        LOG.info(self.get_method_doc())
 
         test_account = "tester"
         test_content = "Test comment"
@@ -352,7 +352,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         """Test instantiating of a simple PowerDNSRecordSet object."""
         if self.verbose:
             print()
-        LOG.info("Testing class PowerDNSRecordSet ...")
+        LOG.info(self.get_method_doc())
 
         from fb_pdnstools.record import PowerDNSRecordSet
 
@@ -372,7 +372,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         """Test instantiating of a PowerDNSRecordSet object with a comment."""
         if self.verbose:
             print()
-        LOG.info("Testing class PowerDNSRecordSet with comments ...")
+        LOG.info(self.get_method_doc())
 
         from fb_pdnstools.record import PowerDNSRecordSet
 

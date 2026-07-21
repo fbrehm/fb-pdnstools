@@ -14,6 +14,7 @@ from __future__ import absolute_import
 
 # Standard modules
 import logging
+from pathlib import Path
 from pathlib import PosixPath
 
 # Third party modules
@@ -23,7 +24,7 @@ from fb_tools.common import to_bool
 # Own modules
 from .xlate import XLATOR
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -34,11 +35,13 @@ class IntegerDescriptor:
     """Descriptor for an integer field."""
 
     # -------------------------------------------------------------------------
-    def __init__(self, name=None, lower_limit=None, upper_limit=None):
+    def __init__(self, name=None, lower_limit=None, upper_limit=None, maybe_none=False):
         """Initialize the IntegerDescriptor descriptor."""
         if name:
             self.public_name = name
             self.private_name = "_" + name
+
+        self.maybe_none = to_bool(maybe_none)
 
         if lower_limit is None:
             self.lower_limit = None
@@ -82,8 +85,11 @@ class IntegerDescriptor:
     def __set__(self, instance, value):
         """Set the data in the instance object by the private name as an integer value."""
         if value is None:
-            setattr(instance, self.private_name, 0)
-            return
+            if self.maybe_none:
+                setattr(instance, self.private_name, None)
+                return
+            msg = _("The attribute {a!r} must not be None.").format(a=self.public_name)
+            raise TypeError(msg)
 
         val = int(value)
 
@@ -141,47 +147,14 @@ class PosixPathDescriptor:
     """Descriptor for a field containing a Posix file path."""
 
     # -------------------------------------------------------------------------
-    def __init__(self, name=None, must_absolute=False):
+    def __init__(self, name=None, must_absolute=False, maybe_none=False):
         """Initialize the PosixPathDescriptor descriptor."""
         if name:
             self.public_name = name
             self.private_name = "_" + name
 
         self.must_absolute = to_bool(must_absolute)
-
-    # -------------------------------------------------------------------------
-    def __get__(self, instance, owner):
-        """Get the data from instance object by the private name."""
-        return getattr(instance, self.private_name, "")
-
-    # -------------------------------------------------------------------------
-    def __set__(self, instance, value):
-        """Set the data in the instance object by the private name as a string value."""
-        path = PosixPath(value)
-
-        if self.must_absolute:
-            if not path.is_absolute():
-                mdg = _("The attribute {a!r} must be an absolute Unix path, given {p!r}.").format(
-                    a=self.public_name, p=str(path)
-                )
-                raise ValueError(mdg)
-
-        setattr(instance, self.private_name, path)
-
-
-# =============================================================================
-class StringDescriptor:
-    """Descriptor for a string field."""
-
-    # -------------------------------------------------------------------------
-    def __init__(self, name=None, lowcase=False, stripped=False):
-        """Initialize the StringDescriptor descriptor."""
-        if name:
-            self.public_name = name
-            self.private_name = "_" + name
-
-        self.lowcase = lowcase
-        self.stripped = stripped
+        self.maybe_none = to_bool(maybe_none)
 
     # -------------------------------------------------------------------------
     def __set_name__(self, owner, name):
@@ -198,8 +171,106 @@ class StringDescriptor:
     def __set__(self, instance, value):
         """Set the data in the instance object by the private name as a string value."""
         if value is None:
-            setattr(instance, self.private_name, "")
-            return
+            if self.maybe_none:
+                setattr(instance, self.private_name, None)
+                return
+            msg = _("The attribute {a!r} must not be None.").format(a=self.public_name)
+            raise TypeError(msg)
+
+        path = PosixPath(value)
+
+        if self.must_absolute:
+            if not path.is_absolute():
+                mdg = _("The attribute {a!r} must be an absolute Unix path, given {p!r}.").format(
+                    a=self.public_name, p=str(path)
+                )
+                raise ValueError(mdg)
+
+        setattr(instance, self.private_name, path)
+
+
+# =============================================================================
+class PathDescriptor:
+    """Descriptor for a field containing a common file path."""
+
+    # -------------------------------------------------------------------------
+    def __init__(self, name=None, must_absolute=False, maybe_none=False):
+        """Initialize the PathDescriptor descriptor."""
+        if name:
+            self.public_name = name
+            self.private_name = "_" + name
+
+        self.must_absolute = to_bool(must_absolute)
+        self.maybe_none = to_bool(maybe_none)
+
+    # -------------------------------------------------------------------------
+    def __set_name__(self, owner, name):
+        """Keep the name of teh descriptor."""
+        self.public_name = name
+        self.private_name = "_" + name
+
+    # -------------------------------------------------------------------------
+    def __get__(self, instance, owner):
+        """Get the data from instance object by the private name."""
+        return getattr(instance, self.private_name, "")
+
+    # -------------------------------------------------------------------------
+    def __set__(self, instance, value):
+        """Set the data in the instance object by the private name as a string value."""
+        if value is None:
+            if self.maybe_none:
+                setattr(instance, self.private_name, None)
+                return
+            msg = _("The attribute {a!r} must not be None.").format(a=self.public_name)
+            raise TypeError(msg)
+
+        path = Path(value)
+
+        if self.must_absolute:
+            if not path.is_absolute():
+                mdg = _("The attribute {a!r} must be an absolute Unix path, given {p!r}.").format(
+                    a=self.public_name, p=str(path)
+                )
+                raise ValueError(mdg)
+
+        setattr(instance, self.private_name, path)
+
+
+# =============================================================================
+class StringDescriptor:
+    """Descriptor for a string field."""
+
+    # -------------------------------------------------------------------------
+    def __init__(self, name=None, lowcase=False, stripped=False, maybe_none=False):
+        """Initialize the StringDescriptor descriptor."""
+        if name:
+            self.public_name = name
+            self.private_name = "_" + name
+
+        self.lowcase = lowcase
+        self.stripped = stripped
+        self.maybe_none = to_bool(maybe_none)
+
+    # -------------------------------------------------------------------------
+    def __set_name__(self, owner, name):
+        """Keep the name of teh descriptor."""
+        self.public_name = name
+        self.private_name = "_" + name
+
+    # -------------------------------------------------------------------------
+    def __get__(self, instance, owner):
+        """Get the data from instance object by the private name."""
+        return getattr(instance, self.private_name, "")
+
+    # -------------------------------------------------------------------------
+    def __set__(self, instance, value):
+        """Set the data in the instance object by the private name as a string value."""
+        if value is None:
+            if self.maybe_none:
+                setattr(instance, self.private_name, None)
+                return
+            msg = _("The attribute {a!r} must not be None.").format(a=self.public_name)
+            raise TypeError(msg)
 
         val = str(value)
         if self.lowcase:
@@ -215,12 +286,20 @@ class StringArrayDescriptor:
     """Descriptor for an field of an array of strings."""
 
     # -------------------------------------------------------------------------
+    def __init__(self, name=None, lowcase=False, stripped=False):
+        """Initialize the StringDescriptor descriptor."""
+        if name:
+            self.public_name = name
+            self.private_name = "_" + name
+
+        self.lowcase = lowcase
+        self.stripped = stripped
+
+    # -------------------------------------------------------------------------
     def __set_name__(self, owner, name):
         """Keep the name of teh descriptor."""
         self.public_name = name
         self.private_name = "_" + name
-        self.lowcase = False
-        self.stripped = False
 
     # -------------------------------------------------------------------------
     def __get__(self, instance, owner):

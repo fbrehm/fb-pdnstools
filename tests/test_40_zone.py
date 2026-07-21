@@ -51,7 +51,7 @@ class TestPdnsZone(FbPdnsToolsTestcase):
         """Test import of module fb_pdnstools.zone ..."""
         if self.verbose:
             print()
-        LOG.info("Test importing record module ...")
+        LOG.info(self.get_method_doc())
 
         LOG.debug("Importing fb_pdnstools.zone ...")
         import fb_pdnstools.zone
@@ -75,7 +75,7 @@ class TestPdnsZone(FbPdnsToolsTestcase):
         """Test verifying a FQDN."""
         if self.verbose:
             print()
-        LOG.info("Testing PowerDNSZone.verify_fqdn() ...")
+        LOG.info(self.get_method_doc())
 
         valid_fqdns = [
             "@",
@@ -152,7 +152,7 @@ class TestPdnsZone(FbPdnsToolsTestcase):
     # -------------------------------------------------------------------------
     def test_zone_simple(self):
         """Test instantiating of a simple PowerDNSZone object."""
-        LOG.info("Testing class PowerDNSZone ...")
+        LOG.info(self.get_method_doc())
 
         from fb_pdnstools.zone import PowerDNSZone
 
@@ -182,7 +182,7 @@ class TestPdnsZone(FbPdnsToolsTestcase):
     # -------------------------------------------------------------------------
     def test_zone_get_soa(self):
         """Test getting the SOA record from a PowerDNSZone object."""
-        LOG.info("Testing class PowerDNSZone.get_soa() ...")
+        LOG.info(self.get_method_doc())
 
         from fb_pdnstools.zone import PowerDNSZone
 
