@@ -82,7 +82,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         if self.verbose > 1:
             LOG.debug("Record: %%s: {}".format(record))
             LOG.debug("record.as_dict():\n{}".format(pp(record.as_dict())))
-        self.assertIsNone(record.content)
+        self.assertEqual(record.content, "")
         self.assertIsInstance(record.disabled, bool)
         self.assertFalse(record.disabled)
 
@@ -122,14 +122,17 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         from fb_pdnstools.record import PowerDNSRecord
 
         test_matrix = (
-            (None, None, True),
-            (test_content, None, False),
-            (None, test_content, False),
+            ("", "", True),
+            (test_content, "", False),
+            ("", test_content, False),
             (test_content, test_content, True),
             (test_content, test_content2, False),
             (test_content, test_content3, True),
         )
         for test_set in test_matrix:
+            c0 = test_set[0]
+            c1 = test_set[1]
+            LOG.debug(f"Testing {c0!r} == {c1!r} ...")
             rec1 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_set[0])
             rec2 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_set[1])
             expected = test_set[2]
@@ -175,9 +178,9 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
             LOG.debug("{} raised: {}".format(e.__class__.__name__, e))
 
         test_matrix = (
-            (None, None, False),
-            (test_content, None, True),
-            (None, test_content, False),
+            ("", "", False),
+            (test_content, "", True),
+            ("", test_content, False),
             (test_content, test_content, False),
             (test_content, test_content2, False),
             (test_content2, test_content, True),
@@ -185,6 +188,9 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         )
 
         for test_set in test_matrix:
+            c0 = test_set[0]
+            c1 = test_set[1]
+            LOG.debug(f"Testing {c0!r} > {c1!r} ...")
             rec1 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_set[0])
             rec2 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_set[1])
             expected = test_set[2]
@@ -230,9 +236,9 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
             LOG.debug("{} raised: {}".format(e.__class__.__name__, e))
 
         test_matrix = (
-            (None, None, False),
-            (test_content, None, False),
-            (None, test_content, True),
+            ("", "", False),
+            (test_content, "", False),
+            ("", test_content, True),
             (test_content, test_content, False),
             (test_content, test_content2, True),
             (test_content2, test_content, False),
@@ -240,8 +246,11 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         )
 
         for test_set in test_matrix:
-            rec1 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_set[0])
-            rec2 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=test_set[1])
+            c0 = test_set[0]
+            c1 = test_set[1]
+            LOG.debug(f"Testing {c0!r} < {c1!r} ...")
+            rec1 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=c0)
+            rec2 = PowerDNSRecord(appname=self.appname, verbose=self.verbose, content=c1)
             expected = test_set[2]
             LOG.debug(
                 "Comparing record {r1!r} < record {r2!r}, expected: {ex}.".format(
@@ -273,8 +282,8 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
 
         LOG.debug("Creating an empty, invalid comment.")
         empty_comment = PowerDNSRecordSetComment(appname=self.appname, verbose=self.verbose)
-        LOG.debug("Empty comment: %%r: {!r}".format(empty_comment))
-        LOG.debug("Empty comment: %%s: {}".format(empty_comment))
+        LOG.debug("Empty comment: %r: {!r}".format(empty_comment))
+        LOG.debug("Empty comment: %s: {}".format(empty_comment))
         if self.verbose > 1:
             LOG.debug("Empty comment.as_dict():\n{}".format(pp(empty_comment.as_dict())))
         LOG.debug(
@@ -294,8 +303,8 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         comment = PowerDNSRecordSetComment(
             appname=self.appname, verbose=self.verbose, account=test_account, content=test_content
         )
-        LOG.debug("Comment: %%r: {!r}".format(comment))
-        LOG.debug("Comment: %%s: {}".format(comment))
+        LOG.debug("Comment: %r: {!r}".format(comment))
+        LOG.debug("Comment: %s: {}".format(comment))
         if self.verbose > 1:
             LOG.debug("Comment.as_dict():\n{}".format(pp(comment.as_dict())))
         LOG.debug("Comment.as_dict(minimal=True): {}".format(pp(comment.as_dict(minimal=True))))
@@ -316,7 +325,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         )
         LOG.debug("Comment: %%s: {}".format(comment))
         if self.verbose > 1:
-            LOG.debug("Comment: %%r: {!r}".format(comment))
+            LOG.debug("Comment: %r: {!r}".format(comment))
         if self.verbose > 2:
             LOG.debug("Comment.as_dict():\n{}".format(pp(comment.as_dict())))
         self.assertIsInstance(comment.modified_at, int)
@@ -361,9 +370,9 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         rrset = PowerDNSRecordSet.init_from_dict(
             js_rrset, appname=self.appname, verbose=self.verbose
         )
-        LOG.debug("RecordSet: %%r: {!r}".format(rrset))
+        LOG.debug("RecordSet: %r: {!r}".format(rrset))
         if self.verbose > 1:
-            LOG.debug("RecordSet: %%s: {}".format(rrset))
+            LOG.debug("RecordSet: %s: {}".format(rrset))
             LOG.debug("rrset.as_dict():\n{}".format(pp(rrset.as_dict())))
         LOG.debug("RecordSet.as_dict(minimal=True): {}".format(pp(rrset.as_dict(minimal=True))))
 
@@ -381,9 +390,9 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         rrset = PowerDNSRecordSet.init_from_dict(
             js_rrset, appname=self.appname, verbose=self.verbose
         )
-        LOG.debug("RecordSet: %%r: {!r}".format(rrset))
+        LOG.debug("RecordSet: %r: {!r}".format(rrset))
         if self.verbose > 1:
-            LOG.debug("RecordSet: %%s: {}".format(rrset))
+            LOG.debug("RecordSet: %s: {}".format(rrset))
             LOG.debug("rrset.as_dict():\n{}".format(pp(rrset.as_dict())))
         LOG.debug("RecordSet.as_dict(minimal=True): {}".format(pp(rrset.as_dict(minimal=True))))
 

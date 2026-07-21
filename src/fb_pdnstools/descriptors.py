@@ -24,7 +24,7 @@ from fb_tools.common import to_bool
 # Own modules
 from .xlate import XLATOR
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -35,11 +35,10 @@ class IntegerDescriptor:
     """Descriptor for an integer field."""
 
     # -------------------------------------------------------------------------
-    def __init__(self, name=None, lower_limit=None, upper_limit=None, maybe_none=False):
+    def __init__(self, name, lower_limit=None, upper_limit=None, maybe_none=False):
         """Initialize the IntegerDescriptor descriptor."""
-        if name:
-            self.public_name = name
-            self.private_name = "_" + name
+        self.public_name = name
+        self.private_name = "_" + name
 
         self.maybe_none = to_bool(maybe_none)
 
@@ -110,11 +109,10 @@ class BooleanDescriptor:
     """Descriptor for a boolean field."""
 
     # -------------------------------------------------------------------------
-    def __init__(self, name=None, maybe_none=False):
+    def __init__(self, name, maybe_none=False):
         """Initialize the BooleanDescriptor descriptor."""
-        if name:
-            self.public_name = name
-            self.private_name = "_" + name
+        self.public_name = name
+        self.private_name = "_" + name
 
         self.maybe_none = to_bool(maybe_none)
 
@@ -147,11 +145,10 @@ class PosixPathDescriptor:
     """Descriptor for a field containing a Posix file path."""
 
     # -------------------------------------------------------------------------
-    def __init__(self, name=None, must_absolute=False, maybe_none=False):
+    def __init__(self, name, must_absolute=False, maybe_none=False):
         """Initialize the PosixPathDescriptor descriptor."""
-        if name:
-            self.public_name = name
-            self.private_name = "_" + name
+        self.public_name = name
+        self.private_name = "_" + name
 
         self.must_absolute = to_bool(must_absolute)
         self.maybe_none = to_bool(maybe_none)
@@ -181,7 +178,7 @@ class PosixPathDescriptor:
 
         if self.must_absolute:
             if not path.is_absolute():
-                mdg = _("The attribute {a!r} must be an absolute Unix path, given {p!r}.").format(
+                mdg = _("The attribute {a!r} must be an absolute Posix path, given {p!r}.").format(
                     a=self.public_name, p=str(path)
                 )
                 raise ValueError(mdg)
@@ -194,11 +191,10 @@ class PathDescriptor:
     """Descriptor for a field containing a common file path."""
 
     # -------------------------------------------------------------------------
-    def __init__(self, name=None, must_absolute=False, maybe_none=False):
+    def __init__(self, name, must_absolute=False, maybe_none=False):
         """Initialize the PathDescriptor descriptor."""
-        if name:
-            self.public_name = name
-            self.private_name = "_" + name
+        self.public_name = name
+        self.private_name = "_" + name
 
         self.must_absolute = to_bool(must_absolute)
         self.maybe_none = to_bool(maybe_none)
@@ -228,7 +224,7 @@ class PathDescriptor:
 
         if self.must_absolute:
             if not path.is_absolute():
-                mdg = _("The attribute {a!r} must be an absolute Unix path, given {p!r}.").format(
+                mdg = _("The attribute {a!r} must be an absolute path, given {p!r}.").format(
                     a=self.public_name, p=str(path)
                 )
                 raise ValueError(mdg)
@@ -241,15 +237,31 @@ class StringDescriptor:
     """Descriptor for a string field."""
 
     # -------------------------------------------------------------------------
-    def __init__(self, name=None, lowcase=False, stripped=False, maybe_none=False):
+    def __init__(
+        self,
+        name,
+        lowcase=False,
+        upcase=False,
+        stripped=False,
+        maybe_none=False,
+        not_empty=False,
+    ):
         """Initialize the StringDescriptor descriptor."""
-        if name:
-            self.public_name = name
-            self.private_name = "_" + name
+        self.public_name = name
+        self.private_name = "_" + name
 
-        self.lowcase = lowcase
-        self.stripped = stripped
+        self.lowcase = to_bool(lowcase)
+        self.upcase = to_bool(upcase)
+        self.stripped = to_bool(stripped)
         self.maybe_none = to_bool(maybe_none)
+        self.not_empty = to_bool(not_empty)
+
+        if self.lowcase and self.upcase:
+            msg = _(
+                "The properties {lc!r} and {uc!r} of attribute {a!r} may not be set to {w} "
+                "at the same time."
+            ).format(lc="lowcase", uc="upcase", a=self.public_name, r="True")
+            raise ValueError(msg)
 
     # -------------------------------------------------------------------------
     def __set_name__(self, owner, name):
@@ -275,8 +287,13 @@ class StringDescriptor:
         val = str(value)
         if self.lowcase:
             val = val.lower()
+        elif self.upcase:
+            val = val.upper()
         if self.stripped:
             val = val.strip()
+        if self.not_empty and val == "":
+            msg = _("The attribute {a!r} must not be empty.").format(a=self.public_name)
+            raise ValueError(msg)
         # LOG.debug(f"Setting {self.public_name!r} to {val!r}.")
         setattr(instance, self.private_name, val)
 
@@ -286,14 +303,22 @@ class StringArrayDescriptor:
     """Descriptor for an field of an array of strings."""
 
     # -------------------------------------------------------------------------
-    def __init__(self, name=None, lowcase=False, stripped=False):
+    def __init__(self, name, lowcase=False, upcase=False, stripped=False, not_empty=False):
         """Initialize the StringDescriptor descriptor."""
-        if name:
-            self.public_name = name
-            self.private_name = "_" + name
+        self.public_name = name
+        self.private_name = "_" + name
 
-        self.lowcase = lowcase
-        self.stripped = stripped
+        self.lowcase = to_bool(lowcase)
+        self.upcase = to_bool(upcase)
+        self.stripped = to_bool(stripped)
+        self.not_empty = to_bool(not_empty)
+
+        if self.lowcase and self.upcase:
+            msg = _(
+                "The properties {lc!r} and {uc!r} of attribute {a!r} may not be set to {w} "
+                "at the same time."
+            ).format(lc="lowcase", uc="upcase", a=self.public_name, r="True")
+            raise ValueError(msg)
 
     # -------------------------------------------------------------------------
     def __set_name__(self, owner, name):
@@ -318,14 +343,28 @@ class StringArrayDescriptor:
             for val in value:
                 if self.lowcase:
                     val = val.lower()
+                elif self.upcase:
+                    val = val.upper()
                 if self.stripped:
                     val = val.strip()
+                if self.not_empty and val == "":
+                    msg = _("The attribute {a!r} must not contain empty strings.").format(
+                        a=self.public_name
+                    )
+                    raise ValueError(msg)
                 array.append(str(val))
         else:
             if self.lowcase:
                 value = value.lower()
+            elif self.upcase:
+                value = value.upper()
             if self.stripped:
                 value = value.strip()
+            if self.not_empty and value == "":
+                msg = _("The attribute {a!r} must not contain empty strings.").format(
+                    a=self.public_name
+                )
+                raise ValueError(msg)
             array.append(str(value))
 
         # LOG.debug(f"Setting {self.public_name!r} to {array!r}.")
