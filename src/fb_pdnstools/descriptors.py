@@ -22,9 +22,10 @@ from fb_tools.common import is_sequence
 from fb_tools.common import to_bool
 
 # Own modules
+from . import VALID_RRSET_TYPES
 from .xlate import XLATOR
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -100,7 +101,6 @@ class IntegerDescriptor:
             msg = self.upper_limit_msg.format(v=value)
             raise ValueError(msg)
 
-        # LOG.debug(f"Setting {self.public_name!r} to {val}.")
         setattr(instance, self.private_name, val)
 
 
@@ -294,7 +294,56 @@ class StringDescriptor:
         if self.not_empty and val == "":
             msg = _("The attribute {a!r} must not be empty.").format(a=self.public_name)
             raise ValueError(msg)
-        # LOG.debug(f"Setting {self.public_name!r} to {val!r}.")
+        setattr(instance, self.private_name, val)
+
+
+# =============================================================================
+class RrsetTypeDescriptor:
+    """Descriptor for a string field for the 'type' field of a Resource record set."""
+
+    # -------------------------------------------------------------------------
+    def __init__(
+        self,
+        name,
+        maybe_none=False,
+    ):
+        """Initialize the StringDescriptor descriptor."""
+        self.public_name = name
+        self.private_name = "_" + name
+
+        self.maybe_none = to_bool(maybe_none)
+
+    # -------------------------------------------------------------------------
+    def __set_name__(self, owner, name):
+        """Keep the name of teh descriptor."""
+        self.public_name = name
+        self.private_name = "_" + name
+
+    # -------------------------------------------------------------------------
+    def __get__(self, instance, owner):
+        """Get the data from instance object by the private name."""
+        return getattr(instance, self.private_name, "")
+
+    # -------------------------------------------------------------------------
+    def __set__(self, instance, value):
+        """Set the data in the instance object by the private name as a string value."""
+        if value is None:
+            if self.maybe_none:
+                setattr(instance, self.private_name, None)
+                return
+            msg = _("The attribute {a!r} must not be None.").format(a=self.public_name)
+            raise TypeError(msg)
+
+        val = str(value).strip().upper()
+        if val == "":
+            msg = _("The attribute {a!r} must not be empty.").format(a=self.public_name)
+            raise ValueError(msg)
+
+        if val not in VALID_RRSET_TYPES:
+            msg = _("Invalid resource record set typ {t!r} for attribute {a!r} given.").format(
+                t=value, a=self.public_name
+            )
+            raise ValueError(msg)
         setattr(instance, self.private_name, val)
 
 
@@ -367,7 +416,6 @@ class StringArrayDescriptor:
                 raise ValueError(msg)
             array.append(str(value))
 
-        # LOG.debug(f"Setting {self.public_name!r} to {array!r}.")
         setattr(instance, self.private_name, array)
 
 
