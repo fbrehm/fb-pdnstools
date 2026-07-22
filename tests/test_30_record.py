@@ -293,7 +293,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         test_content = "Test comment"
         test_modified_at = 1000 * 24 * 60 * 60
 
-        from fb_pdnstools.record import PowerDNSRecordSetComment
+        from fb_pdnstools.recordsetcomment import PowerDNSRecordSetComment
 
         LOG.debug("Creating an empty, invalid comment.")
         empty_comment = PowerDNSRecordSetComment()
@@ -371,7 +371,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
             print()
         LOG.info(self.get_method_doc())
 
-        from fb_pdnstools.record import PowerDNSRecordSet
+        from fb_pdnstools.recordset import PowerDNSRecordSet
 
         js_rrset = self.get_js_a_rrset()
 
@@ -389,7 +389,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
             print()
         LOG.info(self.get_method_doc())
 
-        from fb_pdnstools.record import PowerDNSRecordSet
+        from fb_pdnstools.recordset import PowerDNSRecordSet
 
         js_rrset = self.get_js_a_rrset_comment()
 
@@ -398,7 +398,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         if self.verbose > 1:
             LOG.debug("RecordSet: %s:\n{}".format(rrset))
             LOG.debug("rrset.as_dict():\n{}".format(pp(rrset.as_dict())))
-        LOG.debug("RecordSet.as_dict(minimal=True): {}".format(pp(rrset.as_dict(minimal=True))))
+        LOG.debug("RecordSet.as_dict(minimal=True):\n{}".format(pp(rrset.as_dict(minimal=True))))
 
 
 # =============================================================================

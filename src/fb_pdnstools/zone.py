@@ -15,19 +15,10 @@ import ipaddress
 import json
 import logging
 import re
-from functools import cmp_to_key
-
-try:
-    from collections.abc import MutableMapping
-except ImportError:
-    from collections import MutableMapping
 
 # Third party modules
 from fb_tools.common import RE_DOT
-from fb_tools.common import compare_fqdn
-from fb_tools.common import is_sequence
 from fb_tools.common import pp
-from fb_tools.common import to_bool
 from fb_tools.common import to_str
 from fb_tools.common import to_unicode
 from fb_tools.common import to_utf8
@@ -39,17 +30,22 @@ import six
 from . import DEFAULT_API_PREFIX
 from . import DEFAULT_PORT
 from . import FQDN_REGEX
-from .base_handler import BasePowerDNSHandler
+from .descriptors import BooleanDescriptor
+from .descriptors import IntegerDescriptor
+from .descriptors import PosixPathDescriptor
+from .descriptors import StringArrayDescriptor
+from .descriptors import StringDescriptor
 from .errors import PDNSNoRecordsToRemove
 from .errors import PowerDNSZoneError
 from .record import PowerDNSRecord
-from .record import PowerDNSRecordSet
-from .record import PowerDNSRecordSetComment
-from .record import PowerDNSRecordSetList
-from .record import PowerDnsSOAData
+from .recordset import PowerDNSRecordSet
+from .recordset import PowerDNSRecordSetList
+from .recordsetcomment import PowerDNSRecordSetComment
+from .requestable import BasePdnsRequestableObject
+from .soa import PowerDnsSOAData
 from .xlate import XLATOR
 
-__version__ = "2.0.0"
+__version__ = "3.0.0"
 
 LOG = logging.getLogger(__name__)
 
@@ -58,7 +54,7 @@ ngettext = XLATOR.ngettext
 
 
 # =============================================================================
-class PowerDNSZone(BasePowerDNSHandler):
+class PowerDNSZone(BasePdnsRequestableObject):
     """An encapsulation class for zone objects by PowerDNS API."""
 
     re_rev_ipv4 = re.compile(r"^((?:\d+\.)*\d+)\.in-addr\.arpa\.?$", re.IGNORECASE)
@@ -68,82 +64,62 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     defaults = {
         "account": "",
-        "api_rectify": False,
+        "api_rectify": None,
         "catalog": "",
         "dnssec": False,
         "edited_serial": 0,
-        "zone_id": "",
+        "id": "",
         "kind": "",
-        "last_check": "",
-        "master_tsig_key_ids": [],
+        "last_check": 0,
+        "master_tsig_key_ids": None,
         "masters": [],
-        "name": "",
         "notified_serial": 0,
         "nsec3narrow": False,
         "nsec3param": "",
+        "presigned": None,
         "serial": 0,
         "slave_tsig_key_ids": [],
         "soa_edit": "",
         "soa_edit_api": "",
-        "url": "",
+        "url": None,
     }
 
-    # -------------------------------------------------------------------------
-    def __init__(
-        self,
-        appname=None,
-        verbose=0,
-        version=__version__,
-        base_dir=None,
-        presigned=None,
-        master_server=None,
-        port=DEFAULT_PORT,
-        api_key=None,
-        use_https=False,
-        timeout=None,
-        path_prefix=DEFAULT_API_PREFIX,
-        simulate=None,
-        force=None,
-        terminal_has_colors=False,
-        initialized=None,
-        **kwargs,
-    ):
-        """Initialize a PowerDNSZone record."""
-        self._presigned = None
-        if presigned is not None:
-            self._presigned = to_bool(presigned)
+    account = StringDescriptor("account", stripped=True)
+    api_rectify = BooleanDescriptor("api_rectify", maybe_none=True)
+    catalog = StringDescriptor("catalog", stripped=True)
+    dnssec = BooleanDescriptor("dnssec")
+    edited_serial = IntegerDescriptor("edited_serial", lower_limit=0)
+    id = StringDescriptor("id", stripped=True, lowcase=True)  # noqa: A003
+    kind = StringDescriptor("kind", stripped=True)
+    last_check = IntegerDescriptor("last_check", lower_limit=0)
+    master_tsig_key_ids = StringArrayDescriptor("master_tsig_key_ids", stripped=True)
+    masters = StringArrayDescriptor("masters", stripped=True)
+    name = StringDescriptor("name", lowcase=True, stripped=True, not_empty=True)
+    notified_serial = IntegerDescriptor("notified_serial", lower_limit=0)
+    nsec3narrow = BooleanDescriptor("nsec3narrow")
+    nsec3param = StringDescriptor("nsec3param", stripped=True)
+    presigned = StringArrayDescriptor("presigned", stripped=True, maybe_none=True)
+    serial = IntegerDescriptor("serial", lower_limit=0)
+    slave_tsig_key_ids = StringArrayDescriptor("slave_tsig_key_ids", stripped=True)
+    soa_edit = StringDescriptor("soa_edit", stripped=True)
+    soa_edit_api = StringDescriptor("soa_edit_api", stripped=True)
+    url = PosixPathDescriptor("url", must_absolute=True, maybe_none=True)
 
-        self._reverse_zone = False
-        self._reverse_net = ""
+    # -------------------------------------------------------------------------
+    def __init__(self, name, version=__version__, **kwargs):
+        """Initialize a PowerDNSZone record."""
+        self.name = name
+
+        for attr in self.defaults.keys():
+            setattr(self, attr, self.defaults[attr])
 
         self.rrsets = PowerDNSRecordSetList()
 
-        for key in self.defaults.keys():
-            attr = "_" + key
-            setattr(self, attr, self.defaults[key])
-
-        super(PowerDNSZone, self).__init__(
-            appname=appname,
-            verbose=verbose,
-            version=version,
-            base_dir=base_dir,
-            master_server=master_server,
-            port=port,
-            api_key=api_key,
-            use_https=use_https,
-            timeout=timeout,
-            path_prefix=path_prefix,
-            simulate=simulate,
-            force=force,
-            terminal_has_colors=terminal_has_colors,
-            initialized=False,
-        )
-
-        LOG.debug("kwargs:" + "\n" + pp(kwargs))
-
-        self._add_keys = {}
         if kwargs:
             for key in kwargs.keys():
+                if key in self.defaults:
+                    setattr(self, key, self.defaults[key])
+
                 cls_key = key
                 val = kwargs[key]
                 if key == "id":
@@ -153,15 +129,14 @@ class PowerDNSZone(BasePowerDNSHandler):
                 else:
                     self._add_keys[key] = val
 
-            if self._add_keys.keys():
-                msg = _("Got unknown init parameters:") + "\n" + pp(self._add_keys)
-                if self.warn_on_unknown_property:
-                    LOG.warn(msg)
-                else:
-                    LOG.debug(msg)
+        for attr in self.defaults.keys():
+            if attr in kwargs:
+                del kwargs[attr]
 
-        if initialized is not None:
-            self.initialized = initialized
+        super(PowerDNSZone, self).__init__(**kwargs)
+
+        if self.berbose > 2:
+            LOG.debug("kwargs:" + "\n" + pp(kwargs))
 
     # -----------------------------------------------------------
     @classmethod
@@ -293,322 +268,39 @@ class PowerDNSZone(BasePowerDNSHandler):
 
     # -----------------------------------------------------------
     @property
-    def account(self):
-        """
-        Give the name of the owning account of the zone.
-
-        Using `internal` to differ local visible zones from all other zones.
-        """
-        return self._account
-
-    @account.setter
-    def account(self, value):
-        if value is None:
-            self._account = ""
-        else:
-            self._account = str(value)
-
-    # -----------------------------------------------------------
-    @property
-    def api_rectify(self):
-        """Give some stuff belonging to PowerDNS >= 4.1."""
-        return self._api_rectify
-
-    @api_rectify.setter
-    def api_rectify(self, value):
-        self._api_rectify = to_bool(value)
-
-    # -----------------------------------------------------------
-    @property
-    def catalog(self):
-        """Return the catalog this zone is a member of."""
-        return self._catalog
-
-    @catalog.setter
-    def catalog(self, value):
-        if value is None:
-            self._catalog = ""
-        else:
-            self._catalog = str(value)
-
-    # -----------------------------------------------------------
-    @property
-    def dnssec(self):
-        """Is the zone under control of DNSSEC."""
-        return self._dnssec
-
-    @dnssec.setter
-    def dnssec(self, value):
-        self._dnssec = to_bool(value)
-
-    # -----------------------------------------------------------
-    @property
-    def edited_serial(self):
-        """
-        Give the SOA serial as seen in query responses.
-
-        Calculated using the SOA-EDIT metadata, default-soa-edit and
-        default-soa-edit-signed settings.
-        """
-        return self._edited_serial
-
-    @edited_serial.setter
-    def edited_serial(self, value):
-        if value is None:
-            self._edited_serial = 0
-        else:
-            self._edited_serial = int(value)
-
-    # -----------------------------------------------------------
-    @property
-    def zone_id(self):  # noqa: A003
-        """Give the unique idendity of the zone."""
-        return self._zone_id
-
-    @zone_id.setter
-    def zone_id(self, value):  # noqa: A003
-        if value is None:
-            self._zone_id = ""
-        else:
-            self._zone_id = str(value)
-
-    # -----------------------------------------------------------
-    @property
-    def kind(self):
-        """Give the kind or type of the zone."""
-        return self._kind
-
-    @kind.setter
-    def kind(self, value):
-        if value is None:
-            self._kind = ""
-        else:
-            self._kind = str(value)
-
-    # -----------------------------------------------------------
-    @property
-    def last_check(self):
-        """Give the timestamp of the last check of the zone."""
-        return self._last_check
-
-    @last_check.setter
-    def last_check(self, value):
-        if value is None:
-            self._last_check = 0
-        else:
-            self._last_check = int(value)
-
-    # -----------------------------------------------------------
-    @property
-    def master_tsig_key_ids(self):
-        """Give the id of the TSIG keys used for master operation in this zone."""
-        return copy.copy(self._master_tsig_key_ids)
-
-    @master_tsig_key_ids.setter
-    def master_tsig_key_ids(self, key_ids):
-        self._master_tsig_key_ids = []
-        if key_ids:
-            if is_sequence(key_ids):
-                for key_id in key_ids:
-                    self._master_tsig_key_ids.append(key_id)
-            else:
-                self._master_tsig_key_ids.append(key_ids)
-
-    # -----------------------------------------------------------
-    @property
-    def masters(self):
-        """
-        Give a list of IP addresses configured as a master for this zone.
-
-        (“Slave” type zones only)
-        """
-        return copy.copy(self._masters)
-
-    @masters.setter
-    def masters(self, masters):
-        self._masters = []
-        if is_sequence(masters):
-            for master in masters:
-                self._masters.append(master)
-        else:
-            self._masters.append(masters)
-
-    # -----------------------------------------------------------
-    @property
-    def name(self):
-        """Give the name of the zone."""
-        return self._name
-
-    @name.setter
-    def name(self, value):
-        if value is None:
-            self._name = ""
-            self._reverse_zone = False
-            self._reverse_net = ""
-            return
-
-        if not value:
-            self._name = ""
-            self._reverse_zone = False
-            self._reverse_net = ""
-            return
-
-        v = to_str(str(value).strip())
-        if not v:
-            self._name = ""
-            self._reverse_zone = False
-            self._reverse_net = ""
-            return
-        self._name = v
-        match = self.re_rev_ipv4.search(v)
-        if match:
-            self._reverse_zone = True
-            self._reverse_net = self.ipv4_nw_from_tuples(match.group(1))
-        else:
-            match = self.re_rev_ipv6.search(v)
-            if match:
-                self._reverse_zone = True
-                self._reverse_net = self.ipv6_nw_from_tuples(match.group(1))
-            else:
-                self._reverse_zone = False
-                self._reverse_net = None
-
-    # -----------------------------------------------------------
-    @property
     def reverse_zone(self):
         """Return, whether this is a reverse zone."""
-        return self._reverse_zone
+        match = self.re_rev_ipv4.search(self.name)
+        if match:
+            return True
+
+        match = self.re_rev_ipv6.search(self.name)
+        if match:
+            return True
+
+        return False
 
     # -----------------------------------------------------------
     @property
     def reverse_net(self):
         """Give an IP network object for the network, for which this is the reverse zone."""
-        return self._reverse_net
+        match = self.re_rev_ipv4.search(self.name)
+        if match:
+            return self.ipv4_nw_from_tuples(match.group(1))
+
+        match = self.re_rev_ipv6.search(self.name)
+        if match:
+            return self.ipv6_nw_from_tuples(match.group(1))
+
+        return ""
 
     # -----------------------------------------------------------
     @property
     def name_unicode(self):
         """Give name of the zone in unicode, if it is an IDNA encoded zone."""
-        n = self._name
-        if "xn--" in n:
-            return to_utf8(n).decode("idna")
-        return n
-
-    # -----------------------------------------------------------
-    @property
-    def notified_serial(self):
-        """Give the notified serial number of the zone."""
-        return self._notified_serial
-
-    @notified_serial.setter
-    def notified_serial(self, value):
-        if value is None:
-            self._notified_serial = 0
-        else:
-            self._notified_serial = int(value)
-
-    # -----------------------------------------------------------
-    @property
-    def nsec3narrow(self):
-        """Give some stuff belonging to DNSSEC."""
-        return getattr(self, "_nsec3narrow", None)
-
-    @nsec3narrow.setter
-    def nsec3narrow(self, value):
-        self._nsec3narrow = to_bool(value)
-
-    # -----------------------------------------------------------
-    @property
-    def nsec3param(self):
-        """Give some stuff belonging to DNSSEC."""
-        return getattr(self, "_nsec3param", None)
-
-    @nsec3param.setter
-    def nsec3param(self, value):
-        if value is None:
-            self._nsec3param = ""
-        else:
-            self._nsec3param = str(value)
-
-    # -----------------------------------------------------------
-    @property
-    def serial(self):
-        """Give the serial number of the zone."""
-        return self._serial
-
-    @serial.setter
-    def serial(self, value):
-        if value is None:
-            self._serial = 0
-        else:
-            self._serial = int(value)
-
-    # -----------------------------------------------------------
-    @property
-    def slave_tsig_key_ids(self):
-        """Return the id of the TSIG keys used for slave operation in this zone."""
-        return copy.copy(self._slave_tsig_key_ids)
-
-    @slave_tsig_key_ids.setter
-    def slave_tsig_key_ids(self, key_ids):
-        self._slave_tsig_key_ids = []
-        if key_ids:
-            if is_sequence(key_ids):
-                for key_id in key_ids:
-                    self._slave_tsig_key_ids.append(key_id)
-            else:
-                self._slave_tsig_key_ids.append(key_ids)
-
-    # -----------------------------------------------------------
-    @property
-    def soa_edit(self):
-        """Give the SOA edit property of the zone object."""
-        return self._soa_edit
-
-    @soa_edit.setter
-    def soa_edit(self, value):
-        if value is None:
-            self._soa_edit = ""
-        else:
-            self._soa_edit = str(value)
-
-    # -----------------------------------------------------------
-    @property
-    def soa_edit_api(self):
-        """Give the SOA edit property (API) of the zone object."""
-        return self._soa_edit_api
-
-    @soa_edit_api.setter
-    def soa_edit_api(self, value):
-        if value is None:
-            self._soa_edit_api = ""
-        else:
-            self._soa_edit_api = str(value)
-
-    # -----------------------------------------------------------
-    @property
-    def url(self):
-        """Give the URL in the API to get the zone object."""
-        return self._url
-
-    @url.setter
-    def url(self, value):
-        if value is None:
-            self._url = ""
-        else:
-            self._url = str(value)
-
-    # -----------------------------------------------------------
-    @property
-    def presigned(self):
-        """Give some stuff belonging to PowerDNS >= 4.1."""
-        return getattr(self, "_presigned", None)
-
-    # -----------------------------------------------------------
-    @property
-    def add_keys(self):
-        """Give additional, unexpected keys on initialisation."""
-        return copy.copy(self._add_keys)
+        if "xn--" in self.name:
+            return to_utf8(self.name).decode("idna")
+        return self.name
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=True):
@@ -626,7 +318,6 @@ class PowerDNSZone(BasePowerDNSHandler):
         for key in self.defaults.keys():
             res[key] = getattr(self, key, None)
 
-        res["add_keys"] = self.add_keys
         res["name_unicode"] = self.name_unicode
         res["presigned"] = self.presigned
         res["reverse_net"] = self.reverse_net
@@ -1471,260 +1162,6 @@ class PowerDNSZone(BasePowerDNSHandler):
         if not rrset:
             LOG.warning(_("Did not get SOA for zone {!r}.").format(self.name))
         return rrset
-
-
-# =============================================================================
-class PowerDNSZoneDict(MutableMapping):
-    """
-    A dictionary containing PDNS Zone objects.
-
-    It works like a dict.
-    i.e.:
-    zones = PowerDNSZoneDict(PowerDNSZone(name='pp.com', ...))
-    and
-    zones['pp.com'] returns a PowerDNSZone object for zone 'pp.com'
-    """
-
-    msg_invalid_zone_type = _("Invalid item type {{!r}} to set, only {} allowed.").format(
-        "PowerDNSZone"
-    )
-    msg_key_not_name = _("The key {k!r} must be equal to the zone name {n!r}.")
-    msg_none_type_error = _("None type as key is not allowed.")
-    msg_empty_key_error = _("Empty key {!r} is not allowed.")
-    msg_no_zone_dict = _("Object {o!r} is not a {e} object.")
-
-    # -------------------------------------------------------------------------
-    # __init__() method required to create instance from class.
-    def __init__(self, *args, **kwargs):
-        """Initialize a PowerDNSZoneDict object."""
-        self._map = {}
-
-        for arg in args:
-            self.append(arg)
-
-    # -------------------------------------------------------------------------
-    def _set_item(self, key, zone):
-
-        if not isinstance(zone, PowerDNSZone):
-            raise TypeError(self.msg_invalid_zone_type.format(zone.__class__.__name__))
-
-        zone_name = zone.name
-        if zone_name != key.lower():
-            raise KeyError(self.msg_key_not_name.format(k=key, n=zone_name))
-
-        self._map[zone_name] = zone
-
-    # -------------------------------------------------------------------------
-    def append(self, zone):
-        """Append the given zone to the current dict."""
-        if not isinstance(zone, PowerDNSZone):
-            raise TypeError(self.msg_invalid_zone_type.format(zone.__class__.__name__))
-        self._set_item(zone.name, zone)
-
-    # -------------------------------------------------------------------------
-    def _get_item(self, key):
-
-        if key is None:
-            raise TypeError(self.msg_none_type_error)
-
-        zone_name = str(key).lower().strip()
-        if zone_name == "":
-            raise ValueError(self.msg_empty_key_error.format(key))
-
-        return self._map[zone_name]
-
-    # -------------------------------------------------------------------------
-    def get(self, key):
-        """Get a zone from current dict by its zone name as key."""
-        return self._get_item(key)
-
-    # -------------------------------------------------------------------------
-    def _del_item(self, key, strict=True):
-
-        if key is None:
-            raise TypeError(self.msg_none_type_error)
-
-        zone_name = str(key).lower().strip()
-        if zone_name == "":
-            raise ValueError(self.msg_empty_key_error.format(key))
-
-        if not strict and zone_name not in self._map:
-            return
-
-        del self._map[zone_name]
-
-    # -------------------------------------------------------------------------
-    # The next five methods are requirements of the ABC.
-    def __setitem__(self, key, value):
-        """Set a zone in current dict by its zone name as key."""
-        self._set_item(key, value)
-
-    # -------------------------------------------------------------------------
-    def __getitem__(self, key):
-        """Get a zone from current dict by its zone name as key."""
-        return self._get_item(key)
-
-    # -------------------------------------------------------------------------
-    def __delitem__(self, key):
-        """Remove the zone in dict with the given zone name as key."""
-        self._del_item(key)
-
-    # -------------------------------------------------------------------------
-    def __iter__(self):
-        """Iterate through all zone names in current dict."""
-        for zone_name in self.keys():
-            yield zone_name
-
-    # -------------------------------------------------------------------------
-    def __len__(self):
-        """Return the number of zones in current dict."""
-        return len(self._map)
-
-    # -------------------------------------------------------------------------
-    # The next methods aren't required, but nice for different purposes:
-    def __str__(self):
-        """Return simple dict representation of the mapping."""
-        return str(self._map)
-
-    # -------------------------------------------------------------------------
-    def __repr__(self):
-        """Echoes class, zone_id, & reproducible representation in the REPL."""
-        return "{}, {}({})".format(
-            super(PowerDNSZoneDict, self).__repr__(), self.__class__.__name__, self._map
-        )
-
-    # -------------------------------------------------------------------------
-    def __contains__(self, key):
-        """Return whether the given zone name is contained in current dict."""
-        if key is None:
-            raise TypeError(self.msg_none_type_error)
-
-        zone_name = str(key).lower().strip()
-        if zone_name == "":
-            raise ValueError(self.msg_empty_key_error.format(key))
-
-        return zone_name in self._map
-
-    # -------------------------------------------------------------------------
-    def keys(self):
-        """Return a sorted list of all zone names in this dict."""
-        return sorted(
-            self._map.keys(), key=lambda x: cmp_to_key(compare_fqdn)(self._map[x].name_unicode)
-        )
-
-    # -------------------------------------------------------------------------
-    def items(self):
-        """Return tuples (zone name + object as tuple) of this dict in a sorted manner."""
-        item_list = []
-
-        for zone_name in self.keys():
-            item_list.append((zone_name, self._map[zone_name]))
-
-        return item_list
-
-    # -------------------------------------------------------------------------
-    def values(self):
-        """Return all zone objects in this dict."""
-        value_list = []
-        for zone_name in self.keys():
-            value_list.append(self._map[zone_name])
-        return value_list
-
-    # -------------------------------------------------------------------------
-    def __eq__(self, other):
-        """Magic method for using it as the '=='-operator."""
-        if not isinstance(other, PowerDNSZoneDict):
-            raise TypeError(self.msg_no_zone_dict.format(o=other, e="PowerDNSZoneDict"))
-
-        return self._map == other._map
-
-    # -------------------------------------------------------------------------
-    def __ne__(self, other):
-        """Magic method for using it as the '!='-operator."""
-        if not isinstance(other, PowerDNSZoneDict):
-            raise TypeError(self.msg_no_zone_dict.format(o=other, e="PowerDNSZoneDict"))
-
-        return self._map != other._map
-
-    # -------------------------------------------------------------------------
-    def pop(self, key, *args):
-        """Get and return the zone by its name and remove it in dict."""
-        if key is None:
-            raise TypeError(self.msg_none_type_error)
-
-        zone_name = str(key).lower().strip()
-        if zone_name == "":
-            raise ValueError(self.msg_empty_key_error.format(key))
-
-        return self._map.pop(zone_name, *args)
-
-    # -------------------------------------------------------------------------
-    def popitem(self):
-        """Remove and return a arbitrary (zone name and object) pair from the dictionary."""
-        if not len(self._map):
-            return None
-
-        zone_name = self.keys()[0]
-        zone = self._map[zone_name]
-        del self._map[zone_name]
-        return (zone_name, zone)
-
-    # -------------------------------------------------------------------------
-    def clear(self):
-        """Remove all items from the dictionary."""
-        self._map = {}
-
-    # -------------------------------------------------------------------------
-    def setdefault(self, key, default):
-        """
-        Return the zone, if the key is in dict.
-
-        If not, insert key with a value of default and return default.
-        """
-        if key is None:
-            raise TypeError(self.msg_none_type_error)
-
-        zone_name = str(key).lower().strip()
-        if zone_name == "":
-            raise ValueError(self.msg_empty_key_error.format(key))
-
-        if not isinstance(default, PowerDNSZone):
-            raise TypeError(self.msg_invalid_zone_type.format(default.__class__.__name__))
-
-        if zone_name in self._map:
-            return self._map[zone_name]
-
-        self._set_item(zone_name, default)
-        return default
-
-    # -------------------------------------------------------------------------
-    def update(self, other):
-        """Update the dict with the key/value pairs from other, overwriting existing keys."""
-        if isinstance(other, PowerDNSZoneDict) or isinstance(other, dict):
-            for zone_name in other.keys():
-                self._set_item(zone_name, other[zone_name])
-            return
-
-        for tokens in other:
-            key = tokens[0]
-            value = tokens[1]
-            self._set_item(key, value)
-
-    # -------------------------------------------------------------------------
-    def as_dict(self, short=True):
-        """Transform the elements of the object into a dict."""
-        res = {}
-        for zone_name in self._map:
-            res[zone_name] = self._map[zone_name].as_dict(short)
-        return res
-
-    # -------------------------------------------------------------------------
-    def as_list(self, short=True):
-        """Return a list with all zones transformed to a dict."""
-        res = []
-        for zone_name in self.keys():
-            res.append(self._map[zone_name].as_dict(short))
-        return res
 
 
 # =============================================================================

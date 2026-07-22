@@ -95,13 +95,13 @@ from .errors import PowerDNSWrongSoaDataError  # noqa: F401
 from .errors import PowerDNSZoneError  # noqa: F401
 from .record import PowerDNSRecord  # noqa: F401
 from .record import PowerDNSRecordList  # noqa: F401
-from .record import PowerDNSRecordSet  # noqa: F401
-from .record import PowerDNSRecordSetComment  # noqa: F401
-from .record import PowerDNSRecordSetList  # noqa: F401
-from .record import PowerDnsSOAData  # noqa: F401
+from .recordset import PowerDNSRecordSet  # noqa: F401
+from .recordset import PowerDNSRecordSetList  # noqa: F401
+from .recordsetcomment import PowerDNSRecordSetComment  # noqa: F401
 from .server import PowerDNSServer  # noqa: F401
+from .soa import PowerDnsSOAData  # noqa: F401
 from .zone import PowerDNSZone  # noqa: F401
-from .zone import PowerDNSZoneDict  # noqa: F401
+from .zonedict import PowerDNSZoneDict  # noqa: F401
 
 
 # =============================================================================
