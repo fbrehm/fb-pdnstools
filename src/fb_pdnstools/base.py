@@ -22,6 +22,7 @@ from collections.abc import Mapping
 from fb_tools.common import RE_DOT_AT_END
 from fb_tools.common import reverse_pointer
 from fb_tools.common import to_str
+from fb_tools.handling_obj import HandlingObject
 from fb_tools.obj import FbBaseObject
 from fb_tools.obj import FbGenericBaseObject
 
@@ -136,6 +137,25 @@ class GenericPdnsObject(FbGenericBaseObject):
 class BasePdnsObject(FbBaseObject, GenericPdnsObject):
     """
     Base class for a PowerDNS object.
+
+    Must not be instantiated directly.
+    """
+
+    # -------------------------------------------------------------------------
+    def __init__(
+        self,
+        version=__version__,
+        **kwargs,
+    ):
+        """Initialize a PowerDNSRecord record."""
+        super(BasePdnsObject, self).__init__(version=version, **kwargs)
+
+
+# =============================================================================
+@add_metaclass(ABCMeta)
+class BasePdnsHandler(HandlingObject, GenericPdnsObject):
+    """
+    Base class for a PowerDNS handler object.
 
     Must not be instantiated directly.
     """

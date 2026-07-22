@@ -21,13 +21,13 @@ from fb_tools.handling_obj import HandlingObject
 # Own modules
 from . import DEFAULT_API_PREFIX
 from . import DEFAULT_PORT
-from .base_handler import BasePowerDNSHandler
 from .errors import PDNSApiNotFoundError, PDNSApiValidationError
+from .requestable import BasePdnsRequestableObject
 from .xlate import XLATOR
 from .zone import PowerDNSZone
 from .zonedict import PowerDNSZoneDict
 
-__version__ = "1.1.1"
+__version__ = "1.2.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -35,7 +35,7 @@ ngettext = XLATOR.ngettext
 
 
 # =============================================================================
-class PowerDNSServer(BasePowerDNSHandler):
+class PowerDNSServer(BasePdnsRequestableObject):
     """Class for a PowerDNS server handler."""
 
     # -------------------------------------------------------------------------

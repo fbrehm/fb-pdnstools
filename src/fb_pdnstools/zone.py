@@ -71,7 +71,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
         "id": "",
         "kind": "",
         "last_check": 0,
-        "master_tsig_key_ids": None,
+        "master_tsig_key_ids": [],
         "masters": [],
         "notified_serial": 0,
         "nsec3narrow": False,
@@ -138,31 +138,31 @@ class PowerDNSZone(BasePdnsRequestableObject):
         if self.berbose > 2:
             LOG.debug("kwargs:" + "\n" + pp(kwargs))
 
-    # -----------------------------------------------------------
-    @classmethod
-    def init_from_dict(
-        cls,
-        data,
-        appname=None,
-        verbose=0,
-        version=__version__,
-        base_dir=None,
-        master_server=None,
-        port=DEFAULT_PORT,
-        api_key=None,
-        use_https=False,
-        timeout=None,
-        path_prefix=DEFAULT_API_PREFIX,
-        simulate=None,
-        force=None,
-        terminal_has_colors=False,
-        initialized=None,
-    ):
-        """Create a new PowerDNSZone object based on a given dict."""
-        if not isinstance(data, dict):
-            raise PowerDNSZoneError(_("Given data {!r} is not a dict object.").format(data))
+    # -------------------------------------------------------------------------
+    def import_data(self, data):
+        """Import the given data from PowerDNS API."""
+        super(PowerDNSRecordSet, self).import_data(data)
 
-        # From API:
+        self.initialized = False
+
+        for attr in self.defaults.keys():
+            setattr(self, attr, self.defaults[attr])
+
+        self.rrsets = PowerDNSRecordSetList()
+
+        for key in data:
+            val = data[key]
+            if key in self.defaults:
+                if val != self.defaults[key]:
+                    setattr(self, key, val)
+
+        rrsets = None
+        if "rrsets" in data:
+            if data["rrsets"]:
+                rrsets = data["rrsets"]
+            del data["rrsets"]
+
+        # Data from API:
         # {   "account": "local",
         #     "api_rectify": False,
         #     "catalog": "",
@@ -192,77 +192,43 @@ class PowerDNSZone(BasePdnsRequestableObject):
         #     "soa_edit_api"': 'INCEPTION-INCREMENT',
         #     "url": "api/v1/servers/localhost/zones/bla.ai."},
 
-        params = {
-            "appname": appname,
-            "verbose": verbose,
-            "version": version,
-            "base_dir": base_dir,
-            "master_server": master_server,
-            "port": port,
-            "api_key": api_key,
-            "use_https": use_https,
-            "timeout": timeout,
-            "path_prefix": path_prefix,
-            "simulate": simulate,
-            "force": force,
-            "terminal_has_colors": terminal_has_colors,
-        }
-        if initialized is not None:
-            params["initialized"] = initialized
+        if rrsets:
+            for rrset_data in rrsets:
+                rrset = PowerDNSRecordSet.init_from_dict(rrset_data)
+                self.rrsets.append(rrset)
 
-        rrsets = None
-        if "rrsets" in data:
-            if data["rrsets"]:
-                rrsets = data["rrsets"]
-            del data["rrsets"]
+        self.initialized = True
 
-        new_data = {}
-        for key in data:
-            val = data[key]
-            if isinstance(key, six.string_types):
-                key = to_str(key)
-            if isinstance(val, six.string_types):
-                val = to_str(val)
-            target_key = key
-            if key == "id":
-                target_key = "zone_id"
-            if target_key in cls.defaults:
-                if val != cls.defaults[target_key]:
-                    new_data[target_key] = val
 
-        params.update(new_data)
+    # -------------------------------------------------------------------------
+    @classmethod
+    def init_from_dict( cls, data, **kwargs):
+        """Create a new PowerDNSZone object based on a given dict."""
+        if not isinstance(data, dict):
+            raise PowerDNSZoneError(_("Given data {!r} is not a dict object.").format(data))
 
-        # if verbose > 3:
-        if verbose > 0:
-            pout = copy.copy(params)
+        init_params = copy.copy(kwargs)
+
+        if "name" not in data:
+            msg = _("No name for zo zone in import data given.")
+            raise PowerDNSZoneError(msg)
+
+        show_secrets = False
+        if "SHOW_PDNS_SECRETS" in os.environ and to_bool(os.environ["SHOW_PDNS_SECRETS"]):
+            show_secrets = False
+
+        if verbose > 1:
+            pout = copy.copy(init_params)
             pout["api_key"] = None
-            if api_key:
-                pout["api_key"] = "******"
+            if api_key in init_params and init_params["api_key"]:
+                if show_secrets:
+                    pout["api_key"] = init_params["api_key"]
+                else:
+                    pout["api_key"] = "******"
             LOG.debug(_("Params initialisation:") + "\n" + pp(pout))
 
-        zone = cls(**params)
-
-        if rrsets:
-            for single_rrset in rrsets:
-                rrset = PowerDNSRecordSet.init_from_dict(
-                    single_rrset,
-                    appname=appname,
-                    verbose=verbose,
-                    base_dir=base_dir,
-                    master_server=master_server,
-                    port=port,
-                    api_key=api_key,
-                    use_https=use_https,
-                    timeout=timeout,
-                    path_prefix=path_prefix,
-                    simulate=simulate,
-                    force=force,
-                    terminal_has_colors=terminal_has_colors,
-                    initialized=True,
-                )
-                zone.rrsets.append(rrset)
-
-        zone.initialized = True
+        zone = cls(name=name, **init_params)
+        zone.import_data(data)
 
         return zone
 
@@ -303,6 +269,22 @@ class PowerDNSZone(BasePdnsRequestableObject):
         return self.name
 
     # -------------------------------------------------------------------------
+    def export_data(self):
+        """Typecast PDNS relevant data into a dict for reproduction."""
+        res = {}
+
+        for key in self.defaults.keys():
+            val = getattr(self, key, None)
+            if val is not None:
+                res[key] = val
+
+        res["rrsets"] = []
+        for rrset in self.rrsets:
+            res["rrsets"].append(rrset.export_data())
+
+        return res
+
+    # -------------------------------------------------------------------------
     def as_dict(self, short=True):
         """
         Transform the elements of the object into a dict.
@@ -319,7 +301,6 @@ class PowerDNSZone(BasePdnsRequestableObject):
             res[key] = getattr(self, key, None)
 
         res["name_unicode"] = self.name_unicode
-        res["presigned"] = self.presigned
         res["reverse_net"] = self.reverse_net
         res["reverse_zone"] = self.reverse_zone
         res["rrsets"] = []

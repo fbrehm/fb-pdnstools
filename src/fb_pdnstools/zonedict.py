@@ -18,7 +18,7 @@ from functools import cmp_to_key
 from fb_tools.common import compare_fqdn
 
 # Own modules
-from .recordset import PowerDNSZone
+from .zone import PowerDNSZone
 from .xlate import XLATOR
 
 __version__ = "1.0.0"

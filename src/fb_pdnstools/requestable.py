@@ -42,7 +42,7 @@ from . import DEFAULT_TIMEOUT
 from . import DEFAULT_USE_HTTPS
 from . import LIBRARY_NAME
 from . import MAX_PORT_NUMBER
-from .base import BasePdnsObject
+from .base import BasePdnsHandler
 from .descriptors import BooleanDescriptor
 from .descriptors import IntegerDescriptor
 from .descriptors import PosixPathDescriptor
@@ -66,7 +66,7 @@ _ = XLATOR.gettext
 
 # =============================================================================
 @add_metaclass(ABCMeta)
-class BasePdnsRequestableObject(BasePdnsObject):
+class BasePdnsRequestableObject(BasePdnsHandler):
     """
     Base class for a PowerDNS handler for requestable object.
 
