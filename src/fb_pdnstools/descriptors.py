@@ -352,7 +352,15 @@ class StringArrayDescriptor:
     """Descriptor for an field of an array of strings."""
 
     # -------------------------------------------------------------------------
-    def __init__(self, name, lowcase=False, upcase=False, stripped=False, not_empty=False):
+    def __init__(
+        self,
+        name,
+        lowcase=False,
+        upcase=False,
+        stripped=False,
+        not_empty=False,
+        maybe_none=False,
+    ):
         """Initialize the StringDescriptor descriptor."""
         self.public_name = name
         self.private_name = "_" + name
@@ -361,6 +369,7 @@ class StringArrayDescriptor:
         self.upcase = to_bool(upcase)
         self.stripped = to_bool(stripped)
         self.not_empty = to_bool(not_empty)
+        self.maybe_none = to_bool(maybe_none)
 
         if self.lowcase and self.upcase:
             msg = _(
@@ -384,8 +393,11 @@ class StringArrayDescriptor:
     def __set__(self, instance, value):
         """Set the data in the instance object by the private name as an array of strings."""
         if value is None:
-            setattr(instance, self.private_name, [])
-            return
+            if self.maybe_none:
+                setattr(instance, self.private_name, None)
+                return
+            msg = _("The attribute {a!r} must not be None.").format(a=self.public_name)
+            raise TypeError(msg)
 
         array = []
         if is_sequence(value):
