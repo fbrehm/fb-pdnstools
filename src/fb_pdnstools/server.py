@@ -24,9 +24,10 @@ from . import DEFAULT_PORT
 from .base_handler import BasePowerDNSHandler
 from .errors import PDNSApiNotFoundError, PDNSApiValidationError
 from .xlate import XLATOR
-from .zone import PowerDNSZone, PowerDNSZoneDict
+from .zone import PowerDNSZone
+from .zonedict import PowerDNSZoneDict
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
