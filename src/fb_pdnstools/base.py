@@ -33,7 +33,7 @@ from six import add_metaclass
 from . import VALID_RRSET_TYPES
 from .xlate import XLATOR
 
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -167,7 +167,7 @@ class BasePdnsHandler(HandlingObject, GenericPdnsObject):
         **kwargs,
     ):
         """Initialize a PowerDNSRecord record."""
-        super(BasePdnsObject, self).__init__(version=version, **kwargs)
+        super(BasePdnsHandler, self).__init__(version=version, **kwargs)
 
 
 # =============================================================================

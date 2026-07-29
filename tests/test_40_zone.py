@@ -65,7 +65,7 @@ class TestPdnsZone(FbPdnsToolsTestcase):
         LOG.debug("Empty PowerDNSZone:\n{}".format(zone))
 
         LOG.info("Testing import of PowerDNSZoneDict from fb_pdnstools.zone ...")
-        from fb_pdnstools.zone import PowerDNSZoneDict
+        from fb_pdnstools.zonedict import PowerDNSZoneDict
 
         zone_map = PowerDNSZoneDict()
         LOG.debug("Empty PowerDNSZoneDict: {}".format(zone_map))
@@ -220,7 +220,7 @@ if __name__ == "__main__":
     suite = unittest.TestSuite()
 
     suite.addTest(TestPdnsZone("test_import_modules", verbose))
-    # suite.addTest(TestPdnsZone("test_verify_fqdn", verbose))
+    suite.addTest(TestPdnsZone("test_verify_fqdn", verbose))
     # suite.addTest(TestPdnsZone("test_zone_simple", verbose))
     # suite.addTest(TestPdnsZone("test_zone_get_soa", verbose))
 

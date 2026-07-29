@@ -14,11 +14,13 @@ import copy
 import ipaddress
 import json
 import logging
+import os
 import re
 
 # Third party modules
 from fb_tools.common import RE_DOT
 from fb_tools.common import pp
+from fb_tools.common import to_bool
 from fb_tools.common import to_str
 from fb_tools.common import to_unicode
 from fb_tools.common import to_utf8
@@ -27,8 +29,6 @@ from fb_tools.obj import FbBaseObject
 import six
 
 # Own modules
-from . import DEFAULT_API_PREFIX
-from . import DEFAULT_PORT
 from . import FQDN_REGEX
 from .descriptors import BooleanDescriptor
 from .descriptors import IntegerDescriptor
@@ -45,7 +45,7 @@ from .requestable import BasePdnsRequestableObject
 from .soa import PowerDnsSOAData
 from .xlate import XLATOR
 
-__version__ = "3.0.0"
+__version__ = "3.0.1"
 
 LOG = logging.getLogger(__name__)
 
@@ -114,6 +114,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
             setattr(self, attr, self.defaults[attr])
 
         self.rrsets = PowerDNSRecordSetList()
+        self._add_keys = {}
 
         if kwargs:
             for key in kwargs.keys():
@@ -135,13 +136,13 @@ class PowerDNSZone(BasePdnsRequestableObject):
 
         super(PowerDNSZone, self).__init__(**kwargs)
 
-        if self.berbose > 2:
+        if self.verbose > 1:
             LOG.debug("kwargs:" + "\n" + pp(kwargs))
 
     # -------------------------------------------------------------------------
     def import_data(self, data):
         """Import the given data from PowerDNS API."""
-        super(PowerDNSRecordSet, self).import_data(data)
+        super(PowerDNSZone, self).import_data(data)
 
         self.initialized = False
 
@@ -199,10 +200,9 @@ class PowerDNSZone(BasePdnsRequestableObject):
 
         self.initialized = True
 
-
     # -------------------------------------------------------------------------
     @classmethod
-    def init_from_dict( cls, data, **kwargs):
+    def init_from_dict(cls, data, **kwargs):
         """Create a new PowerDNSZone object based on a given dict."""
         if not isinstance(data, dict):
             raise PowerDNSZoneError(_("Given data {!r} is not a dict object.").format(data))
@@ -212,6 +212,9 @@ class PowerDNSZone(BasePdnsRequestableObject):
         if "name" not in data:
             msg = _("No name for zo zone in import data given.")
             raise PowerDNSZoneError(msg)
+        name = data["name"]
+
+        verbose = int(kwargs.get('verbose', 0))
 
         show_secrets = False
         if "SHOW_PDNS_SECRETS" in os.environ and to_bool(os.environ["SHOW_PDNS_SECRETS"]):
@@ -220,7 +223,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
         if verbose > 1:
             pout = copy.copy(init_params)
             pout["api_key"] = None
-            if api_key in init_params and init_params["api_key"]:
+            if "api_key" in init_params and init_params["api_key"]:
                 if show_secrets:
                     pout["api_key"] = init_params["api_key"]
                 else:
