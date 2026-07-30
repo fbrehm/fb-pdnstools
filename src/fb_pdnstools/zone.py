@@ -24,7 +24,7 @@ from fb_tools.common import to_bool
 from fb_tools.common import to_str
 from fb_tools.common import to_unicode
 from fb_tools.common import to_utf8
-from fb_tools.obj import FbBaseObject
+from fb_tools.obj import FbGenericBaseObject
 
 import six
 
@@ -45,7 +45,7 @@ from .requestable import BasePdnsRequestableObject
 from .soa import PowerDnsSOAData
 from .xlate import XLATOR
 
-__version__ = "3.0.2"
+__version__ = "3.0.3"
 
 LOG = logging.getLogger(__name__)
 
@@ -309,7 +309,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
         res["rrsets"] = []
 
         for rrset in self.rrsets:
-            if isinstance(rrset, FbBaseObject):
+            if isinstance(rrset, FbGenericBaseObject):
                 res["rrsets"].append(rrset.as_dict(short))
             else:
                 res["rrsets"].append(rrset)
