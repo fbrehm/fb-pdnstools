@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@summary: An encapsulation class for zone objects by PowerDNS API.
+@summary: An encapsulation class fora dict of zone objects by PowerDNS API.
 
 @author: Frank Brehm
 @contact: frank@brehm-online.com

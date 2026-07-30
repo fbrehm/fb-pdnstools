@@ -16,6 +16,7 @@ import json
 import logging
 import os
 import re
+# from collections.abc import MutableSequence
 
 # Third party modules
 from fb_tools.common import RE_DOT
@@ -24,7 +25,6 @@ from fb_tools.common import to_bool
 from fb_tools.common import to_str
 from fb_tools.common import to_unicode
 from fb_tools.common import to_utf8
-from fb_tools.obj import FbGenericBaseObject
 
 import six
 
@@ -45,7 +45,7 @@ from .requestable import BasePdnsRequestableObject
 from .soa import PowerDnsSOAData
 from .xlate import XLATOR
 
-__version__ = "3.0.3"
+__version__ = "3.1.0"
 
 LOG = logging.getLogger(__name__)
 
@@ -306,13 +306,9 @@ class PowerDNSZone(BasePdnsRequestableObject):
         res["name_unicode"] = self.name_unicode
         res["reverse_net"] = self.reverse_net
         res["reverse_zone"] = self.reverse_zone
-        res["rrsets"] = []
-
-        for rrset in self.rrsets:
-            if isinstance(rrset, FbGenericBaseObject):
-                res["rrsets"].append(rrset.as_dict(short))
-            else:
-                res["rrsets"].append(rrset)
+        rrsets_copy = copy.copy(self.rrsets)
+        rrsets_copy.sort()
+        res["rrsets"] = rrsets_copy.as_dict(short=short)
 
         return res
 
@@ -471,21 +467,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
         self.rrsets = PowerDNSRecordSetList()
         if "rrsets" in json_response:
             for single_rrset in json_response["rrsets"]:
-                rrset = PowerDNSRecordSet.init_from_dict(
-                    single_rrset,
-                    appname=self.appname,
-                    verbose=self.verbose,
-                    base_dir=self.base_dir,
-                    master_server=self.master_server,
-                    port=self.port,
-                    api_key=self.api_key,
-                    use_https=self.use_https,
-                    timeout=self.timeout,
-                    path_prefix=self.path_prefix,
-                    simulate=self.simulate,
-                    force=self.force,
-                    initialized=True,
-                )
+                rrset = PowerDNSRecordSet.init_from_dict(single_rrset)
                 self.rrsets.append(rrset)
 
     # -------------------------------------------------------------------------
@@ -541,14 +523,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
                     LOG.warn(_("Found invalid comment {!r}.").format(str(cmt)))
             else:
                 cmt = str(cmt).strip()
-                comment = PowerDNSRecordSetComment(
-                    appname=self.appname,
-                    verbose=self.verbose,
-                    base_dir=self.base_dir,
-                    account="unknown",
-                    content=cmt,
-                    initialized=True,
-                )
+                comment = PowerDNSRecordSetComment(account="unknown", content=cmt)
                 comment_list.append(comment)
 
         return comment_list
@@ -615,14 +590,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
             )
         )
 
-        new_soa_record = PowerDNSRecord(
-            appname=self.appname,
-            verbose=self.verbose,
-            base_dir=self.base_dir,
-            content=soa.data,
-            disabled=False,
-            initialized=True,
-        )
+        new_soa_record = PowerDNSRecord(content=soa.data, disabled=False)
 
         soa_rrset.records.clear()
         soa_rrset.records.append(new_soa_record)
@@ -652,13 +620,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
                 used_account = str(account).strip()
             if not used_account:
                 used_account = "unknown"
-            cmt = PowerDNSRecordSetComment(
-                appname=self.appname,
-                verbose=self.verbose,
-                base_dir=self.base_dir,
-                account=used_account,
-                content=comment,
-            )
+            cmt = PowerDNSRecordSetComment(account=used_account, content=comment)
             comment_list.append(cmt)
 
         return comment_list
@@ -755,28 +717,14 @@ class PowerDNSZone(BasePdnsRequestableObject):
                     f=fqdn_used, t=rtype
                 )
                 LOG.debug(msg)
-            rrset = PowerDNSRecordSet(
-                appname=self.appname,
-                verbose=self.verbose,
-                base_dir=self.base_dir,
-                initialized=False,
-            )
-            rrset.name = fqdn_used
-            rrset.type = rrset_type
+            rrset = PowerDNSRecordSet(name=fqdn_used, type=rrset_type)
             if ttl:
                 rrset.ttl = ttl
             else:
                 soa = self.get_soa()
                 rrset.ttl = soa.ttl
 
-        record = PowerDNSRecord(
-            appname=self.appname,
-            verbose=self.verbose,
-            base_dir=self.base_dir,
-            content=content,
-            disabled=bool(disabled),
-            initialized=True,
-        )
+        record = PowerDNSRecord(content=content, disabled=bool(disabled))
         if record in rrset.records:
             msg = _("Record {c!r} already contained in record set {f!r} type {t}.").format(
                 c=content, f=rrset.name, t=rrset.type
@@ -838,28 +786,14 @@ class PowerDNSZone(BasePdnsRequestableObject):
                     f=fqdn_used, t=rtype
                 )
                 LOG.debug(msg)
-            rrset = PowerDNSRecordSet(
-                appname=self.appname,
-                verbose=self.verbose,
-                base_dir=self.base_dir,
-                initialized=False,
-            )
-            rrset.name = fqdn_used
-            rrset.type = rrset_type
+            rrset = PowerDNSRecordSet(name=fqdn_used, type=rrset_type)
             if ttl:
                 rrset.ttl = ttl
             else:
                 soa = self.get_soa()
                 rrset.ttl = soa.ttl
 
-        record = PowerDNSRecord(
-            appname=self.appname,
-            verbose=self.verbose,
-            base_dir=self.base_dir,
-            content=content,
-            disabled=bool(disabled),
-            initialized=True,
-        )
+        record = PowerDNSRecord(content=content, disabled=bool(disabled))
 
         rrset.records.append(record)
 
