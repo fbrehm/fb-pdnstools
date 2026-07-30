@@ -15,6 +15,7 @@ import copy
 import logging
 import re
 from collections.abc import MutableSequence
+from functools import cmp_to_key
 
 # Third party modules
 from fb_tools.common import compare_fqdn
@@ -36,7 +37,7 @@ from .recordsetcomment import PowerDNSRecordSetComment
 from .soa import PowerDnsSOAData
 from .xlate import XLATOR
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 LOG = logging.getLogger(__name__)
 
@@ -544,6 +545,11 @@ class PowerDNSRecordSetList(MutableSequence):
             return self.export_data()
 
         return [r.as_dict(short=short) for r in self]
+
+    # -------------------------------------------------------------------------
+    def sort(self, reverse=False):
+        """Sorts the resource records in place."""
+        self._list.sort(reverse=reverse, key=cmp_to_key(compare_rrsets))
 
 
 # =============================================================================
