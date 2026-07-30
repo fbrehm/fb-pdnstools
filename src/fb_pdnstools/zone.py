@@ -45,7 +45,7 @@ from .requestable import BasePdnsRequestableObject
 from .soa import PowerDnsSOAData
 from .xlate import XLATOR
 
-__version__ = "3.0.1"
+__version__ = "3.0.2"
 
 LOG = logging.getLogger(__name__)
 
@@ -457,10 +457,10 @@ class PowerDNSZone(BasePdnsRequestableObject):
 
         LOG.debug(
             _("Updating data of zone {n!r} from API path {u!r} ...").format(
-                n=self.name, u=self.url
+                n=self.name, u=str(self.url)
             )
         )
-        json_response = self.perform_request(self.url)
+        json_response = self.perform_request(str(self.url))
 
         for key in self.defaults:
             if key == "id":
@@ -509,7 +509,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
             LOG.debug(_("Patching zone {!r} ...").format(self.name))
 
         return self.perform_request(
-            self.url, method="PATCH", data=json.dumps(payload), may_simulate=True
+            str(self.url), method="PATCH", data=json.dumps(payload), may_simulate=True
         )
 
     # -------------------------------------------------------------------------
@@ -1058,7 +1058,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
     def notify(self):
         """Initiate a notify of all secondary servers of current zone."""
         LOG.info(_("Notifying slave servers of zone {!r} ...").format(self.name))
-        path = self.url + "/notify"
+        path = str(self.url) + "/notify"
         return self.perform_request(path, method="PUT", may_simulate=True)
 
     # -------------------------------------------------------------------------
