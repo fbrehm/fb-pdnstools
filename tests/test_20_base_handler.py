@@ -73,6 +73,14 @@ class TestPdnsBaseHandler(FbPdnsToolsTestcase):
                 """Typecast into a string for reproduction."""
                 return "<{}()>".format(self.__class__.__name__)
 
+            def import_data(self, data):
+                """Import the given data from PowerDNS API."""
+                super(DummyPowerDNSHandler, self).import_data(data)
+
+            def export_data(self):
+                """Typecast PDNS relevant data into a dict for reproduction."""
+                return {}
+
         test_handler = DummyPowerDNSHandler(
             master_server=self.master_server, appname=self.appname, verbose=self.verbose)
 
@@ -95,6 +103,13 @@ class TestPdnsBaseHandler(FbPdnsToolsTestcase):
                 """Typecast into a string for reproduction."""
                 return "<{}()>".format(self.__class__.__name__)
 
+            def import_data(self, data):
+                """Import the given data from PowerDNS API."""
+                super(DummyPowerDNSHandler, self).import_data(data)
+
+            def export_data(self):
+                """Typecast PDNS relevant data into a dict for reproduction."""
+                return {}
 
         wrong_ports = ("uhu", 0, -10, 123456)
 

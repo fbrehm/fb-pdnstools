@@ -228,7 +228,7 @@ if __name__ == "__main__":
     suite.addTest(TestPdnsZone("test_import_modules", verbose))
     suite.addTest(TestPdnsZone("test_verify_fqdn", verbose))
     suite.addTest(TestPdnsZone("test_zone_simple", verbose))
-    # suite.addTest(TestPdnsZone("test_zone_get_soa", verbose))
+    suite.addTest(TestPdnsZone("test_zone_get_soa", verbose))
 
     runner = unittest.TextTestRunner(verbosity=verbose)
 
