@@ -28,7 +28,7 @@ from .descriptors import StringDescriptor
 from .errors import PowerDNSWrongSoaDataError
 from .xlate import XLATOR
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 LOG = logging.getLogger(__name__)
 
@@ -250,6 +250,23 @@ class PowerDnsSOAData(GenericPdnsObject):
         soa = cls()
         soa.import_data(data)
         return soa
+
+    # -------------------------------------------------------------------------
+    def __repr__(self):
+        """Typecast into a string for reproduction."""
+        out = "<%s(" % (self.__class__.__name__)
+
+        fields = []
+        fields.append("primary={!r}".format(self.primary))
+        fields.append("email={!r}".format(self.email))
+        fields.append("serial={!r}".format(self.serial))
+        fields.append("refresh={!r}".format(self.refresh))
+        fields.append("retry={!r}".format(self.retry))
+        fields.append("expire={!r}".format(self.expire))
+        fields.append("ttl={!r}".format(self.ttl))
+
+        out += ", ".join(fields) + ")>"
+        return out
 
     # -------------------------------------------------------------------------
     def __copy__(self):
