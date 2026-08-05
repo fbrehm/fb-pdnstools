@@ -115,10 +115,18 @@ class FbPdnsToolsTestcase(unittest.TestCase):
             self.open_args["encoding"] = "utf-8"
             self.open_args["errors"] = "surrogateescape"
 
-        self.server_version = "4.1.10-mocked"
+        self.server_version = "5.0.6-mocked"
+
+        self.api_root_data = [
+            {
+                "api_features": [],
+                "server_url": "/api/v1/servers{/server}"
+            }
+        ]
 
         self.server_list_data = [
             {
+                "autoprimaries_url": "/api/v1/servers/localhost/autoprimaries{/autoprimary}",
                 "config_url": "/api/v1/servers/localhost/config{/config_setting}",
                 "daemon_type": "authoritative",
                 "id": "localhost",

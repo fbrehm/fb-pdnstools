@@ -21,6 +21,7 @@ from fb_tools.handling_obj import HandlingObject
 # Own modules
 from . import DEFAULT_API_PREFIX
 from . import DEFAULT_PORT
+from .descriptors import StringDescriptor
 from .errors import PDNSApiNotFoundError, PDNSApiValidationError
 from .requestable import BasePdnsRequestableObject
 from .xlate import XLATOR
@@ -38,51 +39,20 @@ ngettext = XLATOR.ngettext
 class PowerDNSServer(BasePdnsRequestableObject):
     """Class for a PowerDNS server handler."""
 
+    api_server_version = StringDescriptor("api_server_version", stripped=True)
+
     # -------------------------------------------------------------------------
-    def __init__(
-        self,
-        appname=None,
-        verbose=0,
-        version=__version__,
-        base_dir=None,
-        master_server=None,
-        port=DEFAULT_PORT,
-        api_key=None,
-        use_https=False,
-        path_prefix=DEFAULT_API_PREFIX,
-        simulate=None,
-        force=None,
-        terminal_has_colors=False,
-        initialized=False,
-    ):
+    def __init__(self, version=__version__, **kwargs):
         """Initialize a PowerDNSServer record."""
-        self._api_servername = self.default_api_servername
-        self._api_server_version = "unknown"
+        self.api_server_version = "unknown"
         self.zones = None
 
-        super(PowerDNSServer, self).__init__(
-            appname=appname,
-            verbose=verbose,
-            version=version,
-            base_dir=base_dir,
-            master_server=master_server,
-            port=port,
-            api_key=api_key,
-            use_https=use_https,
-            path_prefix=path_prefix,
-            simulate=simulate,
-            force=force,
-            terminal_has_colors=terminal_has_colors,
-            initialized=False,
-        )
+        LOG.debug("Got kwargs:\n" + pp(kwargs))
 
-        self.initialized = initialized
+        super(PowerDNSServer, self).__init__(version=version, **kwargs)
 
-    # -----------------------------------------------------------
-    @property
-    def api_server_version(self):
-        """Geet the version of the PowerDNS server, how provided by API."""
-        return self._api_server_version
+        if "initialized" in kwargs:
+            self.initialized = kwargs["initialized"]
 
     # -----------------------------------------------------------
     @HandlingObject.simulate.setter
@@ -100,6 +70,20 @@ class PowerDNSServer(BasePdnsRequestableObject):
                 self.zones[zone_name].simulate = self.simulate
 
     # -------------------------------------------------------------------------
+    def export_data(self):
+        """Typecast PDNS relevant data into a dict for reproduction."""
+        res = super(PowerDNSServer, self).export_data()
+
+        res["api_server_version"] = self.api_server_version
+        res["zones"] = {}
+
+        if self.zones:
+            for zone_name in self.zones:
+                res["zones"][zone_name] = self.zones[zone_name].export_data()
+
+        return res
+
+    # -------------------------------------------------------------------------
     def as_dict(self, short=True):
         """
         Transform the elements of the object into a dict.
@@ -111,9 +95,40 @@ class PowerDNSServer(BasePdnsRequestableObject):
         @rtype:  dict
         """
         res = super(PowerDNSServer, self).as_dict(short=short)
+
         res["api_server_version"] = self.api_server_version
 
         return res
+
+    # -------------------------------------------------------------------------
+    def import_data(self, data):
+        """Import the given data from PowerDNS API."""
+        super(PowerDNSServer, self).import_data(data)
+        self.initialized = False
+
+        if not self.zones:
+            self.zones = PowerDNSZoneDict()
+
+        for zone_name in data:
+            zone_data = data[zone_name]
+            zone = PowerDNSZone.init_from_dict(
+                zone_data,
+                appname=self.appname,
+                verbose=self.verbose,
+                base_dir=self.base_dir,
+                master_server=self.master_server,
+                port=self.port,
+                api_key=self.api_key,
+                use_https=self.use_https,
+                timeout=self.timeout,
+                path_prefix=self.path_prefix,
+                simulate=self.simulate,
+                force=self.force,
+                initialized=True,
+            )
+            self.zones[zone_name] = zone
+
+        self.initialized = True
 
     # -------------------------------------------------------------------------
     def get_api_server_version(self):

@@ -18,7 +18,7 @@ from .xlate import XLATOR
 
 _ = XLATOR.gettext
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 # =============================================================================
@@ -182,6 +182,13 @@ class PDNSRequestError(PowerDNSHandlerError):
             msg += " / Response: {c}{e}".format(c=cls, e=self.response)
 
         return msg
+
+
+# =============================================================================
+class PDNSApiResponseError(PowerDNSHandlerError):
+    """Raised when the API response has errors."""
+
+    pass
 
 
 # =============================================================================

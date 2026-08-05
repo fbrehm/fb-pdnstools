@@ -56,7 +56,7 @@ from .errors import PDNSRequestError
 from .errors import PowerDNSHandlerError
 from .xlate import XLATOR
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 LOG = logging.getLogger(__name__)
 
 LOGLEVEL_REQUESTS_SET = False
@@ -140,6 +140,25 @@ class BasePdnsRequestableObject(BasePdnsHandler):
             self.initialized = kwargs["initialized"]
 
     # -------------------------------------------------------------------------
+    def export_data(self):
+        """Typecast PDNS relevant data into a dict for reproduction."""
+        res = {
+            "api_key": self.api_key,
+            "api_servername": self.api_servername,
+            "default_api_servername": self.default_api_servername,
+            "default_port": self.default_port,
+            "default_timeout": self.default_timeout,
+            "master_server": self.master_server,
+            "mocked": self.mocked,
+            "path_prefix": self.path_prefix,
+            "port": self.port,
+            "use_https": self.use_https,
+            "user_agent": self.user_agent,
+        }
+
+        return res
+
+    # -------------------------------------------------------------------------
     def as_dict(self, short=True):
         """
         Transform the elements of the object into a dict.
@@ -196,7 +215,8 @@ class BasePdnsRequestableObject(BasePdnsHandler):
     # -------------------------------------------------------------------------
     def _build_url(self, path, no_prefix=False):
 
-        if not os.path.isabs(path):
+        path = str(path)
+        if path != "" and not os.path.isabs(path):
             msg = _("The path {!r} must be an absolute path.").format(path)
             raise ValueError(msg)
 

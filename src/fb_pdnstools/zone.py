@@ -459,10 +459,8 @@ class PowerDNSZone(BasePdnsRequestableObject):
         json_response = self.perform_request(str(self.url))
 
         for key in self.defaults:
-            if key == "id":
-                cls_key = "zone_id"
-            val = json_response.get(key, self.defaults[cls_key])
-            setattr(self, cls_key, val)
+            val = json_response.get(key, self.defaults[key])
+            setattr(self, key, val)
 
         self.rrsets = PowerDNSRecordSetList()
         if "rrsets" in json_response:
