@@ -20,12 +20,11 @@ from fb_tools.common import pp
 
 # Own modules
 
-from .base import GenericPdnsObject
-from .descriptors import BooleanDescriptor
-from .descriptors import IntegerDescriptor
-from .descriptors import StringDescriptor
-from .record import PowerDNSRecord
-from .xlate import XLATOR
+from ..base import GenericPdnsObject
+from ..descriptors import BooleanDescriptor
+from ..descriptors import IntegerDescriptor
+from ..descriptors import StringDescriptor
+from ..xlate import XLATOR
 
 __version__ = "1.0.0"
 
@@ -84,7 +83,7 @@ class PowerDNSRecordSetComment(GenericPdnsObject):
         self.content = ""
         self.modified_at = None
 
-        super(PowerDNSRecord, self).import_data(data)
+        super(PowerDNSRecordSetComment, self).import_data(data)
 
         if "account" in data:
             self.account = data["account"]

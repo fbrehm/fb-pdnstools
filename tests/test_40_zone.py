@@ -55,18 +55,18 @@ class TestPdnsZone(FbPdnsToolsTestcase):
         LOG.info(self.get_method_doc())
 
         LOG.debug("Importing fb_pdnstools.zone ...")
-        import fb_pdnstools.zone
+        import fb_pdnstools.api.zone
 
-        LOG.debug("Version of fb_pdnstools.zone: {!r}.".format(fb_pdnstools.zone.__version__))
+        LOG.debug("Version of fb_pdnstools.api.zone: {!r}.".format(fb_pdnstools.api.zone.__version__))
 
-        LOG.info("Testing import of PowerDNSZone from fb_pdnstools.zone ...")
-        from fb_pdnstools.zone import PowerDNSZone
+        LOG.info("Testing import of PowerDNSZone from fb_pdnstools.api.zone ...")
+        from fb_pdnstools.api.zone import PowerDNSZone
 
         zone = PowerDNSZone(name="test.internal.", appname=self.appname, verbose=self.verbose)
         LOG.debug("Empty PowerDNSZone:\n{}".format(zone))
 
-        LOG.info("Testing import of PowerDNSZoneDict from fb_pdnstools.zone ...")
-        from fb_pdnstools.zonedict import PowerDNSZoneDict
+        LOG.info("Testing import of PowerDNSZoneDict from fb_pdnstools.api.zone ...")
+        from fb_pdnstools.api.zonedict import PowerDNSZoneDict
 
         zone_map = PowerDNSZoneDict()
         LOG.debug("Empty PowerDNSZoneDict: {}".format(zone_map))
@@ -100,7 +100,7 @@ class TestPdnsZone(FbPdnsToolsTestcase):
             "uhu.testing.net.",
         ]
 
-        from fb_pdnstools.zone import PowerDNSZone
+        from fb_pdnstools.api.zone import PowerDNSZone
 
         js_zone = self.get_js_zone()
 
@@ -155,7 +155,7 @@ class TestPdnsZone(FbPdnsToolsTestcase):
         """Test instantiating of a simple PowerDNSZone object."""
         LOG.info(self.get_method_doc())
 
-        from fb_pdnstools.zone import PowerDNSZone
+        from fb_pdnstools.api.zone import PowerDNSZone
 
         js_zone = self.get_js_zone()
 
@@ -190,7 +190,7 @@ class TestPdnsZone(FbPdnsToolsTestcase):
         """Test getting the SOA record from a PowerDNSZone object."""
         LOG.info(self.get_method_doc())
 
-        from fb_pdnstools.zone import PowerDNSZone
+        from fb_pdnstools.api.zone import PowerDNSZone
 
         js_zone = self.get_js_zone()
 

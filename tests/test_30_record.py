@@ -49,18 +49,18 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
 
     # -------------------------------------------------------------------------
     def test_import_modules(self):
-        """Test import of module fb_pdnstools.record."""
+        """Test import of module fb_pdnstools.api.record."""
         if self.verbose:
             print()
         LOG.info(self.get_method_doc())
 
-        LOG.debug("Importing fb_pdnstools.record ...")
-        import fb_pdnstools.record
+        LOG.debug("Importing fb_pdnstools.api.record ...")
+        import fb_pdnstools.api.record
 
-        LOG.debug("Version of fb_pdnstools.record: {!r}.".format(fb_pdnstools.record.__version__))
+        LOG.debug("Version of fb_pdnstools.api.record: {!r}.".format(fb_pdnstools.api.record.__version__))
 
-        LOG.info("Testing import of PowerDNSRecord from fb_pdnstools.record ...")
-        from fb_pdnstools.record import PowerDNSRecord
+        LOG.info("Testing import of PowerDNSRecord from fb_pdnstools.api.record ...")
+        from fb_pdnstools.api.record import PowerDNSRecord
 
         record = PowerDNSRecord()
         LOG.debug("Empty PowerDNSRecord:\n{}".format(record))
@@ -74,7 +74,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
 
         test_content = "www.testing.com."
 
-        from fb_pdnstools.record import PowerDNSRecord
+        from fb_pdnstools.api.record import PowerDNSRecord
 
         LOG.debug("Creating an empty record.")
         record = PowerDNSRecord()
@@ -134,7 +134,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         test_content2 = "www.uhu-banane.com."
         test_content3 = "www.Testing.com."
 
-        from fb_pdnstools.record import PowerDNSRecord
+        from fb_pdnstools.api.record import PowerDNSRecord
 
         test_matrix = (
             ("", "", True),
@@ -177,7 +177,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         test_content2 = "www.2uhu-banane.com."
         test_content3 = "www.1Testing.com."
 
-        from fb_pdnstools.record import PowerDNSRecord
+        from fb_pdnstools.api.record import PowerDNSRecord
 
         LOG.debug("Testing the greater than operator with wrong argument ...")
         record = PowerDNSRecord(content=test_content)
@@ -235,7 +235,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         test_content2 = "www.2uhu-banane.com."
         test_content3 = "www.1Testing.com."
 
-        from fb_pdnstools.record import PowerDNSRecord
+        from fb_pdnstools.api.record import PowerDNSRecord
 
         LOG.debug("Testing the less than operator with wrong argument ...")
         record = PowerDNSRecord(content=test_content)
@@ -293,7 +293,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
         test_content = "Test comment"
         test_modified_at = 1000 * 24 * 60 * 60
 
-        from fb_pdnstools.recordsetcomment import PowerDNSRecordSetComment
+        from fb_pdnstools.api.recordsetcomment import PowerDNSRecordSetComment
 
         LOG.debug("Creating an empty, invalid comment.")
         empty_comment = PowerDNSRecordSetComment()
@@ -371,7 +371,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
             print()
         LOG.info(self.get_method_doc())
 
-        from fb_pdnstools.recordset import PowerDNSRecordSet
+        from fb_pdnstools.api.recordset import PowerDNSRecordSet
 
         js_rrset = self.get_js_a_rrset()
 
@@ -389,7 +389,7 @@ class TestPdnsRecord(FbPdnsToolsTestcase):
             print()
         LOG.info(self.get_method_doc())
 
-        from fb_pdnstools.recordset import PowerDNSRecordSet
+        from fb_pdnstools.api.recordset import PowerDNSRecordSet
 
         js_rrset = self.get_js_a_rrset_comment()
 

@@ -20,13 +20,13 @@ from fb_tools.common import pp
 
 # Own modules
 
-from .base import GenericPdnsObject
-from .descriptors import BooleanDescriptor
-from .descriptors import StringDescriptor
-from .errors import PowerDNSWrongRecordTypeError
-from .xlate import XLATOR
+from ..base import GenericPdnsObject
+from ..descriptors import BooleanDescriptor
+from ..descriptors import StringDescriptor
+from ..errors import PowerDNSWrongRecordTypeError
+from ..xlate import XLATOR
 
-__version__ = "3.0.0"
+__version__ = "3.1.0"
 
 LOG = logging.getLogger(__name__)
 

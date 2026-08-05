@@ -24,18 +24,18 @@ from fb_tools.common import to_utf8
 
 # Own modules
 
-from .base import GenericPdnsObject
-from .common import seconds2human
-from .descriptors import BooleanDescriptor
-from .descriptors import IntegerDescriptor
-from .descriptors import RrsetTypeDescriptor
-from .descriptors import StringDescriptor
-from .errors import PowerDNSRecordSetError
 from .record import PowerDNSRecord
 from .record import PowerDNSRecordList
 from .recordsetcomment import PowerDNSRecordSetComment
 from .soa import PowerDnsSOAData
-from .xlate import XLATOR
+from ..base import GenericPdnsObject
+from ..common import seconds2human
+from ..descriptors import BooleanDescriptor
+from ..descriptors import IntegerDescriptor
+from ..descriptors import RrsetTypeDescriptor
+from ..descriptors import StringDescriptor
+from ..errors import PowerDNSRecordSetError
+from ..xlate import XLATOR
 
 __version__ = "1.1.0"
 

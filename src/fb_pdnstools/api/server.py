@@ -19,14 +19,14 @@ from fb_tools.common import pp, to_bool, to_str
 from fb_tools.handling_obj import HandlingObject
 
 # Own modules
-from . import DEFAULT_API_PREFIX
-from . import DEFAULT_PORT
-from .descriptors import StringDescriptor
-from .errors import PDNSApiNotFoundError, PDNSApiValidationError
-from .requestable import BasePdnsRequestableObject
-from .xlate import XLATOR
+from .. import DEFAULT_API_PREFIX
+from .. import DEFAULT_PORT
 from .zone import PowerDNSZone
 from .zonedict import PowerDNSZoneDict
+from ..descriptors import StringDescriptor
+from ..errors import PDNSApiNotFoundError, PDNSApiValidationError
+from ..requestable import BasePdnsRequestableObject
+from ..xlate import XLATOR
 
 __version__ = "1.2.0"
 LOG = logging.getLogger(__name__)

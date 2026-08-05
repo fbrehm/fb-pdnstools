@@ -30,8 +30,8 @@ from ..errors import PDNSApiResponseError
 from ..errors import PDNSApiNotFoundError, PDNSApiValidationError
 from ..requestable import BasePdnsRequestableObject
 from ..xlate import XLATOR
-from ..zone import PowerDNSZone
-from ..zonedict import PowerDNSZoneDict
+from .zone import PowerDNSZone
+from .zonedict import PowerDNSZoneDict
 
 __version__ = "0.1.0"
 LOG = logging.getLogger(__name__)

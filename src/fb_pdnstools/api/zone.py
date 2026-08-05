@@ -29,21 +29,21 @@ from fb_tools.common import to_utf8
 import six
 
 # Own modules
-from . import FQDN_REGEX
-from .descriptors import BooleanDescriptor
-from .descriptors import IntegerDescriptor
-from .descriptors import PosixPathDescriptor
-from .descriptors import StringArrayDescriptor
-from .descriptors import StringDescriptor
-from .errors import PDNSNoRecordsToRemove
-from .errors import PowerDNSZoneError
+from .. import FQDN_REGEX
+from ..descriptors import BooleanDescriptor
+from ..descriptors import IntegerDescriptor
+from ..descriptors import PosixPathDescriptor
+from ..descriptors import StringArrayDescriptor
+from ..descriptors import StringDescriptor
+from ..errors import PDNSNoRecordsToRemove
+from ..errors import PowerDNSZoneError
+from ..requestable import BasePdnsRequestableObject
+from ..xlate import XLATOR
 from .record import PowerDNSRecord
 from .recordset import PowerDNSRecordSet
 from .recordset import PowerDNSRecordSetList
 from .recordsetcomment import PowerDNSRecordSetComment
-from .requestable import BasePdnsRequestableObject
 from .soa import PowerDnsSOAData
-from .xlate import XLATOR
 
 __version__ = "3.1.0"
 

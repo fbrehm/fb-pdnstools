@@ -79,6 +79,15 @@ FQDN_REGEX = re.compile(r"^((?!-)[-A-Z\d]{1,62}(?<!-)\.)+[A-Z]{1,62}\.?$", re.IG
 
 
 # Own modules
+from .api.record import PowerDNSRecord  # noqa: F401
+from .api.record import PowerDNSRecordList  # noqa: F401
+from .api.recordset import PowerDNSRecordSet  # noqa: F401
+from .api.recordset import PowerDNSRecordSetList  # noqa: F401
+from .api.recordsetcomment import PowerDNSRecordSetComment  # noqa: F401
+from .api.server import PowerDNSServer  # noqa: F401
+from .api.soa import PowerDnsSOAData  # noqa: F401
+from .api.zone import PowerDNSZone  # noqa: F401
+from .api.zonedict import PowerDNSZoneDict  # noqa: F401
 from .errors import PDNSApiError  # noqa: F401
 from .errors import PDNSApiNotAuthorizedError  # noqa: F401
 from .errors import PDNSApiNotFoundError  # noqa: F401
@@ -93,15 +102,6 @@ from .errors import PowerDNSRecordSetError  # noqa: F401
 from .errors import PowerDNSWrongRecordTypeError  # noqa: F401
 from .errors import PowerDNSWrongSoaDataError  # noqa: F401
 from .errors import PowerDNSZoneError  # noqa: F401
-from .record import PowerDNSRecord  # noqa: F401
-from .record import PowerDNSRecordList  # noqa: F401
-from .recordset import PowerDNSRecordSet  # noqa: F401
-from .recordset import PowerDNSRecordSetList  # noqa: F401
-from .recordsetcomment import PowerDNSRecordSetComment  # noqa: F401
-from .server import PowerDNSServer  # noqa: F401
-from .soa import PowerDnsSOAData  # noqa: F401
-from .zone import PowerDNSZone  # noqa: F401
-from .zonedict import PowerDNSZoneDict  # noqa: F401
 
 
 # =============================================================================
