@@ -38,6 +38,7 @@ import urllib3
 # Own modules
 from . import DEFAULT_API_PREFIX
 from . import DEFAULT_PORT
+from . import DEFAULT_SERVER_NAME
 from . import DEFAULT_TIMEOUT
 from . import DEFAULT_USE_HTTPS
 from . import LIBRARY_NAME
@@ -75,7 +76,7 @@ class BasePdnsRequestableObject(BasePdnsHandler):
 
     default_port = DEFAULT_PORT
     default_timeout = DEFAULT_TIMEOUT
-    default_api_servername = "localhost"
+    default_api_servername = DEFAULT_SERVER_NAME
 
     loglevel_requests_set = False
 
@@ -138,6 +139,27 @@ class BasePdnsRequestableObject(BasePdnsHandler):
 
         if "initialized" in kwargs:
             self.initialized = kwargs["initialized"]
+
+    # -------------------------------------------------------------------------
+    def get_repr_fields(self):
+        """Return a list of parameters prepared for __repr__()."""
+        fields = []
+
+        fields.append(f"master_server={self.master_server!r}")
+        if self.port != DEFAULT_PORT:
+            fields.append(f"port={self.port!r}")
+        if self.use_https != DEFAULT_USE_HTTPS:
+            fields.append(f"use_https={self.use_https!r}")
+        fields.append("api_key={!r}".format("********"))
+        if self.timeout != DEFAULT_TIMEOUT:
+            fields.append(f"timeout={self.timeout!r}")
+        if str(self.path_prefix) != DEFAULT_API_PREFIX:
+            fields.append(f"path_prefix={self.path_prefix!r}")
+
+        if self.verbose:
+            fields.append(f"verbose={self.verbose!r}")
+
+        return fields
 
     # -------------------------------------------------------------------------
     def export_data(self):
