@@ -99,6 +99,22 @@ class GenericPdnsObject(FbGenericBaseObject):
         return self.canon_name(fqdn)
 
     # -------------------------------------------------------------------------
+    @abstractmethod
+    def get_repr_fields(self):
+        """Return a list of parameters prepared for __repr__()."""
+        return []
+
+    # -------------------------------------------------------------------------
+    def __repr__(self):
+        """Typecast into a string for reproduction."""
+        out = "<%s(" % (self.__class__.__name__)
+
+        fields = self.get_repr_fields()
+        out += ", ".join(fields) + ")>"
+
+        return out
+
+    # -------------------------------------------------------------------------
     def decanon_name(self, name):
         """Decanonize the FQDN - removing possible dots at the end of the name."""
         ret = RE_DOT_AT_END.sub("", name)
@@ -153,7 +169,7 @@ class BasePdnsObject(FbBaseObject, GenericPdnsObject):
 
 # =============================================================================
 @add_metaclass(ABCMeta)
-class BasePdnsHandler(HandlingObject, GenericPdnsObject):
+class BasePdnsHandler(GenericPdnsObject, HandlingObject):
     """
     Base class for a PowerDNS handler object.
 
