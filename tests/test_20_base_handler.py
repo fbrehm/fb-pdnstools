@@ -69,10 +69,6 @@ class TestPdnsBaseHandler(FbPdnsToolsTestcase):
         # Creating dummy class
         class DummyPowerDNSHandler(BasePdnsRequestableObject):
 
-            def __repr__(self):
-                """Typecast into a string for reproduction."""
-                return "<{}()>".format(self.__class__.__name__)
-
             def import_data(self, data):
                 """Import the given data from PowerDNS API."""
                 super(DummyPowerDNSHandler, self).import_data(data)
@@ -84,6 +80,7 @@ class TestPdnsBaseHandler(FbPdnsToolsTestcase):
         test_handler = DummyPowerDNSHandler(
             master_server=self.master_server, appname=self.appname, verbose=self.verbose)
 
+        LOG.debug("Dummy PDNS handler %r: " + repr(test_handler))
         LOG.debug("Dummy PDNS handler:\n{}".format(pp(test_handler.as_dict())))
         self.assertEqual(self.master_server, test_handler.master_server)
 

@@ -12,6 +12,7 @@
 import logging
 import logging.handlers
 import os
+import re
 import sys
 from pathlib import PosixPath
 
@@ -180,7 +181,9 @@ class TestPdnsZone(FbPdnsToolsTestcase):
                 LOG.debug(f"Testing for property {key!r} == {exp_val!r}, got {got_val!r}.")
                 self.assertEqual(exp_val, got_val)
 
-        exp_val = PosixPath(js_zone["url"])
+        re_api_prefix = re.compile(r"^/api/v1/")
+        url = re_api_prefix.sub("", js_zone["url"])
+        exp_val = PosixPath(url)
         got_val = getattr(zone, "url")
         LOG.debug(f"Testing for property 'url' == {exp_val!r}, got {got_val!r}.")
         self.assertEqual(exp_val, got_val)

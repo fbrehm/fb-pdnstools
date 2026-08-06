@@ -75,6 +75,10 @@ class TestPdnsBaseHandler(FbPdnsToolsTestcase):
                 """Typecast PDNS relevant data into a dict for reproduction."""
                 return {}
 
+            def get_repr_fields(self):
+                """Return a list of parameters prepared for __repr__()."""
+                return []
+
         test_handler = DummyPowerDNSHandler(appname=self.appname, verbose=self.verbose)
         test_handler.initialized = True
 
