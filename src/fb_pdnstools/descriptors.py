@@ -21,11 +21,17 @@ from pathlib import PosixPath
 from fb_tools.common import is_sequence
 from fb_tools.common import to_bool
 
+try:
+    from semver import Version
+except ImportError:
+    from semver import VersionInfo as Version
+
+
 # Own modules
 from . import VALID_RRSET_TYPES
 from .xlate import XLATOR
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -429,6 +435,43 @@ class StringArrayDescriptor:
             array.append(str(value))
 
         setattr(instance, self.private_name, array)
+
+# =============================================================================
+class VersionDescriptor:
+    """Descriptor for a bversion field."""
+
+    # -------------------------------------------------------------------------
+    def __init__(self, name, maybe_none=False):
+        """Initialize the VersionDescriptor: descriptor."""
+        self.public_name = name
+        self.private_name = "_" + name
+
+        self.maybe_none = to_bool(maybe_none)
+
+    # -------------------------------------------------------------------------
+    def __set_name__(self, owner, name):
+        """Keep the name of teh descriptor."""
+        self.public_name = name
+        self.private_name = "_" + name
+
+    # -------------------------------------------------------------------------
+    def __get__(self, instance, owner):
+        """Get the data from instance object by the private name."""
+        return getattr(instance, self.private_name, None)
+
+    # -------------------------------------------------------------------------
+    def __set__(self, instance, value):
+        """Set the data in the instance object by the private name as an semver.Version object."""
+        if value is None:
+            if self.maybe_none:
+                setattr(instance, self.private_name, None)
+                return
+            msg = _("The attribute {a!r} must not be None.").format(a=self.public_name)
+            raise TypeError(msg)
+
+        version = Version.parse(value)
+
+        setattr(instance, self.private_name, version)
 
 
 # =============================================================================
