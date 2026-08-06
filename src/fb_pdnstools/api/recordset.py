@@ -281,19 +281,20 @@ class PowerDNSRecordSet(GenericPdnsObject):
         return pp(self.as_dict(short=True))
 
     # -------------------------------------------------------------------------
-    def __repr__(self):
-        """Typecast into a string for reproduction."""
-        out = "<%s(" % (self.__class__.__name__)
-
+    def get_repr_fields(self):
+        """Return a list of parameters prepared for __repr__()."""
         fields = []
+
         fields.append("name={!r}".format(self.name))
         fields.append("type={!r}".format(self.type))
         fields.append("ttl={!r}".format(self.ttl))
-        fields.append("comments=[" + ", ".join([repr(c) for c in self.comments]) + "]")
+        if self.comments:
+            fields.append("comments=[" + ", ".join([repr(c) for c in self.comments]) + "]")
         fields.append("records=[" + ", ".join([repr(r) for r in self.records]) + "]")
 
-        out += ", ".join(fields) + ")>"
-        return out
+        fields += super(PowerDNSRecordSet, self).get_repr_fields()
+
+        return fields
 
     # -------------------------------------------------------------------------
     def __copy__(self):

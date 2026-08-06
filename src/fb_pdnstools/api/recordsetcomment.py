@@ -148,17 +148,18 @@ class PowerDNSRecordSetComment(GenericPdnsObject):
         return pp(self.export_data())
 
     # -------------------------------------------------------------------------
-    def __repr__(self):
-        """Typecast into a string for reproduction."""
-        out = "<%s(" % (self.__class__.__name__)
-
+    def get_repr_fields(self):
+        """Return a list of parameters prepared for __repr__()."""
         fields = []
-        fields.append("account={!r}".format(self.account))
+
+        if self.account:
+            fields.append("account={!r}".format(self.account))
         fields.append("content={!r}".format(self.content))
         fields.append("modified_at={!r}".format(self.modified_at))
 
-        out += ", ".join(fields) + ")>"
-        return out
+        fields += super(PowerDNSRecordSetComment, self).get_repr_fields()
+
+        return fields
 
     # -------------------------------------------------------------------------
     def __eq__(self, other):

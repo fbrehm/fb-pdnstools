@@ -131,16 +131,16 @@ class PowerDNSRecord(GenericPdnsObject):
         return pp(self.as_dict(short=True))
 
     # -------------------------------------------------------------------------
-    def __repr__(self):
-        """Typecast into a string for reproduction."""
-        out = "<%s(" % (self.__class__.__name__)
-
+    def get_repr_fields(self):
+        """Return a list of parameters prepared for __repr__()."""
         fields = []
+
         fields.append("content={!r}".format(self.content))
         fields.append("disabled={!r}".format(self.disabled))
 
-        out += ", ".join(fields) + ")>"
-        return out
+        fields += super(PowerDNSRecord, self).get_repr_fields()
+
+        return fields
 
     # -------------------------------------------------------------------------
     def __eq__(self, other):

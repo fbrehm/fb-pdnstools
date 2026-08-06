@@ -103,7 +103,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
     slave_tsig_key_ids = StringArrayDescriptor("slave_tsig_key_ids", stripped=True)
     soa_edit = StringDescriptor("soa_edit", stripped=True)
     soa_edit_api = StringDescriptor("soa_edit_api", stripped=True)
-    url = PosixPathDescriptor("url", must_absolute=True, maybe_none=True)
+    url = PosixPathDescriptor("url", must_absolute=False, maybe_none=True)
 
     # -------------------------------------------------------------------------
     def __init__(self, name, version=__version__, **kwargs):
@@ -154,6 +154,10 @@ class PowerDNSZone(BasePdnsRequestableObject):
         for key in data:
             val = data[key]
             if key in self.defaults:
+                if key == "url":
+                    pat_api_prefix = re.escape(str(self.path_prefix)) + r"/"
+                    re_api_prefix = re.compile(pat_api_prefix)
+                    val = re_api_prefix.sub("", val)
                 if val != self.defaults[key]:
                     setattr(self, key, val)
 
@@ -191,7 +195,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
         #     "slave_tsig_key_ids": [],
         #     "soa_edit": '',
         #     "soa_edit_api"': 'INCEPTION-INCREMENT',
-        #     "url": "api/v1/servers/localhost/zones/bla.ai."},
+        #     "url": "/api/v1/servers/localhost/zones/bla.ai."},
 
         if rrsets:
             for rrset_data in rrsets:
@@ -386,25 +390,51 @@ class PowerDNSZone(BasePdnsRequestableObject):
         return net
 
     # -------------------------------------------------------------------------
-    def __repr__(self):
-        """Typecast into a string for reproduction."""
-        out = "<%s(" % (self.__class__.__name__)
-
+    def get_repr_fields(self):
+        """Return a list of parameters prepared for __repr__()."""
         fields = []
-        fields.append("name={!r}".format(self.name))
-        fields.append("url={!r}".format(self.url))
-        fields.append("reverse_zone={!r}".format(self.reverse_zone))
-        fields.append("reverse_net={!r}".format(self.reverse_net))
-        fields.append("kind={!r}".format(self.kind))
-        fields.append("serial={!r}".format(self.serial))
-        fields.append("dnssec={!r}".format(self.dnssec))
-        fields.append("account={!r}".format(self.account))
-        fields.append("appname={!r}".format(self.appname))
-        fields.append("verbose={!r}".format(self.verbose))
-        fields.append("version={!r}".format(self.version))
 
-        out += ", ".join(fields) + ")>"
-        return out
+        fields.append(f"name={self.name!r}")
+        if self.account:
+            fields.append(f"account={self.account!r}")
+        if self.api_rectify is not None:
+            fields.append(f"api_rectify={self.api_rectify!r}")
+        if self.dnssec:
+            fields.append(f"dnssec={self.dnssec!r}")
+        if self.edited_serial:
+            fields.append(f"edited_serial={self.edited_serial!r}")
+        if self.id:
+            fields.append(f"id={self.id!r}")
+        if self.kind:
+            fields.append(f"kind={self.kind!r}")
+        if self.last_check:
+            fields.append(f"last_check={self.last_check!r}")
+        if self.master_tsig_key_ids:
+            fields.append(f"master_tsig_key_ids={self.master_tsig_key_ids!r}")
+        if self.masters:
+            fields.append(f"masters={self.masters!r}")
+        if self.notified_serial:
+            fields.append(f"notified_serial={self.notified_serial!r}")
+        if self.nsec3narrow:
+            fields.append(f"nsec3narrow={self.nsec3narrow!r}")
+        if self.nsec3param:
+            fields.append(f"nsec3param={self.nsec3param!r}")
+        if self.presigned:
+            fields.append(f"presigned={self.presigned!r}")
+        if self.serial:
+            fields.append(f"serial={self.serial!r}")
+        if self.slave_tsig_key_ids:
+            fields.append(f"slave_tsig_key_ids={self.slave_tsig_key_ids!r}")
+        if self.soa_edit:
+            fields.append(f"soa_edit={self.soa_edit!r}")
+        if self.soa_edit_api:
+            fields.append(f"soa_edit_api={self.soa_edit_api!r}")
+        if self.url is not None:
+            fields.append(f"url={self.url!r}")
+
+        fields += super(PowerDNSZone, self).get_repr_fields()
+
+        return fields
 
     # -------------------------------------------------------------------------
     def __copy__(self):

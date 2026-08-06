@@ -252,11 +252,10 @@ class PowerDnsSOAData(GenericPdnsObject):
         return soa
 
     # -------------------------------------------------------------------------
-    def __repr__(self):
-        """Typecast into a string for reproduction."""
-        out = "<%s(" % (self.__class__.__name__)
-
+    def get_repr_fields(self):
+        """Return a list of parameters prepared for __repr__()."""
         fields = []
+
         fields.append("primary={!r}".format(self.primary))
         fields.append("email={!r}".format(self.email))
         fields.append("serial={!r}".format(self.serial))
@@ -265,8 +264,9 @@ class PowerDnsSOAData(GenericPdnsObject):
         fields.append("expire={!r}".format(self.expire))
         fields.append("ttl={!r}".format(self.ttl))
 
-        out += ", ".join(fields) + ")>"
-        return out
+        fields += super(PowerDnsSOAData, self).get_repr_fields()
+
+        return fields
 
     # -------------------------------------------------------------------------
     def __copy__(self):

@@ -26,14 +26,15 @@ from .. import DEFAULT_PORT
 from ..descriptors import PosixPathDescriptor
 from ..descriptors import StringArrayDescriptor
 from ..descriptors import StringDescriptor
-from ..errors import PDNSApiResponseError
 from ..errors import PDNSApiNotFoundError, PDNSApiValidationError
+from ..errors import PDNSApiResponseError
 from ..requestable import BasePdnsRequestableObject
 from ..xlate import XLATOR
+from .server import PowerDNSServer
 from .zone import PowerDNSZone
 from .zonedict import PowerDNSZoneDict
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -48,7 +49,7 @@ class PowerDnsApiRoot(BasePdnsRequestableObject):
     server_url = PosixPathDescriptor(name="server_url", must_absolute=False, maybe_none=False)
 
     # -------------------------------------------------------------------------
-    def __init__(self, version=__version__, **kwargs):
+    def __init__(self, server_url=None, version=__version__, **kwargs):
         """Initialize a PowerDnsApiRoot object."""
         LOG.debug("Got kwargs:\n" + pp(kwargs))
 
@@ -57,6 +58,9 @@ class PowerDnsApiRoot(BasePdnsRequestableObject):
         self.servers = {}
 
         super(PowerDnsApiRoot, self).__init__(version=version, **kwargs)
+
+        if server_url is not None:
+            self.server_url = server_url
 
         if "initialized" in kwargs:
             self.initialized = kwargs["initialized"]
@@ -101,6 +105,18 @@ class PowerDnsApiRoot(BasePdnsRequestableObject):
         res["server_url"] = self.server_url
 
         return res
+
+    # -------------------------------------------------------------------------
+    def get_repr_fields(self):
+        """Return a list of parameters prepared for __repr__()."""
+        fields = []
+
+        if str(self.server_url) != "servers":
+            fields.append(f"server_url={self.server_url!r}")
+
+        fields += super(PowerDnsApiRoot, self).get_repr_fields()
+
+        return fields
 
     # -------------------------------------------------------------------------
     def import_data(self, data):
@@ -170,6 +186,26 @@ class PowerDnsApiRoot(BasePdnsRequestableObject):
 
             if self.verbose > 1:
                 msg = "Creating API server object from:" + "\n" + pp(item)
+
+            server = PowerDNSServer(
+                appname=self.appname,
+                verbose=self.verbose,
+                base_dir=self.base_dir,
+                master_server=self.master_server,
+                port=self.port,
+                api_key=self.api_key,
+                use_https=self.use_https,
+                timeout=self.timeout,
+                path_prefix=self.path_prefix,
+                simulate=self.simulate,
+                force=self.force,
+                initialized=True,
+            )
+            server.import_server_data(item)
+
+            server_name = server.api_servername
+
+            self.servers[server_name] = server
 
             i += 1
 
