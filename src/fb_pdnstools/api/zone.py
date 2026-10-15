@@ -214,7 +214,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
         init_params = copy.copy(kwargs)
 
         if "name" not in data:
-            msg = _("No name for zo zone in import data given.")
+            msg = _("No zone name in import data given.")
             raise PowerDNSZoneError(msg)
         name = data["name"]
 

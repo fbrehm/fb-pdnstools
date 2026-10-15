@@ -264,7 +264,7 @@ class StringDescriptor:
 
         if self.lowcase and self.upcase:
             msg = _(
-                "The properties {lc!r} and {uc!r} of attribute {a!r} may not be set to {w} "
+                "The properties {lc!r} and {uc!r} of attribute {a!r} must not be set to {w} "
                 "at the same time."
             ).format(lc="lowcase", uc="upcase", a=self.public_name, r="True")
             raise ValueError(msg)
@@ -379,7 +379,7 @@ class StringArrayDescriptor:
 
         if self.lowcase and self.upcase:
             msg = _(
-                "The properties {lc!r} and {uc!r} of attribute {a!r} may not be set to {w} "
+                "The properties {lc!r} and {uc!r} of attribute {a!r} must not be set to {w} "
                 "at the same time."
             ).format(lc="lowcase", uc="upcase", a=self.public_name, r="True")
             raise ValueError(msg)
@@ -438,7 +438,7 @@ class StringArrayDescriptor:
 
 # =============================================================================
 class VersionDescriptor:
-    """Descriptor for a bversion field."""
+    """Descriptor for a version field."""
 
     # -------------------------------------------------------------------------
     def __init__(self, name, maybe_none=False):

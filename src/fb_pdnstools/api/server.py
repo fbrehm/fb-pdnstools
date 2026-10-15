@@ -20,9 +20,9 @@ from fb_tools.common import pp, to_bool, to_str
 from fb_tools.handling_obj import HandlingObject
 
 try:
-        from semver import Version
+    from semver import Version
 except ImportError:
-        from semver import VersionInfo as Version
+    from semver import VersionInfo as Version
 
 # Own modules
 from .. import DEFAULT_API_PREFIX
@@ -235,7 +235,7 @@ class PowerDNSServer(BasePdnsRequestableObject):
             self.url = url
 
         if "version" in data:
-            self.server_version =  data["version"]
+            self.server_version = data["version"]
 
         if "zones_url" in data:
             url = re_api_prefix.sub("", data["zones_url"])
