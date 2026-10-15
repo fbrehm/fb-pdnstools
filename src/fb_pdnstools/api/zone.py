@@ -29,6 +29,11 @@ from fb_tools.common import to_utf8
 import six
 
 # Own modules
+from .record import PowerDNSRecord
+from .recordset import PowerDNSRecordSet
+from .recordset import PowerDNSRecordSetList
+from .recordsetcomment import PowerDNSRecordSetComment
+from .soa import PowerDnsSOAData
 from .. import FQDN_REGEX
 from ..descriptors import BooleanDescriptor
 from ..descriptors import IntegerDescriptor
@@ -39,13 +44,8 @@ from ..errors import PDNSNoRecordsToRemove
 from ..errors import PowerDNSZoneError
 from ..requestable import BasePdnsRequestableObject
 from ..xlate import XLATOR
-from .record import PowerDNSRecord
-from .recordset import PowerDNSRecordSet
-from .recordset import PowerDNSRecordSetList
-from .recordsetcomment import PowerDNSRecordSetComment
-from .soa import PowerDnsSOAData
 
-__version__ = "3.1.0"
+__version__ = "3.1.1"
 
 LOG = logging.getLogger(__name__)
 

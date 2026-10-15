@@ -17,24 +17,24 @@ from collections.abc import Mapping
 # Third party modules
 
 from fb_tools.common import is_sequence
-from fb_tools.common import pp, to_bool, to_str
-from fb_tools.handling_obj import HandlingObject
+from fb_tools.common import pp
 
 # Own modules
-from .. import DEFAULT_API_PREFIX
-from .. import DEFAULT_PORT
+from .. import DEFAULT_API_PREFIX                       # noqa: F401
+from .. import DEFAULT_PORT                             # noqa: F401
 from ..descriptors import PosixPathDescriptor
 from ..descriptors import StringArrayDescriptor
-from ..descriptors import StringDescriptor
-from ..errors import PDNSApiNotFoundError, PDNSApiValidationError
+from ..descriptors import StringDescriptor              # noqa: F401
+from ..errors import PDNSApiNotFoundError               # noqa: F401
 from ..errors import PDNSApiResponseError
+from ..errors import PDNSApiValidationError             # noqa: F401
 from ..requestable import BasePdnsRequestableObject
 from ..xlate import XLATOR
-from .server import PowerDNSServer
-from .zone import PowerDNSZone
-from .zonedict import PowerDNSZoneDict
+from .server import PowerDNSServer                      # noqa: I100
+from .zone import PowerDNSZone                          # noqa: F401
+from .zonedict import PowerDNSZoneDict                  # noqa: F401
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -76,7 +76,6 @@ class PowerDnsApiRoot(BasePdnsRequestableObject):
     def request_url_servers(self):
         """Return the URL to request for the API servers."""
         return self._build_url("/" + str(self.server_url))
-
 
     # -------------------------------------------------------------------------
     def export_data(self):
@@ -209,7 +208,6 @@ class PowerDnsApiRoot(BasePdnsRequestableObject):
 
             i += 1
 
-
     # -------------------------------------------------------------------------
     def _set_server_url(self, server_url):
 
@@ -223,7 +221,6 @@ class PowerDnsApiRoot(BasePdnsRequestableObject):
         pat_servers = r"\{/server\}"
         if self.verbose > 3:
             LOG.debug(f"Pattern servers: {pat_servers!r}.")
-
 
         server_url = re.sub(pat_api_prefix, "", server_url)
         server_url = re.sub(pat_servers, "", server_url)

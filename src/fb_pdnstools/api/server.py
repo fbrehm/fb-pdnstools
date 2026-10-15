@@ -19,14 +19,9 @@ from collections.abc import Mapping
 from fb_tools.common import pp, to_bool, to_str
 from fb_tools.handling_obj import HandlingObject
 
-try:
-    from semver import Version
-except ImportError:
-    from semver import VersionInfo as Version
-
 # Own modules
-from .. import DEFAULT_API_PREFIX
-from .. import DEFAULT_PORT
+from .zone import PowerDNSZone
+from .zonedict import PowerDNSZoneDict
 from .. import DEFAULT_SERVER_AUTOPRIMARIES_URl
 from .. import DEFAULT_SERVER_CONFIG_URL
 from .. import DEFAULT_SERVER_DAEMON_TYPE
@@ -39,10 +34,8 @@ from ..descriptors import VersionDescriptor
 from ..errors import PDNSApiNotFoundError, PDNSApiValidationError
 from ..requestable import BasePdnsRequestableObject
 from ..xlate import XLATOR
-from .zone import PowerDNSZone
-from .zonedict import PowerDNSZoneDict
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -59,28 +52,38 @@ class PowerDNSServer(BasePdnsRequestableObject):
     config_url = PosixPathDescriptor("config_url", must_absolute=False, maybe_none=False)
     daemon_type = StringDescriptor("daemon_type", maybe_none=True, stripped=True)
     server_version = VersionDescriptor("server_version", maybe_none=True)
-    type = StringDescriptor("type", maybe_none=True, stripped=True)
+    type = StringDescriptor("type", maybe_none=True, stripped=True)             # noqa: A003
     url = PosixPathDescriptor("url", must_absolute=False, maybe_none=False)
     zones_url = PosixPathDescriptor("zones_url", must_absolute=False, maybe_none=False)
 
-    default_autoprimaries_url = "servers/" + DEFAULT_SERVER_NAME + "/" + DEFAULT_SERVER_AUTOPRIMARIES_URl
+    default_autoprimaries_url = (
+        "servers/" + DEFAULT_SERVER_NAME + "/" + DEFAULT_SERVER_AUTOPRIMARIES_URl
+    )
     default_config_url = "servers/" + DEFAULT_SERVER_NAME + "/" + DEFAULT_SERVER_CONFIG_URL
     default_url = "servers/" + DEFAULT_SERVER_NAME
     default_zones_url = "servers/" + DEFAULT_SERVER_NAME + "/" + DEFAULT_SERVER_ZONES_URL
 
+    pat_autoprimary = r"\{/autoprimary\}"
+    pat_config = r"\{/config_setting\}"
+    pat_zone = r"\{/zone\}"
+
+    re_autoprimary = re.compile(pat_autoprimary)
+    re_config = re.compile(pat_config)
+    re_zone = re.compile(pat_zone)
+
     # -------------------------------------------------------------------------
     def __init__(
-            self,
-            autoprimaries_url=None,
-            config_url=None,
-            daemon_type=None,
-            server_version=None,
-            type=None,
-            url=None,
-            zones_url=None,
-            version=__version__,
-            **kwargs
-        ):
+        self,
+        autoprimaries_url=None,
+        config_url=None,
+        daemon_type=None,
+        server_version=None,
+        type=None,                                          # noqa: A002
+        url=None,
+        zones_url=None,
+        version=__version__,
+        **kwargs,
+    ):
         """Initialize a PowerDNSServer record."""
         self.autoprimaries_url = self.default_autoprimaries_url
         self.config_url = self.default_config_url
@@ -96,14 +99,17 @@ class PowerDNSServer(BasePdnsRequestableObject):
 
         super(PowerDNSServer, self).__init__(version=version, **kwargs)
 
+        pat_api_prefix = re.escape(str(self.path_prefix)) + r"/"
+        self.re_api_prefix = re.compile(pat_api_prefix)
+
         if autoprimaries_url is not None:
-            url = re_api_prefix.sub("", autoprimaries_url)
-            url = re_autoprimary.sub("", url)
+            url = self.re_api_prefix.sub("", autoprimaries_url)
+            url = self.re_autoprimary.sub("", url)
             self.autoprimaries_url = url
 
         if config_url is not None:
-            url = re_api_prefix.sub("", config_url)
-            url = re_config.sub("", url)
+            url = self.re_api_prefix.sub("", config_url)
+            url = self.re_config.sub("", url)
             self.config_url = url
 
         if daemon_type is not None:
@@ -119,8 +125,7 @@ class PowerDNSServer(BasePdnsRequestableObject):
             self.url = url
 
         if zones_url is not None:
-            url = re_api_prefix.sub("", zones_url)
-
+            url = self.re_api_prefix.sub("", zones_url)
 
         self.zones = None
 
@@ -147,7 +152,9 @@ class PowerDNSServer(BasePdnsRequestableObject):
         """Typecast PDNS relevant data into a dict for reproduction."""
         res = super(PowerDNSServer, self).export_data()
 
-        res["autoprimaries_url"] = str(self.path_prefix) + "/" + str(self.autoprimaries_url) + "{/autoprimary}"
+        res["autoprimaries_url"] = (
+            str(self.path_prefix) + "/" + str(self.autoprimaries_url) + "{/autoprimary}"
+        )
         res["config_url"] = str(self.path_prefix) + "/" + self.config_url + "{/config_setting}"
         res["daemon_type"] = self.daemon_type
         res["id"] = self.api_servername
@@ -201,24 +208,14 @@ class PowerDNSServer(BasePdnsRequestableObject):
         if self.verbose > 1:
             LOG.debug("Server data to import:" + "\n" + pp(data))
 
-        pat_api_prefix = re.escape(str(self.path_prefix)) + r"/"
-        pat_autoprimary = r"\{/autoprimary\}"
-        pat_config = r"\{/config_setting\}"
-        pat_zone = r"\{/zone\}"
-
-        re_api_prefix = re.compile(pat_api_prefix)
-        re_autoprimary = re.compile(pat_autoprimary)
-        re_config = re.compile(pat_config)
-        re_zone = re.compile(pat_zone)
-
         if "autoprimaries_url" in data:
-            ap_url = re_api_prefix.sub("", data["autoprimaries_url"])
-            ap_url = re_autoprimary.sub("", ap_url)
+            ap_url = self.re_api_prefix.sub("", data["autoprimaries_url"])
+            ap_url = self.re_autoprimary.sub("", ap_url)
             self.autoprimaries_url = ap_url
 
         if "config_url" in data:
-            url = re_api_prefix.sub("", data["config_url"])
-            url = re_config.sub("", url)
+            url = self.re_api_prefix.sub("", data["config_url"])
+            url = self.re_config.sub("", url)
             self.config_url = url
 
         if "daemon_type" in data:
@@ -231,15 +228,15 @@ class PowerDNSServer(BasePdnsRequestableObject):
             self.type = data["type"]
 
         if url is not None:
-            url = re_api_prefix.sub("", data["url"])
+            url = self.re_api_prefix.sub("", data["url"])
             self.url = url
 
         if "version" in data:
             self.server_version = data["version"]
 
         if "zones_url" in data:
-            url = re_api_prefix.sub("", data["zones_url"])
-            url = re_zone.sub("", url)
+            url = self.re_api_prefix.sub("", data["zones_url"])
+            url = self.re_zone.sub("", url)
             self.zones_url = url
 
     # -------------------------------------------------------------------------
