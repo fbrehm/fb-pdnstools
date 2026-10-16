@@ -33,9 +33,9 @@ from fb_tools.errors import FbAppError
 # Own modules
 from . import DEFAULT_API_PREFIX
 from . import DEFAULT_PORT
+from . import PowerDNSServer
 from . import __version__ as GLOBAL_VERSION
 from .bulk_rm_cfg import PdnsBulkRmCfg
-from .server import PowerDNSServer
 from .xlate import DOMAIN
 from .xlate import LOCALE_DIR
 from .xlate import XLATOR
@@ -44,7 +44,7 @@ from .xlate import __lib_dir__ as __xlate_lib_dir__
 from .xlate import __mo_file__ as __xlate_mo_file__
 from .xlate import __module_dir__ as __xlate_module_dir__
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext

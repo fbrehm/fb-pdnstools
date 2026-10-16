@@ -55,8 +55,7 @@ jobs:
     name: "Calling shared build workflow"
     needs:
       - prepare-image
-    # uses: fbrehm/actions/.github/workflows/pyproject-build-packages.yaml@main
-    uses: fbrehm/actions/.github/workflows/pyproject-build-packages.yaml@develop
+    uses: fbrehm/actions/.github/workflows/pyproject-build-packages.yaml@main
     with:
       has_i18n: true
       # test_python_versions: '["3.9", "3.12", "3.13", "3.14", "3.15"]'
