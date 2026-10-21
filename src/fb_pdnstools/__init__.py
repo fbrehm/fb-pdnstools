@@ -11,6 +11,7 @@ from __future__ import absolute_import
 
 # Standard modules
 import re
+from pathlib import PosixPath
 
 __version__ = "1.2.0"
 
@@ -70,7 +71,7 @@ VALID_RRSET_TYPES = [
 
 DEFAULT_PORT = 8081
 DEFAULT_TIMEOUT = 20
-DEFAULT_API_PREFIX = "/api/v1"
+DEFAULT_API_PREFIX = PosixPath("/api/v1")
 DEFAULT_USE_HTTPS = True
 DEFAULT_SERVER_AUTOPRIMARIES_URl = "autoprimaries"
 DEFAULT_SERVER_CONFIG_URL = "config"

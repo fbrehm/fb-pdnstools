@@ -31,7 +31,7 @@ except ImportError:
 from . import VALID_RRSET_TYPES
 from .xlate import XLATOR
 
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -74,7 +74,7 @@ class IntegerDescriptor:
         ).format(a=self.public_name, m=self.lower_limit)
         self.upper_limit_msg = _(
             "Invalid value {{v}} of attribute {a}, must be less or equal to {m}."
-        ).format(a=self.public_name, m=self.lower_limit)
+        ).format(a=self.public_name, m=self.upper_limit)
 
     # -------------------------------------------------------------------------
     def __set_name__(self, owner, name):

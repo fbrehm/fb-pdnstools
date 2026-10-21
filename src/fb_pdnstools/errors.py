@@ -13,12 +13,14 @@ from __future__ import absolute_import
 
 # Own modules
 from fb_tools.errors import FbHandlerError
+from fb_tools.multi_config import MultiConfigError
 
+from . import MAX_PORT_NUMBER
 from .xlate import XLATOR
 
 _ = XLATOR.gettext
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 
 # =============================================================================
@@ -187,6 +189,62 @@ class PDNSRequestError(PowerDNSHandlerError):
 # =============================================================================
 class PDNSApiResponseError(PowerDNSHandlerError):
     """Raised when the API response has errors."""
+
+    pass
+
+# =============================================================================
+class PowerDNSWrongPortTypeError(PowerDNSHandlerError, TypeError):
+    """Exception when wrong vSphere server port was given."""
+
+    # -------------------------------------------------------------------------
+    def __init__(self, port, emesg=None, server_type="PowerDNS"):
+        """Initialize the PowerDNSWrongPortTypeError object."""
+        self.port = port
+        self.emesg = emesg
+        self.server_type = server_type
+
+    # -------------------------------------------------------------------------
+    def __str__(self):
+        """Typecast into a string."""
+        msg = _("Invalid type of {port!r} for a port of a {server_type} server").format(
+            port=self.port, server_type=self.server_type)
+        if self.emesg:
+            msg += ": " + self.emesg
+        else:
+            msg += "."
+
+        return msg
+
+
+# =============================================================================
+class PowerDNSWrongPortValueError(PowerDNSHandlerError, ValueError):
+    """Exception when a wrong port number was given."""
+
+    default_max_port = MAX_PORT_NUMBER
+
+    # -------------------------------------------------------------------------
+    def __init__(self, port, max_port=None, server_type="PowerDNS"):
+        """Initialize the PowerDNSWrongPortValueError object."""
+        self.port = port
+        self.max_port = max_port
+        if self.max_port is None:
+            self.max_port = self.default_max_port
+        self.server_type = server_type
+
+    # -------------------------------------------------------------------------
+    def __str__(self):
+        """Typecast into a string."""
+        msg = _(
+            "Invalid port number {port!r} for the {server_type} server, "
+            "PORT must be greater than zero and less or equal to {max}."
+        ).format(port=self.port, server_type=self.server_type, max=self.max_port)
+
+        return msg
+
+
+# =============================================================================
+class PowerDNSConfigError(MultiConfigError, PowerDNSHandlerError):
+    """Error class for all exceptions in configuration modules."""
 
     pass
 
