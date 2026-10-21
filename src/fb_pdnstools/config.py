@@ -20,7 +20,6 @@ from fb_tools.common import is_sequence
 from fb_tools.common import pp
 from fb_tools.common import to_bool
 from fb_tools.multi_config import BaseMultiConfig
-from fb_tools.obj import FbBaseObject
 
 # Own modules
 from . import DEFAULT_API_PREFIX
@@ -251,6 +250,8 @@ class PdnsApiConfig(BaseMultiConfig):
     There are also methods to read it from configuration files.
     """
 
+    mandatory = BooleanDescriptor(name="mandatory")
+
     # -------------------------------------------------------------------------
     def __init__(
         self,
@@ -262,7 +263,7 @@ class PdnsApiConfig(BaseMultiConfig):
         **kwargs
     ):
         """Initialize a PdnsApiConfig object."""
-        self.mandatory = bool(mandatory)
+        self.mandatory = mandatory
 
         add_stems = []
         if additional_stems:
@@ -277,13 +278,14 @@ class PdnsApiConfig(BaseMultiConfig):
         if "powerdns" not in add_stems:
             add_stems.append("powerdns")
 
-        self.pdns_api = None
+        self.pdns_api = PdnsApiConfigInfo(initialized=False)
 
         super(PdnsApiConfig, self).__init__(
             version=version,
             config_dir=config_dir,
             additional_stems=add_stems,
             initialized=False,
+            **kwargs
         )
 
         if initialized:
@@ -327,9 +329,26 @@ class PdnsApiConfig(BaseMultiConfig):
             self.pdns_api = PdnsApiConfigInfo.from_config(
                 section_name=section_name,
                 section=section,
-                verbose=self.verbose,
-                base_dir=self.base_dir,
+                raise_on_error=self.mandatory,
             )
+
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=True):
+        """
+        Transform the elements of the object into a dict.
+
+        @param short: don't include local properties in resulting dict.
+        @type short: bool
+
+        @return: structure as dict
+        @rtype:  dict
+        """
+        res = super(PdnsApiConfig, self).as_dict(short=short)
+
+        res["mandatory"] = self.mandatory
+        res["pdns_api"] = self.pdns_api.as_dict(short=short)
+
+        return res
 
 
 # =============================================================================

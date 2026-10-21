@@ -175,31 +175,22 @@ class TestPdnsConfig(FbPdnsToolsTestcase):
             e = cm.exception
             LOG.debug("{} raised: {}".format(e.__class__.__name__, e))
 
-        # cfg = VmwareConfiguration(
-        #     appname=self.appname,
-        #     config_dir="test",
-        #     additional_stems="test",
-        #     verbose=self.verbose,
-        # )
-        # LOG.debug("VmwareConfiguration %%r: %r", cfg)
-        # LOG.debug("VmwareConfiguration %%s: %s", str(cfg))
+    # -------------------------------------------------------------------------
+    def test_config_object(self):
+        """Test init of a PdnsApiConfig object."""
+        LOG.info(self.get_method_doc())
 
-    # # -------------------------------------------------------------------------
-    # def test_read_config(self):
-    #     """Test reading of config."""
-    #     LOG.info(self.get_method_doc())
+        from fb_pdnstools.config import PdnsApiConfig
 
-    #     from fb_vmware.config import VmwareConfiguration
+        cfg = PdnsApiConfig(
+            appname=self.appname,
+            config_dir="test",
+            additional_stems="test",
+            verbose=self.verbose,
+        )
 
-    #     cfg = VmwareConfiguration(
-    #         appname=self.appname,
-    #         config_dir="test",
-    #         additional_stems="test",
-    #         verbose=self.verbose,
-    #     )
-    #     cfg.read()
-    #     cfg.eval()
-    #     LOG.debug("VmwareConfiguration %%s: %s", str(cfg))
+        LOG.debug("PdnsApiConfig %r: {!r}".format(cfg))
+        LOG.debug("PdnsApiConfig %s:\n" + pp(str(cfg)))
 
 
 # =============================================================================
@@ -216,7 +207,7 @@ if __name__ == "__main__":
 
     suite.addTest(TestPdnsConfig("test_import", verbose))
     suite.addTest(TestPdnsConfig("test_info_object", verbose))
-    # suite.addTest(TestPdnsConfig("test_read_config", verbose))
+    suite.addTest(TestPdnsConfig("test_config_object", verbose))
 
     runner = unittest.TextTestRunner(verbosity=verbose)
 
