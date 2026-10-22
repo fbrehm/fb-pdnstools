@@ -19,6 +19,7 @@ import re
 from fb_tools.common import is_sequence
 from fb_tools.common import pp
 from fb_tools.common import to_bool
+from fb_tools.errors import ConfigError
 from fb_tools.multi_config import BaseMultiConfig
 
 # Own modules
@@ -35,7 +36,7 @@ from .descriptors import StringDescriptor
 from .errors import PowerDNSConfigError
 from .xlate import XLATOR
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -292,11 +293,21 @@ class PdnsApiConfig(BaseMultiConfig):
             self.initialized = True
 
     # -------------------------------------------------------------------------
+    def read(self):
+        """Read all collected config files and save their configuration."""
+        try:
+            super(PdnsApiConfig, self).read()
+        except ConfigError as e:
+            raise PowerDNSConfigError(str(e))
+
+    # -------------------------------------------------------------------------
     def eval(self):     # noqa: A003
         """Evaluate configuration and store it in object properties."""
+        LOG.debug(_("Trying to read all configuration ..."))
+
         super(PdnsApiConfig, self).eval()
 
-        if not self.pdns_api:
+        if not self.pdns_api.initialized:
             msg = _("Did not found configuration for PowerDNS.") + " "
 
             if self.config_files:
@@ -314,6 +325,8 @@ class PdnsApiConfig(BaseMultiConfig):
     # -------------------------------------------------------------------------
     def eval_section(self, section_name):
         """Evaluate a particular configuration section."""
+        LOG.debug(_("Trying to read PowerDNS configuration ..."))
+
         super(PdnsApiConfig, self).eval_section(section_name)
         sn = section_name.lower()
 

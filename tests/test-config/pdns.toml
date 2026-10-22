@@ -1,0 +1,11 @@
+[global]
+
+verbose = 1
+
+[powerdns]
+
+host = "dnsmaster.uhu-banane.de"
+port = 8088
+timeout = 30
+https = false
+key = "My very secure API key"

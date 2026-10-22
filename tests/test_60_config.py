@@ -38,11 +38,15 @@ class TestPdnsConfig(FbPdnsToolsTestcase):
     # -------------------------------------------------------------------------
     def setUp(self):
         """Execute this on seting up before calling each particular test method."""
+        if self.verbose >= 1:
+            print()
+
         super(TestPdnsConfig, self).setUp()
 
         self.test_dir = Path(__file__).parent.resolve()
         self.base_dir = self.test_dir.parent
         self.test_cfg_dir = self.test_dir / "test-config"
+        self.test_broken_cfg_dir = self.test_dir / "test-broken"
         self._appname = "test-config"
 
     # -------------------------------------------------------------------------
@@ -186,11 +190,75 @@ class TestPdnsConfig(FbPdnsToolsTestcase):
             appname=self.appname,
             config_dir="test",
             additional_stems="test",
+            additional_cfgdirs=self.test_cfg_dir,
             verbose=self.verbose,
         )
 
         LOG.debug("PdnsApiConfig %r: {!r}".format(cfg))
         LOG.debug("PdnsApiConfig %s:\n" + pp(str(cfg)))
+
+    # -------------------------------------------------------------------------
+    def test_read_config(self):
+        """Test reading configuration."""
+        LOG.info(self.get_method_doc())
+
+        from fb_pdnstools.config import PdnsApiConfig
+
+        cfg = PdnsApiConfig(
+            appname=self.appname,
+            config_dir="test",
+            additional_stems="test",
+            additional_cfgdirs=self.test_cfg_dir,
+            verbose=self.verbose,
+        )
+        LOG.debug("PdnsApiConfig %r: {!r}".format(cfg))
+
+        if self.verbose >= 1:
+            print()
+        LOG.debug("Reading configuration ...")
+        cfg.read()
+
+        if self.verbose >= 1:
+            print()
+        LOG.debug("Evaluating configuration ...")
+        cfg.eval()
+
+        LOG.debug("PdnsApiConfig %s:\n" + pp(str(cfg.pdns_api)))
+
+        self.assertEqual(cfg.pdns_api.host, "dnsmaster.uhu-banane.de")
+        self.assertEqual(cfg.pdns_api.port, 8088)
+        self.assertEqual(cfg.pdns_api.timeout, 30)
+        self.assertEqual(cfg.pdns_api.prefix, PosixPath("/api/v1"))
+        self.assertTrue(cfg.pdns_api.prefix.is_absolute())
+        self.assertFalse(cfg.pdns_api.use_https)
+        self.assertEqual(cfg.pdns_api.key, "My very secure API key")
+        self.assertTrue(cfg.pdns_api.initialized)
+
+    # -------------------------------------------------------------------------
+    def test_read_broken_config(self):
+        """Test reading broken configuration."""
+        LOG.info(self.get_method_doc())
+
+        from fb_pdnstools.config import PdnsApiConfig
+        from fb_pdnstools.errors import PowerDNSConfigError
+
+        cfg = PdnsApiConfig(
+            appname=self.appname,
+            config_dir="test",
+            additional_stems="test",
+            additional_cfgdirs=self.test_broken_cfg_dir,
+            verbose=self.verbose,
+        )
+        LOG.debug("PdnsApiConfig %r: {!r}".format(cfg))
+
+        if self.verbose >= 1:
+            print()
+        LOG.debug("Reading configuration ...")
+        with self.assertRaises(PowerDNSConfigError) as cm:
+            cfg.read()
+            LOG.error("This message should never be visible.")
+        e = cm.exception
+        LOG.debug("{} raised: {}".format(e.__class__.__name__, e))
 
 
 # =============================================================================
@@ -208,6 +276,8 @@ if __name__ == "__main__":
     suite.addTest(TestPdnsConfig("test_import", verbose))
     suite.addTest(TestPdnsConfig("test_info_object", verbose))
     suite.addTest(TestPdnsConfig("test_config_object", verbose))
+    suite.addTest(TestPdnsConfig("test_read_config", verbose))
+    suite.addTest(TestPdnsConfig("test_read_broken_config", verbose))
 
     runner = unittest.TextTestRunner(verbosity=verbose)
 
