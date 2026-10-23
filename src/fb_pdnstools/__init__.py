@@ -81,6 +81,7 @@ DEFAULT_SERVER_NAME = "localhost"
 DEFAULT_SERVER_ZONES_URL = "zones"
 
 MAX_PORT_NUMBER = (2**16) - 1
+MAX_API_TIMEOUT = 3600
 
 FQDN_REGEX = re.compile(r"^((?!-)[-A-Z\d]{1,62}(?<!-)\.)+[A-Z]{1,62}\.?$", re.IGNORECASE)
 

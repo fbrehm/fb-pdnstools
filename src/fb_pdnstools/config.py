@@ -36,7 +36,7 @@ from .descriptors import StringDescriptor
 from .errors import PowerDNSConfigError
 from .xlate import XLATOR
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -242,6 +242,23 @@ class PdnsApiConfigInfo(GenericPdnsObject):
                 res["key"] = "*******"
 
         return res
+
+    # -------------------------------------------------------------------------
+    def __copy__(self):
+        """Magic method to create a copy of the current object by copy.copy()."""
+
+        new_info = PdnsApiConfigInfo(
+            host=self.host,
+            port=self.port,
+            use_https=self.use_https,
+            key=self.key,
+            prefix=self.prefix,
+            timeout=self.timeout,
+            initialized=self.initialized,
+        )
+
+        return new_info
+
 
 # =============================================================================
 class PdnsApiConfig(BaseMultiConfig):
