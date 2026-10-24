@@ -11,6 +11,7 @@ from __future__ import absolute_import, print_function
 
 # Standard modules
 import copy
+import logging
 import os
 
 # Third party modules
@@ -46,7 +47,7 @@ from ..xlate import __lib_dir__ as __xlate_lib_dir__
 from ..xlate import __mo_file__ as __xlate_mo_file__
 from ..xlate import __module_dir__ as __xlate_module_dir__
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -80,6 +81,12 @@ class BasePowerDNSApplication(FbConfigApplication):
             cfg_class=cfg_class,
             **kwargs
         )
+
+    # -------------------------------------------------------------------------
+    def __del__(self):
+        """Destructor."""
+        if self.pdns_api:
+            self.pdns_api = None
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=True):
