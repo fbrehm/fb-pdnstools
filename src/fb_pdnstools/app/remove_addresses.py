@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@summary: The module for the 'pdns-bulk-remove' application object.
+@summary: The module for the 'pdns-remove-addresses' application object.
 
 @author: Frank Brehm
 @contact: frank@brehm-online.com
@@ -37,8 +37,8 @@ _ = XLATOR.gettext
 ngettext = XLATOR.ngettext
 
 # =============================================================================
-class PdnsBulkRmApp(BasePowerDNSApplication):
-    """Class for the application object of the pdns-bulk-remove application."""
+class PdnsRemoveAddrApp(BasePowerDNSApplication):
+    """Class for the application object of the pdns-remove-addresses application."""
 
     show_simulate_option = True
 
@@ -46,7 +46,7 @@ class PdnsBulkRmApp(BasePowerDNSApplication):
 
     # -------------------------------------------------------------------------
     def __init__(self, version=GLOBAL_VERSION, *args, **kwargs):
-        """Initialize the PdnsBulkRmApp object."""
+        """Initialize the PdnsRemoveAddrApp object."""
         desc = _(
             "Removes the given addresses (A-, AAAA- or CNAME-Records) completety from "
             "PowerDNS. If there are multiple entries to a DNS-Name, all appropriate "
@@ -62,7 +62,7 @@ class PdnsBulkRmApp(BasePowerDNSApplication):
         self.records2remove = {}
         self.expected_ptr = None
 
-        super(PdnsBulkRmApp, self).__init__(
+        super(PdnsRemoveAddrApp, self).__init__(
             *args,
             description=desc,
             version=version,
@@ -82,7 +82,7 @@ class PdnsBulkRmApp(BasePowerDNSApplication):
         @return: structure as dict
         @rtype:  dict
         """
-        res = super(PdnsBulkRmApp, self).as_dict(short=short)
+        res = super(PdnsRemoveAddrApp, self).as_dict(short=short)
         res["remove_reverse"] = self.remove_reverse
 
         return res
@@ -130,14 +130,14 @@ class PdnsBulkRmApp(BasePowerDNSApplication):
             ).format("-F/--file"),
         )
 
-        super(PdnsBulkRmApp, self).init_arg_parser()
+        super(PdnsRemoveAddrApp, self).init_arg_parser()
 
     # -------------------------------------------------------------------------
     def post_init(self):
         """Execute this method before calling run()."""
         self.initialized = False
 
-        super(PdnsBulkRmApp, self).post_init()
+        super(PdnsRemoveAddrApp, self).post_init()
 
         if self.address_file:
             self.read_address_file()
@@ -149,7 +149,7 @@ class PdnsBulkRmApp(BasePowerDNSApplication):
     # -------------------------------------------------------------------------
     def perform_arg_parser(self):
         """Parse the command line options."""
-        super(PdnsBulkRmApp, self).perform_arg_parser()
+        super(PdnsRemoveAddrApp, self).perform_arg_parser()
 
         if self.args.no_reverse:
             self.remove_reverse = False
@@ -204,13 +204,13 @@ class PdnsBulkRmApp(BasePowerDNSApplication):
 
 # =============================================================================
 def main():
-    """Entrypoint for pdns-bulk-remove."""
+    """Entrypoint for pdns-remove-addresses."""
     my_path = pathlib.Path(sys.argv[0])
     appname = my_path.name
 
     locale.setlocale(locale.LC_ALL, "")
 
-    app = PdnsBulkRmApp(appname=appname)
+    app = PdnsRemoveAddrApp(appname=appname)
     app.initialized = True
 
     if app.verbose > 2:
