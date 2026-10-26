@@ -10,27 +10,25 @@
 from __future__ import absolute_import
 
 # Standard modules
-import copy
-import ipaddress
+# import ipaddress
 import locale
 import logging
 import os
-import pathlib
 import re
 import sys
-from functools import cmp_to_key
+# from functools import cmp_to_key
+from pathlib import Path
 
 # Third party modules
-from fb_tools.argparse_actions import CfgFileOptionAction
 
 # Own modules
 from . import BasePowerDNSApplication
-from . import PdnsAppError
+# from . import PdnsAppError
 from .. import __version__ as GLOBAL_VERSION
 from ..descriptors import BooleanDescriptor
 from ..xlate import XLATOR
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -44,6 +42,9 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
 
     remove_reverse = BooleanDescriptor(name="remove_reverse")
 
+    re_comment = re.compile(r"\s*#.*")
+    re_whitespace = re.compile(r"\s+")
+
     # -------------------------------------------------------------------------
     def __init__(self, version=GLOBAL_VERSION, *args, **kwargs):
         """Initialize the PdnsRemoveAddrApp object."""
@@ -56,8 +57,7 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
 
         self.remove_reverse = True
 
-        self.address_file = None
-
+        self.address_files = []
         self.addresses = []
         self.records2remove = {}
         self.expected_ptr = None
@@ -103,31 +103,17 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
             ),
         )
 
-        # file_group = app_group.add_mutually_exclusive_group()
-
-        app_group.add_argument(
-            "-F",
-            "--file",
-            metavar=_("FILE"),
-            dest="addr_file",
-            type=pathlib.Path,
-            action=CfgFileOptionAction,
-            help=_(
-                "File containing the addresses to remove. The addresses must be "
-                "whitespace separeted, lines may be commented out by prepending them "
-                "with a hash sign '#'. This option is mutually exclusive with "
-                "giving the addresses as command line arguments."
-            ),
-        )
-
         app_group.add_argument(
             "addresses",
-            metavar=_("ADDRESS"),
+            metavar=_("ADDRESS|@FILE"),
             type=str,
-            nargs="*",
+            nargs="+",
             help=_(
-                "Addresses to remove. This option is mutually exclusive with the {!r} option."
-            ).format("-F/--file"),
+                "Addresses to remove or a file (given as @filename), containing the addresses "
+                "to remove. If a file was given, then the addresses in ther  must be separated "
+                "with whitespaces and/or newlines. Lines ay be commented out by prepending them "
+                "with a hash sign '#'."
+            )
         )
 
         super(PdnsRemoveAddrApp, self).init_arg_parser()
@@ -139,12 +125,14 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
 
         super(PdnsRemoveAddrApp, self).post_init()
 
-        if self.address_file:
-            self.read_address_file()
+        if self.address_files:
+            self.read_address_files()
 
         if not self.addresses:
             LOG.error(_("No addresses to remove given."))
             self.exit(1)
+
+        self.addresses.sort()
 
     # -------------------------------------------------------------------------
     def perform_arg_parser(self):
@@ -154,36 +142,52 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
         if self.args.no_reverse:
             self.remove_reverse = False
 
-        if self.args.addr_file:
-            afile = self.args.addr_file
-            if not os.access(str(afile), os.R_OK):
-                msg = _("No read access to file {!r}.").format(str(afile))
-                LOG.error(msg)
-                self.exit(1)
-            self.address_file = afile
-
         if self.args.addresses:
-            for address in self.args.addresses:
-                addr = address.strip().lower()
-                if addr != "" and addr not in self.addresses:
-                    self.addresses.append(addr)
+            for address_token in self.args.addresses:
+                self._perform_address_token(address_token)
 
     # -------------------------------------------------------------------------
-    def read_address_file(self):
+    def _perform_address_token(self, address_token):
+
+        if address_token.startswith("@"):
+            afile = Path(address_token.replace("@", "", 1))
+            if not afile.exists():
+                LOG.error(_("File {f} does not exists.").format(
+                    self.colored(str(afile), ["cyan", "bold"])))
+                self.exit(1)
+            if not afile.is_file():
+                LOG.error(_("File {f} is not a regular file.").format(
+                    self.colored(str(afile), ["cyan", "bold"])))
+                self.exit(1)
+            if not os.access(str(afile), os.R_OK):
+                LOG.error(_("No read access to file {!r}.").format(
+                    self.colored(str(afile), ["cyan", "bold"])))
+                self.exit(1)
+            afile = afile.resolve()
+            if afile not in self.address_files:
+                self.address_files.append(afile)
+            return
+
+        addr = address_token.strip().lower()
+        if addr != "" and addr not in self.addresses:
+            self.addresses.append(addr)
+
+    # -------------------------------------------------------------------------
+    def read_address_file(self, afile):
         """Read the file containing all addresses to remove."""
-        content = self.read_file(self.address_file)
+        if self.verbose > 1:
+            LOG.debug(_("Reading address file {} ...").format(
+                self.colored(str(afile), ["cyan", "bold"])))
+        content = afile.read_text(encoding=self.encoding, errors="surrogateescape")
         if self.verbose > 2:
             LOG.debug(_("Content of {!r}:").format(str(self.address_file)) + "\n" + content)
 
-        re_comment = re.compile(r"\s*#.*")
-        re_whitespace = re.compile(r"\s+")
-
         addresses = []
         for line in content.splitlines():
-            line_stripped = re_comment.sub("", line).strip()
+            line_stripped = self.re_comment.sub("", line).strip()
             if line_stripped == "":
                 continue
-            for token in re_whitespace.split(line_stripped):
+            for token in self.re_whitespace.split(line_stripped):
                 addr = token.strip().lower()
                 if addr != "" and addr not in addresses:
                     addresses.append(addr)
@@ -192,8 +196,14 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
             self.addresses = addresses
 
         if not self.addresses:
-            LOG.error(_("No addresses to remove found in {!r}.").format(str(self.address_file)))
-            self.exit(1)
+            LOG.error(_("No addresses to remove found in {!r}.").format(str(afile)))
+            # self.exit(1)
+
+    # -------------------------------------------------------------------------
+    def read_address_files(self):
+        """Read all files containing addresses to remove."""
+        for afile in self.address_files:
+            self.read_address_file(afile)
 
     # -------------------------------------------------------------------------
     def _run(self):
@@ -205,7 +215,7 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
 # =============================================================================
 def main():
     """Entrypoint for pdns-remove-addresses."""
-    my_path = pathlib.Path(sys.argv[0])
+    my_path = Path(sys.argv[0])
     appname = my_path.name
 
     locale.setlocale(locale.LC_ALL, "")

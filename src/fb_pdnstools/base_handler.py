@@ -46,7 +46,6 @@ from . import DEFAULT_PORT
 from . import DEFAULT_TIMEOUT
 from . import DEFAULT_USE_HTTPS
 from . import LIBRARY_NAME
-from . import MAX_API_TIMEOUT
 from . import MAX_PORT_NUMBER
 from . import VALID_RRSET_TYPES
 from .errors import PDNSApiError
@@ -59,7 +58,7 @@ from .errors import PowerDNSHandlerError
 from .xlate import XLATOR
 
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 LOG = logging.getLogger(__name__)
 
 LOGLEVEL_REQUESTS_SET = False

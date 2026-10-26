@@ -35,7 +35,7 @@ from ..errors import PDNSApiNotFoundError, PDNSApiValidationError
 from ..requestable import BasePdnsRequestableObject
 from ..xlate import XLATOR
 
-__version__ = "2.1.0"
+__version__ = "2.1.1"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -95,7 +95,7 @@ class PowerDNSServer(BasePdnsRequestableObject):
 
         self.zones = None
 
-        LOG.debug("Got kwargs:\n" + pp(kwargs))
+        # LOG.debug("Got kwargs:\n" + pp(kwargs))
 
         super(PowerDNSServer, self).__init__(version=version, **kwargs)
 

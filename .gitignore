@@ -136,6 +136,7 @@ dmypy.json
 tmp/
 etc/*.ini
 etc/*.yaml
+etc/*.toml
 rpmdir/*
 .rpm-version*
 /get*.awk

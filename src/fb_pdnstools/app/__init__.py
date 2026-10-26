@@ -24,11 +24,13 @@ from fb_tools.multi_config import DEFAULT_ENCODING
 
 from rich import box
 from rich.console import Console
-from rich.text import Text
 from rich.panel import Panel
+from rich.prompt import InvalidResponse
+from rich.prompt import Prompt
+from rich.prompt import PromptBase
+from rich.prompt import PromptType
 
 # Own modules
-from .. import __version__ as GLOBAL_VERSION
 from .. import DEFAULT_API_PREFIX
 from .. import DEFAULT_PORT
 from .. import DEFAULT_TIMEOUT
@@ -36,8 +38,9 @@ from .. import DEFAULT_USE_HTTPS
 from .. import MAX_API_TIMEOUT
 from .. import MAX_PORT_NUMBER
 from .. import PowerDNSServer
+from .. import __version__ as GLOBAL_VERSION
 from ..config import PdnsApiConfig
-from ..config import PdnsApiConfigInfo
+from ..descriptors import StringDescriptor
 from ..errors import PowerDNSHandlerError
 from ..xlate import DOMAIN
 from ..xlate import LOCALE_DIR
@@ -47,17 +50,52 @@ from ..xlate import __lib_dir__ as __xlate_lib_dir__
 from ..xlate import __mo_file__ as __xlate_mo_file__
 from ..xlate import __module_dir__ as __xlate_module_dir__
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
 ngettext = XLATOR.ngettext
+
+Prompt.validate_error_message = "[prompt.invalid]" + _("Please enter a valid value")
 
 # =============================================================================
 class PdnsAppError(FbAppError, PowerDNSHandlerError):
     """Base exception class for all exceptions in all PowerDNS application classes."""
 
     pass
+
+# =============================================================================
+class NonEmptyStrPrompt(PromptBase[str]):
+    """A prompt that returns a non-empty stripped str object.
+
+    Example:
+        >>> server = NonEmptyStrPrompt.ask("Tell the name of the server")
+
+    """
+
+    response_type = str
+    validate_error_message = "[prompt.invalid]" + _(
+        "Please enter a non-empty string without whitespaces at the beginning and the end."
+    )
+
+    # -------------------------------------------------------------------------
+    def process_response(self, value: str) -> PromptType:
+        """Process response from user, convert to prompt type.
+
+        Args:
+            value (str): String typed by user.
+
+        Raises:
+            InvalidResponse: If ``value`` is invalid.
+
+        Returns:
+            PromptType: The value to be returned from ask method.
+        """
+        return_value = value.strip()
+        if return_value == "":
+            raise InvalidResponse(self.validate_error_message)
+        return return_value
+
 
 # =============================================================================
 class BasePowerDNSApplication(FbConfigApplication):
@@ -69,12 +107,17 @@ class BasePowerDNSApplication(FbConfigApplication):
         "16color": "standard",
     }
 
+    default_encoding = DEFAULT_ENCODING
+    encoding = StringDescriptor(name="encoding", stripped=True, lowcase=True, not_empty=True)
+
     # -------------------------------------------------------------------------
     def __init__(self, version=GLOBAL_VERSION, cfg_class=PdnsApiConfig, **kwargs):
         """Initialize a BasePowerDNSApplication object."""
         self.rich_console = None
         self.pdns_api = None
         self.pdns_api_info = None
+
+        self.encoding = self.default_encoding
 
         super(BasePowerDNSApplication, self).__init__(
             version=version,
@@ -100,6 +143,8 @@ class BasePowerDNSApplication(FbConfigApplication):
         @rtype:  dict
         """
         res = super(BasePowerDNSApplication, self).as_dict(short=short)
+
+        res["encoding"] = self.encoding
 
         res["xlate"]["fb_pdnstools"] = {
             "__module_dir__": __xlate_module_dir__,
@@ -199,22 +244,29 @@ class BasePowerDNSApplication(FbConfigApplication):
         super(BasePowerDNSApplication, self).post_init()
 
         self.pdns_api_info = copy.copy(self.cfg.pdns_api)
+        self.eval_env()
         self.perform_arg_parser_pdns()
+        self.check_empty_configs()
 
-        self.pdns_api = PowerDNSServer(
-            appname=self.appname,
-            verbose=self.verbose,
-            base_dir=self.base_dir,
-            master_server=self.pdns_api_info.host,
-            port=self.pdns_api_info.port,
-            key=self.pdns_api_info.key,
-            use_https=self.pdns_api_info.use_https,
-            path_prefix=self.pdns_api_info.prefix,
-            timeout=self.pdns_api_info.timeout,
-            simulate=self.simulate,
-            force=self.force,
-            initialized=True,
-        )
+        params = {
+            "appname": self.appname,
+            "verbose": self.verbose,
+            "base_dir": self.base_dir,
+            "master_server": self.pdns_api_info.host,
+            "port": self.pdns_api_info.port,
+            "api_key": self.pdns_api_info.key,
+            "use_https": self.pdns_api_info.use_https,
+            "path_prefix": self.pdns_api_info.prefix,
+            "timeout": self.pdns_api_info.timeout,
+            "simulate": self.simulate,
+            "force": self.force,
+            "initialized": True,
+        }
+
+        if self.verbose > 4:
+            LOG.debug("Params for PowerDNSServer:\n" + pp(params))
+
+        self.pdns_api = PowerDNSServer(**params)
 
         args_color = getattr(self.args, "color", "auto")
         if args_color == "auto":
@@ -232,6 +284,39 @@ class BasePowerDNSApplication(FbConfigApplication):
                     color_system = self.term_colors.get(colors, "standard")
 
             self.rich_console = Console(color_system=color_system)
+
+    # -------------------------------------------------------------------------
+    def eval_env(self):
+        """Evaluate OS environment for configuration."""
+        if "PDNS_API_HOST" in os.environ:
+            host = os.environ.get("PDNS_API_HOST", "").strip().lower()
+            if host:
+                self.pdns_api_info.host = host
+
+        if "PDNS_API_PORT" in os.environ:
+            port = os.environ.get("PDNS_API_PORT", "")
+            if port:
+                self.pdns_api_info.port = port
+
+        if "PDNS_API_HTTPS" in os.environ:
+            use_https = os.environ.get("PDNS_API_HTTPS", "").strip()
+            if use_https != "":
+                self.pdns_api_info.use_https = use_https
+
+        if "PDNS_API_KEY" in os.environ:
+            key = os.environ.get("PDNS_API_KEY", "").strip()
+            if key:
+                self.pdns_api_info.key = key
+
+        if "PDNS_API_PREFIX" in os.environ:
+            prefix = os.environ.get("PDNS_API_PREFIX", "").strip()
+            if host:
+                self.pdns_api_info.prefix = prefix
+
+        if "PDNS_API_TIMEOUT" in os.environ:
+            timeout = os.environ.get("PDNS_API_TIMEOUT", "").strip()
+            if timeout:
+                self.pdns_api_info.timeout = timeout
 
     # -------------------------------------------------------------------------
     def perform_arg_parser_pdns(self):
@@ -261,21 +346,59 @@ class BasePowerDNSApplication(FbConfigApplication):
             self.pdns_api_info.timeout = timeout
 
     # -------------------------------------------------------------------------
+    def check_empty_configs(self):
+        """Check for empty host and API key and ask the user for it."""
+        try:
+            if not self.pdns_api_info.host:
+                self.pdns_api_info.host = NonEmptyStrPrompt.ask(_(
+                    "Get the name or address of the PowerDNS API server"))
+
+            if not self.pdns_api_info.key:
+                self.pdns_api_info.key = NonEmptyStrPrompt.ask(_(
+                    "Get the API key for access the PowerDNS API"))
+
+        except KeyboardInterrupt:
+            print("\n" + self.colored(_("User interrupt."), "YELLOW"))
+            self.exit(5)
+
+    # -------------------------------------------------------------------------
     def pre_run(self):
         """Execute some actions before the main routine."""
         LOG.debug(_("Actions before running main routine."))
 
         if self.simulate:
             message = _("Simulation mode - nothing will be done in real.")
+            box_style = box.ROUNDED
             if self.quiet:
                 box_style = None
+
             sim_panel = Panel(
                 message,
-                box=box.ROUNDED,
+                box=box_style,
                 style="bold cyan",
                 border_style="bold yellow",
+                title=self.appname,
             )
             self.rich_console.print(sim_panel)
+
+        service = "https"
+        if not self.pdns_api_info.use_https:
+            service = "http"
+
+        host = "<unknown>"
+        if self.pdns_api_info.host:
+            host = self.pdns_api_info.host
+
+        port = self.pdns_api_info.port
+        prefix = self.pdns_api_info.prefix
+
+        url = f"{service}://{host}:{port}{prefix}"
+
+        if not self.quiet:
+            print()
+            label = _("Used URL to PowerDNS:") + " " + self.colored(url, ["bold", "cyan"])
+            print(label)
+            print()
 
 
 # =============================================================================
