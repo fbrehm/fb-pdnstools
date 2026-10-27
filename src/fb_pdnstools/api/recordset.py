@@ -37,7 +37,7 @@ from ..descriptors import StringDescriptor
 from ..errors import PowerDNSRecordSetError
 from ..xlate import XLATOR
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 LOG = logging.getLogger(__name__)
 
@@ -546,6 +546,21 @@ class PowerDNSRecordSetList(MutableSequence):
             return self.export_data()
 
         return [r.as_dict(short=short) for r in self]
+
+    # -------------------------------------------------------------------------
+    def as_list(self, short=True, as_dicts=False):
+        """
+        Return a list with all resource records.
+
+        If the parameter 'as_dicts' is true, all rrset objects are transformed into dicts.
+        """
+        res = []
+        for rrset in self._list:
+            if as_dicts:
+                res.append(rrset.as_dict(short))
+            else:
+                res.append(copy.copy(rrset))
+        return res
 
     # -------------------------------------------------------------------------
     def sort(self, reverse=False):

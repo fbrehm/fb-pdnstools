@@ -45,7 +45,7 @@ from ..errors import PowerDNSZoneError
 from ..requestable import BasePdnsRequestableObject
 from ..xlate import XLATOR
 
-__version__ = "3.2.0"
+__version__ = "3.3.0"
 
 LOG = logging.getLogger(__name__)
 
@@ -485,7 +485,9 @@ class PowerDNSZone(BasePdnsRequestableObject):
         if not url.startswith("/"):
             url = "/" + url
 
-        url = str(self.path_prefix) + url
+        prefix = str(self.path_prefix)
+        if not url.startswith(prefix + "/"):
+            url = prefix + url
 
         LOG.debug(
             _("Updating data of zone {n!r} from API path {u!r} ...").format(n=self.name, u=url)
@@ -1085,11 +1087,12 @@ class PowerDNSZone(BasePdnsRequestableObject):
         if not rtype:
             return None
 
-        LOG.debug(
-            _("Searching for RecordSet {f!r} of type {t!r} in zone {z!r}.").format(
-                f=fqdn_used, t=rtype, z=self.name
+        if self.verbose > 1:
+            LOG.debug(
+                _("Searching for RecordSet {f!r} of type {t!r} in zone {z!r}.").format(
+                    f=fqdn_used, t=rtype, z=self.name
+                )
             )
-        )
 
         if not len(self.rrsets):
             self.update()
@@ -1102,8 +1105,43 @@ class PowerDNSZone(BasePdnsRequestableObject):
                     LOG.debug(msg)
                 return rrset
 
-        LOG.debug(_("Did not found RecordSet {f!r} of type {t!r}.".format(f=fqdn_used, t=rtype)))
+        if self.verbose > 1:
+            LOG.debug(_("Did not found RecordSet {f!r} of type {t!r}.".format(
+                f=fqdn_used, t=rtype)))
         return None
+
+    # -------------------------------------------------------------------------
+    def get_address_rrsets(self, fqdn, raise_on_error=True):
+        """Search an A or AAAA record set by given name."""
+        rrsets = PowerDNSRecordSetList()
+
+        for rrset_type in ("A", "AAAA"):
+            rrset = self.get_rrset(fqdn, rrset_type=rrset_type, raise_on_error=raise_on_error)
+            if rrset:
+                rrsets.append(rrset)
+
+        if self.verbose > 2:
+            if len(rrsets):
+                LOG.debug(_("Found address RRSETs for FQDN {!r}:").format(
+                    fqdn) + "\n" + pp(rrsets.as_dict()))
+            else:
+                LOG.debug(_("Found NO address RRSETs for FQDN {!r}.").format(fqdn))
+
+        return rrsets
+
+    # -------------------------------------------------------------------------
+    def get_ptr_rrset(self, fqdn, raise_on_error=True):
+        """Search the appropriate PTR record by the given FQDN."""
+        rrset = self.get_rrset(fqdn, rrset_type="PTR", raise_on_error=raise_on_error)
+
+        if self.verbose > 2:
+            if rrset:
+                LOG.debug(_("Found PTR record set for FQDN {!r}:").format(
+                    fqdn) + "\n" + pp(rrset.as_dict()))
+            else:
+                LOG.debug(_("Found NO PTR record set for FQDN {!r}:").format(fqdn))
+
+        return rrset
 
     # -------------------------------------------------------------------------
     def get_soa_rrset(self, raise_on_error=True):

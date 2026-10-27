@@ -50,7 +50,7 @@ from ..xlate import __lib_dir__ as __xlate_lib_dir__
 from ..xlate import __mo_file__ as __xlate_mo_file__
 from ..xlate import __module_dir__ as __xlate_module_dir__
 
-__version__ = "0.3.1"
+__version__ = "0.5.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -379,6 +379,25 @@ class BasePowerDNSApplication(FbConfigApplication):
         except KeyboardInterrupt:
             print("\n" + self.colored(_("User interrupt."), "YELLOW"))
             self.exit(5)
+
+    # -------------------------------------------------------------------------
+    def init_logging(self):
+        """
+        Initialize the logger object.
+
+        @return: None
+        """
+        if not self.do_init_logging:
+            return
+
+        super(BasePowerDNSApplication, self).init_logging()
+
+        if self.verbose < 3:
+            url3logger = logging.getLogger("urllib3.connectionpool")
+            if self.verbose < 1:
+                url3logger.setLevel(logging.WARNING)
+            else:
+                url3logger.setLevel(logging.INFO)
 
     # -------------------------------------------------------------------------
     def pre_run(self):
