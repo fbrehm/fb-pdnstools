@@ -10,6 +10,7 @@
 from __future__ import absolute_import
 
 # Standard modules
+import copy
 # import ipaddress
 import locale
 import logging
@@ -20,6 +21,10 @@ import sys
 from pathlib import Path
 
 # Third party modules
+from fb_tools.common import pp
+# from fb_tools.common import reverse_pointer
+# from fb_tools.common import to_bool
+from fb_tools.common import to_str
 
 # Own modules
 from . import BasePowerDNSApplication
@@ -28,7 +33,7 @@ from .. import __version__ as GLOBAL_VERSION
 from ..descriptors import BooleanDescriptor
 from ..xlate import XLATOR
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -61,6 +66,7 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
         self.addresses = []
         self.records2remove = {}
         self.expected_ptr = None
+        self.zones = {}
 
         super(PdnsRemoveAddrApp, self).__init__(
             *args,
@@ -180,7 +186,7 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
                 self.colored(str(afile), ["cyan", "bold"])))
         content = afile.read_text(encoding=self.encoding, errors="surrogateescape")
         if self.verbose > 2:
-            LOG.debug(_("Content of {!r}:").format(str(self.address_file)) + "\n" + content)
+            LOG.debug(_("Content of {!r}:").format(str(afile)) + "\n" + content)
 
         addresses = []
         for line in content.splitlines():
@@ -211,6 +217,191 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
         print()
         LOG.debug("Starting {a!r}, version {v!r} ...".format(a=self.appname, v=self.version))
 
+        ret = 0
+        try:
+            self.zones = self.pdns_api.get_api_zones()
+            ret = self.verify_addresses(copy.copy(self.addresses))
+
+        finally:
+            # Cleaning up ...
+            self.pdns_api = None
+
+        self.exit_value = ret
+
+    # -------------------------------------------------------------------------
+    def verify_addresses(self, addresses):
+        """Verify all given DNS addresses."""
+        LOG.debug(_("Verifying all given DNS addresses."))
+
+        fqdns_found = []
+
+        all_fqdns = self._canon_addresses(addresses)
+        zones_of_records = self._get_zones_of_addresses(all_fqdns)
+
+        if not zones_of_records:
+            msg = _("Did not found any addresses with an appropriate zone in PowerDNS.")
+            LOG.error(msg)
+            return 1
+
+        if self.verbose > 1:
+            LOG.debug(_("Found zones for addresses:") + "\n" + pp(zones_of_records))
+
+        for zone_name in zones_of_records:
+            fqdns_found = self._verify_fqdns_in_pdns_zones(
+                zone_name, zones_of_records, fqdns_found
+            )
+        if self.verbose > 2:
+            LOG.debug(_("The following FQDNs were found:") + "\n" + pp(fqdns_found))
+
+        fqdns_not_found = []
+        for fqdn in all_fqdns:
+            if fqdn not in fqdns_found:
+                fqdns_not_found.append(fqdn)
+        if fqdns_not_found:
+            msg = _("The following addresses (FQDNs) are not found:")
+            for fqdn in fqdns_not_found:
+                msg += "\n  * {!r}".format(fqdn)
+            LOG.warning(msg)
+
+        if not self.records2remove:
+            return 1
+
+        if self.verbose > 2:
+            msg = _("Found resource record sets to remove:")
+            msg += "\n" + pp(self.records2remove)
+            LOG.debug(msg)
+
+        return 0
+
+    # -------------------------------------------------------------------------
+    def _canon_addresses(self, addresses):
+
+        if self.verbose > 1:
+            LOG.debug(_("Canonizing all given addresses."))
+        all_fqdns = []
+
+        for addr in addresses:
+
+            fqdn = self.pdns_api.name2fqdn(addr)
+            if not fqdn:
+                LOG.warning(_("Address {!r} could not interpreted as a FQDN.").format(addr))
+                continue
+            if fqdn not in all_fqdns:
+                all_fqdns.append(fqdn)
+
+        if self.verbose > 2:
+            LOG.debug(_("Canonized addresses:") + "\n" + pp(all_fqdns))
+        return all_fqdns
+
+    # -------------------------------------------------------------------------
+    def _get_zones_of_addresses(self, fqdns):
+
+        if self.verbose > 1:
+            LOG.debug(_("Retrieve zones for canonized addresses."))
+        zones_of_records = {}
+
+        for fqdn in fqdns:
+
+            zones = self.pdns_api.get_all_zones_for_item(fqdn)
+            if not zones:
+                LOG.warning(_("Did not found an appropriate zone for address {!r}.").format(fqdn))
+                continue
+
+            for zone_name in zones:
+                if zone_name not in zones_of_records:
+                    zones_of_records[zone_name] = {}
+                zones_of_records[zone_name][fqdn] = {}
+
+        if self.verbose > 2:
+            LOG.debug(_("Zones of addresses:") + "\n" + pp(zones_of_records))
+        return zones_of_records
+
+    # -------------------------------------------------------------------------
+    def _verify_fqdns_in_pdns_zones(self, zone_name, zones_of_records, fqdns_found=None):
+
+        if self.verbose > 1:
+            LOG.debug(_("Verifying FQDNs for zone {!r}.").format(zone_name))
+
+        if fqdns_found is None:
+            fqdns_found = []
+
+        zone = self.pdns_api.zones[zone_name]
+        zone.update()
+        if self.verbose > 1:
+            LOG.debug(
+                _("Found {c} resource record sets (RRSET) for zone {z!r}.").format(
+                    c=len(zone.rrsets), z=zone_name
+                )
+            )
+
+        for fqdn in zones_of_records[zone_name]:
+            fqdns_in_zone_found = self._verify_fqdn_in_pdns_zone(zone_name, fqdn)
+            if fqdns_in_zone_found:
+                fqdns_found += fqdns_in_zone_found
+
+        return fqdns_found
+
+    # -------------------------------------------------------------------------
+    def _verify_fqdn_in_pdns_zone(self, zone_name, fqdn):
+
+        zone = self.pdns_api.zones[zone_name]
+        fqdns_in_zone_found = []
+
+        fqdn_puny = to_str(fqdn.encode("idna"))
+        if self.verbose > 1:
+            if fqdn != fqdn_puny:
+                LOG.debug(
+                    _("Searching {f!r} ({p!r}) in zone {z!r} ...").format(
+                        f=fqdn, p=fqdn_puny, z=zone_name
+                    )
+                )
+            else:
+                LOG.debug(_("Searching {f!r} in zone {z!r} ...").format(f=fqdn, z=zone_name))
+
+        for rrset in zone.rrsets:
+
+            if rrset.name != fqdn:
+                if fqdn == fqdn_puny:
+                    continue
+                if rrset.name != fqdn_puny:
+                    continue
+
+            rrset2remove = {"fqdn": fqdn_puny, "type": rrset.type.upper(), "records": []}
+            found = False
+            if zone.reverse_zone:
+                if rrset.type.upper() == "PTR":
+                    found = True
+            else:
+                if rrset.type.upper() in ("A", "AAAA", "CNAME"):
+                    found = True
+            if not found:
+                continue
+
+            for record in rrset.records:
+                if zone.reverse_zone and rrset.type.upper() == "PTR":
+                    if self.expected_ptr is not None and fqdn_puny in self.expected_ptr:
+                        ptr = self.pdns_api.decanon_name(fqdn_puny)
+                        exp = self.pdns_api.decanon_name(self.expected_ptr[fqdn_puny])
+                        addr = self.pdns_api.decanon_name(record.content)
+                        if self.verbose > 1:
+                            LOG.debug(_("Expexted PTR: {p!r} => {a!r}.").format(p=ptr, a=exp))
+                        if record.content != self.expected_ptr[fqdn_puny]:
+                            LOG.warning(
+                                _(
+                                    "PTR {p!r} does not pointing to expected {e!r}, "
+                                    "but to {c!r} instead, ignoring for deletion."
+                                ).format(p=ptr, e=exp, c=addr)
+                            )
+                            continue
+                record2remove = {"content": record.content, "disabled": record.disabled}
+                rrset2remove["records"].append(record2remove)
+            if zone_name not in self.records2remove:
+                self.records2remove[zone_name] = []
+            self.records2remove[zone_name].append(rrset2remove)
+            if fqdn_puny not in fqdns_in_zone_found:
+                fqdns_in_zone_found.append(fqdn_puny)
+
+        return fqdns_in_zone_found
 
 # =============================================================================
 def main():

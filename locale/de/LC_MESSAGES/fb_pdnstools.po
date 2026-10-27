@@ -658,7 +658,7 @@ msgstr "Suche {f!r} ({p!r}) in Zone {z!r} …"
 #: src/fb_pdnstools/bulk_rm_app.py:521
 #, python-brace-format
 msgid "Searching {f!r} in zone {z!r} ..."
-msgstr "Suche {f!r} in Zone {!r} …"
+msgstr "Suche {f!r} in Zone {z!r} …"
 
 #: src/fb_pdnstools/bulk_rm_app.py:549
 #, python-brace-format

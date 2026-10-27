@@ -50,7 +50,7 @@ from ..xlate import __lib_dir__ as __xlate_lib_dir__
 from ..xlate import __mo_file__ as __xlate_mo_file__
 from ..xlate import __module_dir__ as __xlate_module_dir__
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -201,13 +201,13 @@ class BasePowerDNSApplication(FbConfigApplication):
         https_group.add_argument(
             "--https",
             action="store_true",
-            dest="https",
+            dest="https_on",
             help=_("Use HTTPS to access the PowerDNS API (Default: {}).").format(default_https_on),
         )
         https_group.add_argument(
             "--no-https",
-            action="store_false",
-            dest="https",
+            action="store_true",
+            dest="https_off",
             help=_("Use No HTTPS to access the PowerDNS API (Default: {}).").format(
                 default_https_off
             ),
@@ -263,7 +263,7 @@ class BasePowerDNSApplication(FbConfigApplication):
             "initialized": True,
         }
 
-        if self.verbose > 4:
+        if self.verbose > 1:
             LOG.debug("Params for PowerDNSServer:\n" + pp(params))
 
         self.pdns_api = PowerDNSServer(**params)
@@ -288,34 +288,49 @@ class BasePowerDNSApplication(FbConfigApplication):
     # -------------------------------------------------------------------------
     def eval_env(self):
         """Evaluate OS environment for configuration."""
+        if self.verbose > 2:
+            LOG.debug("Trying to eval envs like PDNS_API_* ...")
+
         if "PDNS_API_HOST" in os.environ:
             host = os.environ.get("PDNS_API_HOST", "").strip().lower()
             if host:
+                if self.verbose > 2:
+                    LOG.debug(f"Setting PDNS host by env to {host!r}.")
                 self.pdns_api_info.host = host
 
         if "PDNS_API_PORT" in os.environ:
             port = os.environ.get("PDNS_API_PORT", "")
             if port:
+                if self.verbose > 2:
+                    LOG.debug(f"Setting PDNS port by env to {port!r}.")
                 self.pdns_api_info.port = port
 
         if "PDNS_API_HTTPS" in os.environ:
             use_https = os.environ.get("PDNS_API_HTTPS", "").strip()
             if use_https != "":
+                if self.verbose > 2:
+                    LOG.debug(f"Setting PDNS HTTPS by env to {use_https!r}.")
                 self.pdns_api_info.use_https = use_https
 
         if "PDNS_API_KEY" in os.environ:
             key = os.environ.get("PDNS_API_KEY", "").strip()
             if key:
+                if self.verbose > 2:
+                    LOG.debug("Setting PDNS API key by env.")
                 self.pdns_api_info.key = key
 
         if "PDNS_API_PREFIX" in os.environ:
             prefix = os.environ.get("PDNS_API_PREFIX", "").strip()
             if host:
+                if self.verbose > 2:
+                    LOG.debug(f"Setting PDNS prefix by env to {prefix!r}.")
                 self.pdns_api_info.prefix = prefix
 
         if "PDNS_API_TIMEOUT" in os.environ:
             timeout = os.environ.get("PDNS_API_TIMEOUT", "").strip()
             if timeout:
+                if self.verbose > 2:
+                    LOG.debug(f"Setting PDNS timeout by env to {timeout!r}.")
                 self.pdns_api_info.timeout = timeout
 
     # -------------------------------------------------------------------------
@@ -329,9 +344,13 @@ class BasePowerDNSApplication(FbConfigApplication):
         if port:
             self.pdns_api_info.port = self.args.port
 
-        use_https = getattr(self.args, "https", None)
-        if use_https is not None:
-            self.pdns_api_info.use_https = use_https
+        # use_https = getattr(self.args, "https", None)
+        # if use_https is not None:
+        #     self.pdns_api_info.use_https = use_https
+        if getattr(self.args, "https_on", False):
+            self.pdns_api_info.use_https = True
+        elif getattr(self.args, "https_off", False):
+            self.pdns_api_info.use_https = False
 
         key = getattr(self.args, "api_key", None)
         if key:

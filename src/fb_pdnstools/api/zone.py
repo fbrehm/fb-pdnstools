@@ -45,7 +45,7 @@ from ..errors import PowerDNSZoneError
 from ..requestable import BasePdnsRequestableObject
 from ..xlate import XLATOR
 
-__version__ = "3.1.1"
+__version__ = "3.2.0"
 
 LOG = logging.getLogger(__name__)
 
@@ -136,7 +136,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
 
         super(PowerDNSZone, self).__init__(**kwargs)
 
-        if self.verbose > 1:
+        if self.verbose > 3:
             LOG.debug("kwargs:" + "\n" + pp(kwargs))
 
     # -------------------------------------------------------------------------
@@ -224,7 +224,7 @@ class PowerDNSZone(BasePdnsRequestableObject):
         if "SHOW_PDNS_SECRETS" in os.environ and to_bool(os.environ["SHOW_PDNS_SECRETS"]):
             show_secrets = False
 
-        if verbose > 1:
+        if verbose > 3:
             pout = copy.copy(init_params)
             pout["api_key"] = None
             if "api_key" in init_params and init_params["api_key"]:
@@ -481,12 +481,16 @@ class PowerDNSZone(BasePdnsRequestableObject):
             msg = _("Cannot update zone {!r}, no API URL defined.").format(self.name)
             raise PowerDNSZoneError(msg)
 
+        url = str(self.url)
+        if not url.startswith("/"):
+            url = "/" + url
+
+        url = str(self.path_prefix) + url
+
         LOG.debug(
-            _("Updating data of zone {n!r} from API path {u!r} ...").format(
-                n=self.name, u=str(self.url)
-            )
+            _("Updating data of zone {n!r} from API path {u!r} ...").format(n=self.name, u=url)
         )
-        json_response = self.perform_request(str(self.url))
+        json_response = self.perform_request(url)
 
         for key in self.defaults:
             val = json_response.get(key, self.defaults[key])
