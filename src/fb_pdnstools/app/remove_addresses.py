@@ -11,7 +11,6 @@ from __future__ import absolute_import
 
 # Standard modules
 import copy
-# import ipaddress
 import locale
 import logging
 import os
@@ -23,23 +22,19 @@ from pathlib import Path
 # Third party modules
 from fb_tools.common import compare_fqdn
 from fb_tools.common import pp
-# from fb_tools.common import reverse_pointer
-# from fb_tools.common import to_bool
 from fb_tools.common import to_str
 
 from rich import box
 from rich.table import Table
-# from rich.text import Text
 
 # Own modules
 from . import BasePowerDNSApplication
-# from . import PdnsAppError
 from .. import __version__ as GLOBAL_VERSION
 from ..api.recordset import PowerDNSRecordSetList
 from ..descriptors import BooleanDescriptor
 from ..xlate import XLATOR
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -230,12 +225,32 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
 
             if ret == 0:
                 self.print_records_remove()
+                self.do_remove()
 
         finally:
             # Cleaning up ...
             self.pdns_api = None
 
         self.exit_value = ret
+
+    # -------------------------------------------------------------------------
+    def do_remove(self):
+        """Remove finally all addresses in DNS."""
+        for zone_name in sorted(
+            self.records2remove.keys(), key=lambda x: cmp_to_key(compare_fqdn)(x)
+        ):
+            print()
+            zone = self.pdns_api.zones[zone_name]
+            rrsets_rm = []
+            for fqdn in self.records2remove[zone_name]:
+                for rrset in self.records2remove[zone_name][fqdn]:
+                    zone.add_rrset_for_remove(fqdn, rrset.type, rrsets_rm)
+
+            if self.verbose > 3:
+                LOG.debug("Struct rrsets_rm:\n" + pp(rrsets_rm))
+            zone.del_rrsets(rrsets_rm)
+
+        print()
 
     # -------------------------------------------------------------------------
     def _mangle_zones_of_records(self, zones_of_records, zone_name):

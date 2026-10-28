@@ -57,7 +57,7 @@ from .errors import PDNSRequestError
 from .errors import PowerDNSHandlerError
 from .xlate import XLATOR
 
-__version__ = "2.2.0"
+__version__ = "2.2.1"
 LOG = logging.getLogger(__name__)
 
 LOGLEVEL_REQUESTS_SET = False
@@ -296,7 +296,7 @@ class BasePdnsRequestableObject(BasePdnsHandler):
             LOG.debug("Headers:\n{}".format(pp(head_out)))
 
         if may_simulate and self.simulate:
-            LOG.debug(_("Simulation mode, Request will not be sent."))
+            LOG.info(_("Simulation mode, Request will not be sent."))
             return ""
 
         try:
