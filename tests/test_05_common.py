@@ -130,6 +130,38 @@ class TestPdnsCommon(FbPdnsToolsTestcase):
                 LOG.debug("Result: {!r}".format(result))
             self.assertEqual(result, data_row[5])
 
+    # -------------------------------------------------------------------------
+    def test_ptr2address(self):
+        """Test public function ptr2address() from fb_pdnstools.common."""
+        LOG.info(self.get_method_doc())
+
+        from fb_pdnstools.common import ptr2address
+        import ipaddress
+
+        test_data_good = (
+            ("67.145.168.192.in-addr.arpa", "192.168.145.67"),
+            ("145.168.192.in-addr.arpa", "192.168.145.0/24"),
+            ("168.192.in-addr.arpa", "192.168.0.0/16"),
+            ("10.in-addr.arpa", "10.0.0.0/8"),
+            (
+                "0.0.3.0.b.7.6.b.0.7.b.8.3.d.e.3.0.0.e.d.0.0.2.b.9.0.1.8.2.0.a.2.ip6.arpa",
+                "2a02:8109:b200:de00:3ed3:8b70:b67b:300",
+            ),
+            ("0.0.e.d.0.0.2.b.9.0.1.8.2.0.a.2.ip6.arpa", "2a02:8109:b200:de00::/64"),
+            ("1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa", "::1"),
+        )
+
+        for test_data in test_data_good:
+            rev_ptr = test_data[0]
+            if "/" in test_data[1]:
+                exp_addr = ipaddress.ip_network(test_data[1])
+            else:
+                exp_addr = ipaddress.ip_address(test_data[1])
+            LOG.debug(f"Test {rev_ptr!r} => {str(exp_addr)!r}.")
+
+            got_addr = ptr2address(rev_ptr)
+            LOG.debug(f"Got {str(got_addr)!r}.")
+
 
 # =============================================================================
 if __name__ == "__main__":
@@ -146,6 +178,7 @@ if __name__ == "__main__":
 
     suite.addTest(TestPdnsCommon("test_import", verbose))
     suite.addTest(TestPdnsCommon("test_seconds2human", verbose))
+    suite.addTest(TestPdnsCommon("test_ptr2address", verbose))
 
     runner = unittest.TextTestRunner(verbosity=verbose)
 
