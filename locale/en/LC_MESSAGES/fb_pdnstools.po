@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fb_pdnstools 1.2.0\n"
 "Report-Msgid-Bugs-To: frank.brehm@pixelpark.com\n"
-"POT-Creation-Date: 2026-10-28 16:18+0100\n"
+"POT-Creation-Date: 2026-10-28 17:35+0100\n"
 "PO-Revision-Date: 2026-10-28 16:30+0100\n"
 "Last-Translator: Frank Brehm <frank.brehm@pixelpark.com>\n"
 "Language: en\n"
@@ -389,9 +389,30 @@ msgstr "Please enter a valid value"
 msgid "Please enter a non-empty string without whitespaces at the beginning and the end."
 msgstr "Please enter a non-empty string without whitespaces at the beginning and the end."
 
+#: src/fb_pdnstools/app/__init__.py:163
+msgid "PowerDNS options"
+msgstr "PowerDNS options"
+
+#: src/fb_pdnstools/app/__init__.py:169
+msgid "HOST"
+msgstr "HOST"
+
 #: src/fb_pdnstools/app/__init__.py:170
 msgid "Address or hostname of the PowerDNS server providing the API."
 msgstr "Address or hostname of the PowerDNS server providing the API."
+
+#: src/fb_pdnstools/app/__init__.py:178
+msgid "PORT"
+msgstr "PORT"
+
+#: src/fb_pdnstools/app/__init__.py:182
+#, python-brace-format
+msgid "Port on PowerDNS server for API on (Default: {})."
+msgstr "Port on PowerDNS server for API on (Default: {})."
+
+#: src/fb_pdnstools/app/__init__.py:191
+msgid "The API key for accessing the PowerDNS API."
+msgstr "The API key for accessing the PowerDNS API."
 
 #: src/fb_pdnstools/app/__init__.py:196 src/fb_pdnstools/app/__init__.py:200
 msgid "on"
@@ -401,10 +422,20 @@ msgstr "on"
 msgid "off"
 msgstr "ff"
 
+#: src/fb_pdnstools/app/__init__.py:205
+#, python-brace-format
+msgid "Use HTTPS to access the PowerDNS API (Default: {})."
+msgstr "Use HTTPS to access the PowerDNS API (Default: {})."
+
 #: src/fb_pdnstools/app/__init__.py:211
 #, python-brace-format
 msgid "Use No HTTPS to access the PowerDNS API (Default: {})."
 msgstr "Use No HTTPS to access the PowerDNS API (Default: {})."
+
+#: src/fb_pdnstools/app/__init__.py:220
+#, python-brace-format
+msgid "The global prefix for all paths for accessing the PowerDNS API (Default: {!r})."
+msgstr "The global prefix for all paths for accessing the PowerDNS API (Default: {!r})."
 
 #: src/fb_pdnstools/app/__init__.py:227
 msgid "SECONDS"
@@ -439,10 +470,30 @@ msgstr "Simulation mode - nothing will be done in real."
 msgid "Used URL to PowerDNS:"
 msgstr "Used URL to PowerDNS:"
 
+#: src/fb_pdnstools/app/remove_addresses.py:58
+msgid ""
+"Removes the given addresses (A-, AAAA- or CNAME-Records) completety from PowerDNS. If there are "
+"multiple entries to a DNS-Name, all appropriate records are removed. Additionally all "
+"appropriate reverse entries (PTR-records) were also removed, if they are pointing back to the "
+"given A- or AAAA-record."
+msgstr ""
+"Removes the given addresses (A-, AAAA- or CNAME-Records) completety from PowerDNS. If there are "
+"multiple entries to a DNS-Name, all appropriate records are removed. Additionally all "
+"appropriate reverse entries (PTR-records) were also removed, if they are pointing back to the "
+"given A- or AAAA-record."
+
 #: src/fb_pdnstools/app/remove_addresses.py:100
 #, python-brace-format
 msgid "Options of {}"
 msgstr "Options of {}"
+
+#: src/fb_pdnstools/app/remove_addresses.py:108
+msgid ""
+"Don't remove reverse DNS entries (PTR records) to the given addresses. (Default: False - reverse"
+" entries will be removed)."
+msgstr ""
+"Don't remove reverse DNS entries (PTR records) to the given addresses. (Default: False - reverse"
+" entries will be removed)."
 
 #: src/fb_pdnstools/app/remove_addresses.py:115
 msgid "ADDRESS|@FILE"
@@ -458,6 +509,10 @@ msgstr ""
 "file was given, then the addresses in there must be separated with whitespaces and/or newlines. "
 "Lines may be commented out by prepending them with a hash sign '#'."
 
+#: src/fb_pdnstools/app/remove_addresses.py:139
+msgid "No addresses to remove given."
+msgstr "No addresses to remove given."
+
 #: src/fb_pdnstools/app/remove_addresses.py:162
 #, python-brace-format
 msgid "File {f} does not exists."
@@ -468,10 +523,75 @@ msgstr "File {f} does not exists."
 msgid "File {f} is not a regular file."
 msgstr "File {f} is not a regular file."
 
+#: src/fb_pdnstools/app/remove_addresses.py:170
+#, python-brace-format
+msgid "No read access to file {!r}."
+msgstr "No read access to file {!r}."
+
 #: src/fb_pdnstools/app/remove_addresses.py:186
 #, python-brace-format
 msgid "Reading address file {} ..."
 msgstr "Reading address file {} …"
+
+#: src/fb_pdnstools/app/remove_addresses.py:190
+#, python-brace-format
+msgid "Content of {!r}:"
+msgstr "Content of {!r}:"
+
+#: src/fb_pdnstools/app/remove_addresses.py:206
+#, python-brace-format
+msgid "No addresses to remove found in {!r}."
+msgstr "No addresses to remove found in {!r}."
+
+#: src/fb_pdnstools/app/remove_addresses.py:275
+msgid "Verifying all given DNS addresses."
+msgstr "Verifying all given DNS addresses."
+
+#: src/fb_pdnstools/app/remove_addresses.py:283
+msgid "Did not found any addresses with an appropriate zone in PowerDNS."
+msgstr "Did not found any addresses with an appropriate zone in PowerDNS."
+
+#: src/fb_pdnstools/app/remove_addresses.py:288
+msgid "Found zones for addresses:"
+msgstr "Found zones for addresses:"
+
+#: src/fb_pdnstools/app/remove_addresses.py:316
+msgid "The following FQDNs were found:"
+msgstr "The following FQDNs were found:"
+
+#: src/fb_pdnstools/app/remove_addresses.py:319
+msgid "The following addresses (FQDNs) are not found:"
+msgstr "The following addresses (FQDNs) are not found:"
+
+#: src/fb_pdnstools/app/remove_addresses.py:330
+msgid "Found resource record sets to remove:"
+msgstr "Found resource record sets to remove:"
+
+#: src/fb_pdnstools/app/remove_addresses.py:340
+msgid "Canonizing all given addresses."
+msgstr "Canonizing all given addresses."
+
+#: src/fb_pdnstools/app/remove_addresses.py:347
+#, python-brace-format
+msgid "Address {!r} could not interpreted as a FQDN."
+msgstr "Address {!r} could not interpreted as a FQDN."
+
+#: src/fb_pdnstools/app/remove_addresses.py:356
+msgid "Canonized addresses:"
+msgstr "Canonized addresses:"
+
+#: src/fb_pdnstools/app/remove_addresses.py:363
+msgid "Retrieve zones for canonized addresses."
+msgstr "Retrieve zones for canonized addresses."
+
+#: src/fb_pdnstools/app/remove_addresses.py:370
+#, python-brace-format
+msgid "Did not found an appropriate zone for address {!r}."
+msgstr "Did not found an appropriate zone for address {!r}."
+
+#: src/fb_pdnstools/app/remove_addresses.py:379
+msgid "Zones of addresses:"
+msgstr "Zones of addresses:"
 
 #: src/fb_pdnstools/app/remove_addresses.py:387
 msgid "Trying to get all reverse pointers of A- and AAAA-records, which should be removed."
@@ -481,14 +601,40 @@ msgstr "Trying to get all reverse pointers of A- and AAAA-records, which should 
 msgid "Got reverse addresses to remove:"
 msgstr "Got reverse addresses to remove:"
 
-#: src/fb_pdnstools/app/remove_addresses.py:452
+#: src/fb_pdnstools/app/remove_addresses.py:437
+msgid "All DNS records to remove"
+msgstr "All DNS records to remove"
+
+#: src/fb_pdnstools/app/remove_addresses.py:448
 #, python-brace-format
+msgid "Total one DNS record to remove."
+msgid_plural "Total {} DNS records to remove."
+msgstr[0] "Total one DNS record to remove."
+msgstr[1] "Total one DNS record to remove."
+
+#: src/fb_pdnstools/app/remove_addresses.py:452
 msgid "Found no DNS records to remove."
 msgstr "Found no DNS records to remove."
+
+#: src/fb_pdnstools/app/remove_addresses.py:471
+msgid "Name"
+msgstr "Name"
 
 #: src/fb_pdnstools/app/remove_addresses.py:472
 msgid "Name Unicode / Address"
 msgstr "Name Unicode / Address"
+
+#: src/fb_pdnstools/app/remove_addresses.py:473
+msgid "Zone"
+msgstr "Zone"
+
+#: src/fb_pdnstools/app/remove_addresses.py:474
+msgid "Type"
+msgstr "Type"
+
+#: src/fb_pdnstools/app/remove_addresses.py:475
+msgid "Record"
+msgstr "Record"
 
 #: src/fb_pdnstools/app/remove_addresses.py:476
 msgid "Status"
@@ -501,6 +647,15 @@ msgstr "Disabled."
 #: src/fb_pdnstools/app/remove_addresses.py:499
 msgid "Enabled"
 msgstr "Disabled."
+
+#: src/fb_pdnstools/app/remove_addresses.py:519
+#, python-brace-format
+msgid ""
+"{c}-Object:\n"
+"{a}"
+msgstr ""
+"{c}-Object:\n"
+"{a}"
 
 #: src/fb_pdnstools/api/server.py:202 src/fb_pdnstools/base.py:56
 #, python-brace-format
@@ -621,281 +776,6 @@ msgstr "Mocking path has no {!r} key defined:"
 #: src/fb_pdnstools/base_handler.py:548 src/fb_pdnstools/requestable.py:394
 msgid "Adding mocking path:"
 msgstr "Adding mocking path:"
-
-#: src/fb_pdnstools/app/remove_addresses.py:58 src/fb_pdnstools/bulk_rm_app.py:71
-msgid ""
-"Removes the given addresses (A-, AAAA- or CNAME-Records) completety from PowerDNS. If there are "
-"multiple entries to a DNS-Name, all appropriate records are removed. Additionally all "
-"appropriate reverse entries (PTR-records) were also removed, if they are pointing back to the "
-"given A- or AAAA-record."
-msgstr ""
-"Removes the given addresses (A-, AAAA- or CNAME-Records) completety from PowerDNS. If there are "
-"multiple entries to a DNS-Name, all appropriate records are removed. Additionally all "
-"appropriate reverse entries (PTR-records) were also removed, if they are pointing back to the "
-"given A- or AAAA-record."
-
-#: src/fb_pdnstools/app/remove_addresses.py:139 src/fb_pdnstools/bulk_rm_app.py:182
-msgid "No addresses to remove given."
-msgstr "No addresses to remove given."
-
-#: src/fb_pdnstools/bulk_rm_app.py:214 src/fb_pdnstools/bulk_rm_app.py:284
-msgid "FILE"
-msgstr "FILE"
-
-#: src/fb_pdnstools/bulk_rm_app.py:216
-#, python-brace-format
-msgid "Configuration file (default: {!r})"
-msgstr "Configuration file (default: {!r})"
-
-#: src/fb_pdnstools/app/__init__.py:163 src/fb_pdnstools/bulk_rm_app.py:219
-msgid "PowerDNS options"
-msgstr "PowerDNS options"
-
-#: src/fb_pdnstools/app/__init__.py:169 src/fb_pdnstools/bulk_rm_app.py:225
-msgid "HOST"
-msgstr "HOST"
-
-#: src/fb_pdnstools/bulk_rm_app.py:227
-#, python-brace-format
-msgid "Address or hostname of the PowerDNS server providing the API (Default: {!r})."
-msgstr "Address or hostname of the PowerDNS server providing the API (Default: {!r})."
-
-#: src/fb_pdnstools/app/__init__.py:178 src/fb_pdnstools/bulk_rm_app.py:236
-msgid "PORT"
-msgstr "PORT"
-
-#: src/fb_pdnstools/app/__init__.py:182 src/fb_pdnstools/bulk_rm_app.py:237
-#, python-brace-format
-msgid "Port on PowerDNS server for API on (Default: {})."
-msgstr "Port on PowerDNS server for API on (Default: {})."
-
-#: src/fb_pdnstools/app/__init__.py:191 src/fb_pdnstools/bulk_rm_app.py:246
-msgid "The API key for accessing the PowerDNS API."
-msgstr "The API key for accessing the PowerDNS API."
-
-#: src/fb_pdnstools/app/__init__.py:205 src/fb_pdnstools/bulk_rm_app.py:253
-#, python-brace-format
-msgid "Use HTTPS to access the PowerDNS API (Default: {})."
-msgstr "Use HTTPS to access the PowerDNS API (Default: {})."
-
-#: src/fb_pdnstools/app/__init__.py:220 src/fb_pdnstools/bulk_rm_app.py:262
-#, python-brace-format
-msgid "The global prefix for all paths for accessing the PowerDNS API (Default: {!r})."
-msgstr "The global prefix for all paths for accessing the PowerDNS API (Default: {!r})."
-
-#: src/fb_pdnstools/app/remove_addresses.py:108 src/fb_pdnstools/bulk_rm_app.py:276
-msgid ""
-"Don't remove reverse DNS entries (PTR records) to the given addresses. (Default: False - reverse"
-" entries will be removed)."
-msgstr ""
-"Don't remove reverse DNS entries (PTR records) to the given addresses. (Default: False - reverse"
-" entries will be removed)."
-
-#: src/fb_pdnstools/bulk_rm_app.py:288
-msgid ""
-"File containing the addresses to remove. The addresses must be whitespace separeted, lines may "
-"be commented out by prepending them with a hash sign '#'. This option is mutually exclusive with"
-" giving the addresses as command line arguments."
-msgstr ""
-"File containing the addresses to remove. The addresses must be whitespace separeted, lines may "
-"be commented out by prepending them with a hash sign '#'. This option is mutually exclusive with"
-" giving the addresses as command line arguments."
-
-#: src/fb_pdnstools/bulk_rm_app.py:297
-msgid "ADDRESS"
-msgstr "ADDRESS"
-
-#: src/fb_pdnstools/bulk_rm_app.py:301
-#, python-brace-format
-msgid "Addresses to remove. This option is mutually exclusive with the {!r} option."
-msgstr "Addresses to remove. This option is mutually exclusive with the {!r} option."
-
-#: src/fb_pdnstools/bulk_rm_app.py:316
-#, python-brace-format
-msgid "The option {!r} is mutually exclusive with giving the addresses as command line arguments."
-msgstr "The option {!r} is mutually exclusive with giving the addresses as command line arguments."
-
-#: src/fb_pdnstools/bulk_rm_app.py:326
-#, python-brace-format
-msgid "File {!r} does not exists."
-msgstr "File {!r} does not exists."
-
-#: src/fb_pdnstools/bulk_rm_app.py:330
-#, python-brace-format
-msgid "File {!r} is not a regular file."
-msgstr "File {!r} is not a regular file."
-
-#: src/fb_pdnstools/app/remove_addresses.py:170 src/fb_pdnstools/bulk_rm_app.py:334
-#, python-brace-format
-msgid "No read access to file {!r}."
-msgstr "No read access to file {!r}."
-
-#: src/fb_pdnstools/app/remove_addresses.py:190 src/fb_pdnstools/bulk_rm_app.py:364
-#, python-brace-format
-msgid "Content of {!r}:"
-msgstr "Content of {!r}:"
-
-#: src/fb_pdnstools/app/remove_addresses.py:206 src/fb_pdnstools/bulk_rm_app.py:383
-#, python-brace-format
-msgid "No addresses to remove found in {!r}."
-msgstr "No addresses to remove found in {!r}."
-
-#: src/fb_pdnstools/bulk_rm_app.py:420
-msgid "Simulation mode - nothing will be removed in real."
-msgstr "Simulation mode - nothing will be removed in real."
-
-#: src/fb_pdnstools/app/remove_addresses.py:340 src/fb_pdnstools/bulk_rm_app.py:442
-msgid "Canonizing all given addresses."
-msgstr "Canonizing all given addresses."
-
-#: src/fb_pdnstools/app/remove_addresses.py:347 src/fb_pdnstools/bulk_rm_app.py:449
-#, python-brace-format
-msgid "Address {!r} could not interpreted as a FQDN."
-msgstr "Address {!r} could not interpreted as a FQDN."
-
-#: src/fb_pdnstools/app/remove_addresses.py:356 src/fb_pdnstools/bulk_rm_app.py:455
-msgid "Canonized addresses:"
-msgstr "Canonized addresses:"
-
-#: src/fb_pdnstools/app/remove_addresses.py:363 src/fb_pdnstools/bulk_rm_app.py:462
-msgid "Retrieve zones for canonized addresses."
-msgstr "Retrieve zones for canonized addresses."
-
-#: src/fb_pdnstools/app/remove_addresses.py:370 src/fb_pdnstools/bulk_rm_app.py:469
-#, python-brace-format
-msgid "Did not found an appropriate zone for address {!r}."
-msgstr "Did not found an appropriate zone for address {!r}."
-
-#: src/fb_pdnstools/app/remove_addresses.py:379 src/fb_pdnstools/bulk_rm_app.py:478
-msgid "Zones of addresses:"
-msgstr "Zones of addresses:"
-
-#: src/fb_pdnstools/bulk_rm_app.py:485
-#, python-brace-format
-msgid "Verifying FQDNs for zone {!r}."
-msgstr "Verifying FQDNs for zone {!r}."
-
-#: src/fb_pdnstools/bulk_rm_app.py:494
-#, python-brace-format
-msgid "Found {c} resource record sets (RRSET) for zone {z!r}."
-msgstr "Found {c} resource record sets (RRSET) for zone {z!r}."
-
-#: src/fb_pdnstools/bulk_rm_app.py:516
-#, python-brace-format
-msgid "Searching {f!r} ({p!r}) in zone {z!r} ..."
-msgstr "Searching {f!r} ({p!r}) in zone {z!r} …"
-
-#: src/fb_pdnstools/bulk_rm_app.py:521
-#, python-brace-format
-msgid "Searching {f!r} in zone {z!r} ..."
-msgstr "Searching {f!r} in zone {z!r} …"
-
-#: src/fb_pdnstools/bulk_rm_app.py:549
-#, python-brace-format
-msgid "Expexted PTR: {p!r} => {a!r}."
-msgstr "Expexted PTR: {p!r} => {a!r}."
-
-#: src/fb_pdnstools/bulk_rm_app.py:553
-#, python-brace-format
-msgid "PTR {p!r} does not pointing to expected {e!r}, but to {c!r} instead, ignoring for deletion."
-msgstr "PTR {p!r} does not pointing to expected {e!r}, but to {c!r} instead, ignoring for deletion."
-
-#: src/fb_pdnstools/app/remove_addresses.py:275 src/fb_pdnstools/bulk_rm_app.py:571
-msgid "Verifying all given DNS addresses."
-msgstr "Verifying all given DNS addresses."
-
-#: src/fb_pdnstools/app/remove_addresses.py:283 src/fb_pdnstools/bulk_rm_app.py:579
-msgid "Did not found any addresses with an appropriate zone in PowerDNS."
-msgstr "Did not found any addresses with an appropriate zone in PowerDNS."
-
-#: src/fb_pdnstools/app/remove_addresses.py:288 src/fb_pdnstools/bulk_rm_app.py:584
-msgid "Found zones for addresses:"
-msgstr "Found zones for addresses:"
-
-#: src/fb_pdnstools/app/remove_addresses.py:316 src/fb_pdnstools/bulk_rm_app.py:591
-msgid "The following FQDNs were found:"
-msgstr "The following FQDNs were found:"
-
-#: src/fb_pdnstools/app/remove_addresses.py:319 src/fb_pdnstools/bulk_rm_app.py:598
-msgid "The following addresses (FQDNs) are not found:"
-msgstr "The following addresses (FQDNs) are not found:"
-
-#: src/fb_pdnstools/app/remove_addresses.py:330 src/fb_pdnstools/bulk_rm_app.py:607
-msgid "Found resource record sets to remove:"
-msgstr "Found resource record sets to remove:"
-
-#: src/fb_pdnstools/bulk_rm_app.py:616
-msgid "Evaluating reverse PTR records of A and AAAA records."
-msgstr "Evaluating reverse PTR records of A and AAAA records."
-
-#: src/fb_pdnstools/bulk_rm_app.py:630
-#, python-brace-format
-msgid "Try to get reverse address of {!r} ..."
-msgstr "Try to get reverse address of {!r} …"
-
-#: src/fb_pdnstools/bulk_rm_app.py:638
-#, python-brace-format
-msgid "IP address {!r} seems not to be a valid IP address."
-msgstr "IP address {!r} seems not to be a valid IP address."
-
-#: src/fb_pdnstools/bulk_rm_app.py:643
-#, python-brace-format
-msgid "Found reverse address {!r}."
-msgstr "Found reverse address {!r}."
-
-#: src/fb_pdnstools/bulk_rm_app.py:652
-msgid "Expected PTR records:"
-msgstr "Expected PTR records:"
-
-#: src/fb_pdnstools/app/remove_addresses.py:437 src/fb_pdnstools/bulk_rm_app.py:659
-msgid "All DNS records to remove"
-msgstr "All DNS records to remove"
-
-#: src/fb_pdnstools/bulk_rm_app.py:665
-msgid "Disabled."
-msgstr "Disabled."
-
-#: src/fb_pdnstools/app/remove_addresses.py:471 src/fb_pdnstools/bulk_rm_app.py:667
-msgid "Name"
-msgstr "Name"
-
-#: src/fb_pdnstools/app/remove_addresses.py:473 src/fb_pdnstools/bulk_rm_app.py:668
-msgid "Zone"
-msgstr "Zone"
-
-#: src/fb_pdnstools/app/remove_addresses.py:474 src/fb_pdnstools/bulk_rm_app.py:669
-msgid "Type"
-msgstr "Type"
-
-#: src/fb_pdnstools/app/remove_addresses.py:475 src/fb_pdnstools/bulk_rm_app.py:670
-msgid "Record"
-msgstr "Record"
-
-#: src/fb_pdnstools/app/remove_addresses.py:448 src/fb_pdnstools/bulk_rm_app.py:727
-#, python-brace-format
-msgid "Total one DNS record to remove."
-msgid_plural "Total {} DNS records to remove."
-msgstr[0] "Total one DNS record to remove."
-msgstr[1] "Total one DNS record to remove."
-
-#: src/fb_pdnstools/app/remove_addresses.py:519 src/fb_pdnstools/bulk_rm_app.py:744
-#, python-brace-format
-msgid ""
-"{c}-Object:\n"
-"{a}"
-msgstr ""
-"{c}-Object:\n"
-"{a}"
-
-#: src/fb_pdnstools/bulk_rm_cfg.py:116
-#, python-brace-format
-msgid "Unhandled configuration section {!r}."
-msgstr "Unhandled configuration section {!r}."
-
-#: src/fb_pdnstools/bulk_rm_cfg.py:122
-#, python-brace-format
-msgid "Checking config section {!r} ..."
-msgstr "Checking config section {!r} …"
 
 #: src/fb_pdnstools/common.py:78
 msgid "A None type for seconds cannot be converted in seconds."
