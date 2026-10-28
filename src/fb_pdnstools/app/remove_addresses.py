@@ -17,14 +17,19 @@ import logging
 import os
 import re
 import sys
-# from functools import cmp_to_key
+from functools import cmp_to_key
 from pathlib import Path
 
 # Third party modules
+from fb_tools.common import compare_fqdn
 from fb_tools.common import pp
 # from fb_tools.common import reverse_pointer
 # from fb_tools.common import to_bool
 from fb_tools.common import to_str
+
+from rich import box
+from rich.table import Table
+# from rich.text import Text
 
 # Own modules
 from . import BasePowerDNSApplication
@@ -34,7 +39,7 @@ from ..api.recordset import PowerDNSRecordSetList
 from ..descriptors import BooleanDescriptor
 from ..xlate import XLATOR
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -223,11 +228,31 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
             self.zones = self.pdns_api.get_api_zones()
             ret = self.verify_addresses(copy.copy(self.addresses))
 
+            if ret == 0:
+                self.print_records_remove()
+
         finally:
             # Cleaning up ...
             self.pdns_api = None
 
         self.exit_value = ret
+
+    # -------------------------------------------------------------------------
+    def _mangle_zones_of_records(self, zones_of_records, zone_name):
+
+        for fqdn in zones_of_records[zone_name].keys():
+            zone = self.pdns_api.zones[zone_name]
+            if zone_name.endswith(".arpa."):
+                rrset = zone.get_ptr_rrset(fqdn, raise_on_error=False)
+                if rrset:
+                    rrsets = [rrset]
+                else:
+                    rrsets = []
+            else:
+                rrsets = zone.get_address_rrsets(fqdn, raise_on_error=False)
+
+            if rrsets:
+                zones_of_records[zone_name][fqdn] = rrsets
 
     # -------------------------------------------------------------------------
     def verify_addresses(self, addresses):
@@ -248,19 +273,7 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
             LOG.debug(_("Found zones for addresses:") + "\n" + pp(zones_of_records))
 
         for zone_name in zones_of_records.keys():
-            for fqdn in zones_of_records[zone_name].keys():
-                zone = self.pdns_api.zones[zone_name]
-                if zone_name.endswith(".arpa."):
-                    rrset = zone.get_ptr_rrset(fqdn, raise_on_error=False)
-                    if rrset:
-                        rrsets = [rrset]
-                    else:
-                        rrsets = []
-                else:
-                    rrsets = zone.get_address_rrsets(fqdn, raise_on_error=False)
-
-                if rrsets:
-                    zones_of_records[zone_name][fqdn] = rrsets
+            self._mangle_zones_of_records(zones_of_records, zone_name)
 
         fqdns_found = []
         fqdns_not_found = {}
@@ -403,6 +416,78 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
                 else:
                     fqdns_not_found[fqdn] = self.fqdn2addr[fqdn]
 
+    # -------------------------------------------------------------------------
+    def print_records_remove(self):
+        """Display all DNS records to remove on screen."""
+        table_title = _("All DNS records to remove") + "\n"
+        show_header = True
+        box_style = box.ROUNDED
+
+        count = 0
+        for zone_name in self.records2remove.keys():
+            for _rrset in self.records2remove[zone_name]:
+                count += 1
+
+        if count:
+            caption = "\n" + ngettext(
+                "Total one DNS record to remove.",
+                "Total {} DNS records to remove.",
+                count).format(count)
+        else:
+            caption = "\n" + _("Found no DNS records to remove.")
+
+        if self.quiet:
+            show_header = False
+            table_title = None
+            box_style = None
+            caption = None
+
+        table = Table(
+            title=table_title,
+            title_style="bold cyan",
+            caption=caption,
+            caption_style="default on default",
+            caption_justify="left",
+            box=box_style,
+            show_header=show_header,
+            show_footer=False,
+        )
+
+        table.add_column(header=_("Name"))
+        table.add_column(header=_("Name Unicode / Address"))
+        table.add_column(header=_("Zone"))
+        table.add_column(header=_("Type"))
+        table.add_column(header=_("Record"))
+        table.add_column(header=_("Status"))
+
+        for zone_name in sorted(
+            self.records2remove.keys(), key=lambda x: cmp_to_key(compare_fqdn)(x)
+        ):
+            zone = self.pdns_api.zones[zone_name]
+            for fqdn in self.records2remove[zone_name].keys():
+                for rrset in self.records2remove[zone_name][fqdn]:
+                    # LOG.debug(f"Rrset: {rrset!r}")
+                    for record in rrset.records:
+                        # LOG.debug(f"Record: {record!r}")
+                        row = []
+                        row.append(self.pdns_api.decanon_name(fqdn))
+                        if zone.reverse_zone:
+                            row.append(str(rrset.address))
+                        else:
+                            row.append(rrset.name_unicode)
+                        row.append(self.pdns_api.decanon_name(zone_name))
+                        row.append(rrset.type)
+                        row.append(self.pdns_api.decanon_name(record.content))
+                        if record.disabled:
+                            row.append(_("Disabled"))
+                        else:
+                            row.append(_("Enabled"))
+
+                        table.add_row(*row)
+
+        self.rich_console.print(table)
+        if not self.quiet:
+            print()
 
 # =============================================================================
 def main():

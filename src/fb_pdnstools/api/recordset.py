@@ -29,6 +29,7 @@ from .record import PowerDNSRecordList
 from .recordsetcomment import PowerDNSRecordSetComment
 from .soa import PowerDnsSOAData
 from ..base import GenericPdnsObject
+from ..common import ptr2address
 from ..common import seconds2human
 from ..descriptors import BooleanDescriptor
 from ..descriptors import IntegerDescriptor
@@ -37,7 +38,7 @@ from ..descriptors import StringDescriptor
 from ..errors import PowerDNSRecordSetError
 from ..xlate import XLATOR
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 LOG = logging.getLogger(__name__)
 
@@ -148,6 +149,15 @@ class PowerDNSRecordSet(GenericPdnsObject):
         if "xn--" in name:
             return to_utf8(name).decode("idna")
         return name
+
+    # -----------------------------------------------------------
+    @property
+    def address(self):
+        """Return the address of the RecordSet, if the Type is PTR."""
+        if not self.name.endswith(".arpa."):
+            return None
+
+        return ptr2address(self.name)
 
     # -----------------------------------------------------------
     @property
