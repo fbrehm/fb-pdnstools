@@ -34,7 +34,7 @@ from ..api.recordset import PowerDNSRecordSetList
 from ..descriptors import BooleanDescriptor
 from ..xlate import XLATOR
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -117,8 +117,8 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
             nargs="+",
             help=_(
                 "Addresses to remove or a file (given as @filename), containing the addresses "
-                "to remove. If a file was given, then the addresses in ther  must be separated "
-                "with whitespaces and/or newlines. Lines ay be commented out by prepending them "
+                "to remove. If a file was given, then the addresses in there must be separated "
+                "with whitespaces and/or newlines. Lines may be commented out by prepending them "
                 "with a hash sign '#'."
             )
         )

@@ -20,7 +20,7 @@ from .xlate import XLATOR
 
 _ = XLATOR.gettext
 
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 
 
 # =============================================================================
@@ -194,20 +194,20 @@ class PDNSApiResponseError(PowerDNSHandlerError):
 
 # =============================================================================
 class PowerDNSWrongPortTypeError(PowerDNSHandlerError, TypeError):
-    """Exception when wrong vSphere server port was given."""
+    """Exception when wrong PowerDNS server port was given."""
 
     # -------------------------------------------------------------------------
-    def __init__(self, port, emesg=None, server_type="PowerDNS"):
+    def __init__(self, port_type, emesg=None, server_type="PowerDNS"):
         """Initialize the PowerDNSWrongPortTypeError object."""
-        self.port = port
+        self.port_type = port_type
         self.emesg = emesg
         self.server_type = server_type
 
     # -------------------------------------------------------------------------
     def __str__(self):
         """Typecast into a string."""
-        msg = _("Invalid type of {port!r} for a port of a {server_type} server").format(
-            port=self.port, server_type=self.server_type)
+        msg = _("Invalid type {typ!r} for a port of a {server_type} server.").format(
+            typ=self.port_type, server_type=self.server_type)
         if self.emesg:
             msg += ": " + self.emesg
         else:
