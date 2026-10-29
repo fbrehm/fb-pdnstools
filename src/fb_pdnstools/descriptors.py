@@ -31,7 +31,7 @@ except ImportError:
 from . import VALID_RRSET_TYPES
 from .xlate import XLATOR
 
-__version__ = "0.5.1"
+__version__ = "0.6.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -65,8 +65,8 @@ class IntegerDescriptor:
             and self.upper_limit < self.lower_limit
         ):
             msg = _(
-                "The upper limit of an IntegerField must be greater or equal to its lower_limit."
-            )
+                "The upper limit of an {} must be greater or equal to its lower_limit."
+            ).format(self.__class__.__name__)
             raise ValueError(msg)
 
         self.lower_limit_msg = _(
@@ -78,7 +78,7 @@ class IntegerDescriptor:
 
     # -------------------------------------------------------------------------
     def __set_name__(self, owner, name):
-        """Keep the name of teh descriptor."""
+        """Keep the name of the descriptor."""
         self.public_name = name
         self.private_name = "_" + name
 
@@ -106,6 +106,114 @@ class IntegerDescriptor:
         if self.upper_limit is not None and val > self.upper_limit:
             msg = self.upper_limit_msg.format(v=value)
             raise ValueError(msg)
+
+        setattr(instance, self.private_name, val)
+
+
+# =============================================================================
+class FloatDescriptor:
+    """Descriptor for an float field."""
+
+    # -------------------------------------------------------------------------
+    def __init__(
+        self,
+        name,
+        lower_limit=None,
+        include_lower_limit=True,
+        upper_limit=None,
+        include_upper_limit=True,
+        maybe_none=False,
+    ):
+        """Initialize the FloatDescriptor."""
+        self.public_name = name
+        self.private_name = "_" + name
+
+        self.maybe_none = to_bool(maybe_none)
+
+        if lower_limit is None:
+            self.lower_limit = None
+        else:
+            self.lower_limit = float(lower_limit)
+
+        self.include_lower_limit = to_bool(include_lower_limit)
+
+        if upper_limit is None:
+            self.upper_limit = None
+        else:
+            self.upper_limit = float(upper_limit)
+
+        self.include_upper_limit = to_bool(include_upper_limit)
+
+        if (
+            self.lower_limit is not None
+            and self.upper_limit is not None
+            and self.upper_limit < self.lower_limit
+        ):
+            msg = _(
+                "The upper limit of an {} must be greater or equal to its lower_limit."
+            ).format(self.__class__.__name__)
+            raise ValueError(msg)
+
+        if self.include_lower_limit:
+            self.lower_limit_msg = _(
+                "Invalid value {{v}} of attribute {a}, must be greater or equal to {m}."
+            )
+        else:
+            self.lower_limit_msg = _(
+                "Invalid value {{v}} of attribute {a}, must be greater to {m}."
+            )
+
+        self.lower_limit_msg = self.lower_limit_msg.format(a=self.public_name, m=self.lower_limit)
+
+        if self.include_upper_limit:
+            self.upper_limit_msg = _(
+                "Invalid value {{v}} of attribute {a}, must be less or equal to {m}."
+            )
+        else:
+            self.upper_limit_msg = _(
+                "Invalid value {{v}} of attribute {a}, must be less to {m}."
+            )
+
+        self.upper_limit_msg = self.upper_limit_msg.format(a=self.public_name, m=self.upper_limit)
+
+    # -------------------------------------------------------------------------
+    def __set_name__(self, owner, name):
+        """Keep the name of the descriptor."""
+        self.public_name = name
+        self.private_name = "_" + name
+
+    # -------------------------------------------------------------------------
+    def __get__(self, instance, owner):
+        """Get the data from instance object by the private name."""
+        return getattr(instance, self.private_name, 0)
+
+    # -------------------------------------------------------------------------
+    def __set__(self, instance, value):
+        """Set the data in the instance object by the private name as an float value."""
+        if value is None:
+            if self.maybe_none:
+                setattr(instance, self.private_name, None)
+                return
+            msg = _("The attribute {a!r} must not be None.").format(a=self.public_name)
+            raise TypeError(msg)
+
+        val = float(value)
+
+        if self.lower_limit is not None:
+            if self.include_lower_limit and val < self.lower_limit:
+                msg = self.lower_limit_msg.format(v=val)
+                raise ValueError(msg)
+            if not self.include_lower_limit and val <= self.lower_limit:
+                msg = self.lower_limit_msg.format(v=val)
+                raise ValueError(msg)
+
+        if self.upper_limit is not None:
+            if self.include_upper_limit and val > self.upper_limit:
+                msg = self.upper_limit_msg.format(v=value)
+                raise ValueError(msg)
+            if not self.include_upper_limit and val >= self.upper_limit:
+                msg = self.upper_limit_msg.format(v=value)
+                raise ValueError(msg)
 
         setattr(instance, self.private_name, val)
 

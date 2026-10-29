@@ -16,7 +16,7 @@ import json
 import logging
 import os
 import re
-# from collections.abc import MutableSequence
+import time
 
 # Third party modules
 from fb_tools.common import RE_DOT
@@ -36,6 +36,7 @@ from .recordsetcomment import PowerDNSRecordSetComment
 from .soa import PowerDnsSOAData
 from .. import FQDN_REGEX
 from ..descriptors import BooleanDescriptor
+from ..descriptors import FloatDescriptor
 from ..descriptors import IntegerDescriptor
 from ..descriptors import PosixPathDescriptor
 from ..descriptors import StringArrayDescriptor
@@ -45,7 +46,7 @@ from ..errors import PowerDNSZoneError
 from ..requestable import BasePdnsRequestableObject
 from ..xlate import XLATOR
 
-__version__ = "3.3.0"
+__version__ = "3.4.0"
 
 LOG = logging.getLogger(__name__)
 
@@ -74,6 +75,8 @@ class PowerDNSZone(BasePdnsRequestableObject):
         "master_tsig_key_ids": [],
         "masters": [],
         "notified_serial": 0,
+        "notify_repeat_count": 3,
+        "notify_repeat_delay": 0.1,
         "nsec3narrow": False,
         "nsec3param": "",
         "presigned": None,
@@ -96,6 +99,8 @@ class PowerDNSZone(BasePdnsRequestableObject):
     masters = StringArrayDescriptor("masters", stripped=True)
     name = StringDescriptor("name", lowcase=True, stripped=True, not_empty=True)
     notified_serial = IntegerDescriptor("notified_serial", lower_limit=0)
+    notify_repeat_count = IntegerDescriptor("notify_repeat_count", lower_limit=1, upper_limit=20)
+    notify_repeat_delay = FloatDescriptor("notify_repeat_delay", lower_limit=0, upper_limit=10)
     nsec3narrow = BooleanDescriptor("nsec3narrow")
     nsec3param = StringDescriptor("nsec3param", stripped=True)
     presigned = StringArrayDescriptor("presigned", stripped=True, maybe_none=True)
@@ -395,42 +400,12 @@ class PowerDNSZone(BasePdnsRequestableObject):
         fields = []
 
         fields.append(f"name={self.name!r}")
-        if self.account:
-            fields.append(f"account={self.account!r}")
-        if self.api_rectify is not None:
-            fields.append(f"api_rectify={self.api_rectify!r}")
-        if self.dnssec:
-            fields.append(f"dnssec={self.dnssec!r}")
-        if self.edited_serial:
-            fields.append(f"edited_serial={self.edited_serial!r}")
-        if self.id:
-            fields.append(f"id={self.id!r}")
-        if self.kind:
-            fields.append(f"kind={self.kind!r}")
-        if self.last_check:
-            fields.append(f"last_check={self.last_check!r}")
-        if self.master_tsig_key_ids:
-            fields.append(f"master_tsig_key_ids={self.master_tsig_key_ids!r}")
-        if self.masters:
-            fields.append(f"masters={self.masters!r}")
-        if self.notified_serial:
-            fields.append(f"notified_serial={self.notified_serial!r}")
-        if self.nsec3narrow:
-            fields.append(f"nsec3narrow={self.nsec3narrow!r}")
-        if self.nsec3param:
-            fields.append(f"nsec3param={self.nsec3param!r}")
-        if self.presigned:
-            fields.append(f"presigned={self.presigned!r}")
-        if self.serial:
-            fields.append(f"serial={self.serial!r}")
-        if self.slave_tsig_key_ids:
-            fields.append(f"slave_tsig_key_ids={self.slave_tsig_key_ids!r}")
-        if self.soa_edit:
-            fields.append(f"soa_edit={self.soa_edit!r}")
-        if self.soa_edit_api:
-            fields.append(f"soa_edit_api={self.soa_edit_api!r}")
-        if self.url is not None:
-            fields.append(f"url={self.url!r}")
+
+        for key in self.defaults:
+            default_val = self.defaults[key]
+            cur_val = getattr(self, key)
+            if cur_val != default_val:
+                fields.append(f"{key}={cur_val!r}")
 
         fields += super(PowerDNSZone, self).get_repr_fields()
 
@@ -1023,11 +998,25 @@ class PowerDNSZone(BasePdnsRequestableObject):
         return True
 
     # -------------------------------------------------------------------------
-    def notify(self):
+    def notify(self, count=None, delay=None):
         """Initiate a notify of all secondary servers of current zone."""
         LOG.info(_("Notifying slave servers of zone {!r} ...").format(self.name))
+
+        i = 1
         path = str(self.url) + "/notify"
-        return self.perform_request(path, method="PUT", may_simulate=True)
+        if count is None:
+            count = self.notify_repeat_count
+        if delay is None:
+            delay = self.notify_repeat_delay
+
+        ret = self.perform_request(path, method="PUT", may_simulate=True)
+        while i < count:
+            if delay > 0:
+                time.sleep(delay)
+            ret = self.perform_request(path, method="PUT", may_simulate=True)
+            i += 1
+
+        return ret
 
     # -------------------------------------------------------------------------
     def verify_fqdn(self, fqdn, raise_on_error=True):
