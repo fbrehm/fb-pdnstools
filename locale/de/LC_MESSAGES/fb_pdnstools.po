@@ -344,7 +344,7 @@ msgstr "Fand Adress-RecordSets für den FQDN {!r}:"
 #: src/fb_pdnstools/api/zone.py:1128
 #, python-brace-format
 msgid "Found NO address RRSETs for FQDN {!r}."
-msgstr "Habe KEINEN Adress-RecordSet für FQDN {f!r} gefunden."
+msgstr "Habe KEINEN Adress-RecordSet für FQDN {!r} gefunden."
 
 #: src/fb_pdnstools/api/zone.py:1139
 #, python-brace-format
@@ -354,7 +354,7 @@ msgstr "Fand PTR-RecordSet für den FQDN {!r}:"
 #: src/fb_pdnstools/api/zone.py:1142
 #, python-brace-format
 msgid "Found NO PTR record set for FQDN {!r}:"
-msgstr "Habe KEINEN PTR-RecordSet für FQDN {f!r} gefunden."
+msgstr "Habe KEINEN PTR-RecordSet für FQDN {!r} gefunden."
 
 #: src/fb_pdnstools/api/zone.py:1151
 #, python-brace-format

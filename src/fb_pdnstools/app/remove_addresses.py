@@ -35,7 +35,7 @@ from ..api.recordset import PowerDNSRecordSetList
 from ..descriptors import BooleanDescriptor
 from ..xlate import XLATOR
 
-__version__ = "0.7.0"
+__version__ = "0.8.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -213,11 +213,12 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
                     addresses.append(addr)
 
         if addresses:
-            self.addresses = addresses
+            for addr in addresses:
+                if addr not in self.addresses:
+                    self.addresses.append(addr)
 
-        if not self.addresses:
-            LOG.error(_("No addresses to remove found in {!r}.").format(str(afile)))
-            # self.exit(1)
+        if not addresses:
+            LOG.warn(_("No addresses to remove found in {!r}.").format(str(afile)))
 
     # -------------------------------------------------------------------------
     def read_address_files(self):
@@ -228,8 +229,8 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
     # -------------------------------------------------------------------------
     def _run(self):
 
-        print()
-        LOG.debug("Starting {a!r}, version {v!r} ...".format(a=self.appname, v=self.version))
+        if self.verbose:
+            LOG.debug("Starting {a!r}, version {v!r} ...".format(a=self.appname, v=self.version))
 
         ret = 0
         try:
@@ -301,11 +302,13 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
         LOG.debug(_("Verifying all given DNS addresses."))
 
         self.fqdn2addr = {}
+        fqdns_not_found = {}
 
         all_fqdns = self._canon_addresses(addresses)
-        zones_of_records = self._get_zones_of_addresses(all_fqdns)
+        zones_of_records = self._get_zones_of_addresses(all_fqdns, fqdns_not_found)
 
         if not zones_of_records:
+            print()
             msg = _("Did not found any addresses with an appropriate zone in PowerDNS.")
             LOG.error(msg)
             return 1
@@ -317,7 +320,19 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
             self._mangle_zones_of_records(zones_of_records, zone_name)
 
         fqdns_found = []
-        fqdns_not_found = {}
+
+        # if self.verbose:
+        #     print()
+        #     z = {}
+        #     for zone_name in zones_of_records.keys():
+        #         z[zone_name] = {}
+        #         for fqdn in zones_of_records[zone_name].keys():
+        #             rrsets = zones_of_records[zone_name][fqdn]
+        #             if isinstance(rrsets, PowerDNSRecordSetList):
+        #                 rrsets = rrsets.as_list()
+        #             z[zone_name][fqdn] = rrsets
+        #     LOG.debug("zones_of_records:\n" + pp(z))
+        #     print()
 
         for zone_name in zones_of_records.keys():
             for fqdn in zones_of_records[zone_name].keys():
@@ -383,7 +398,7 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
         return all_fqdns
 
     # -------------------------------------------------------------------------
-    def _get_zones_of_addresses(self, fqdns):
+    def _get_zones_of_addresses(self, fqdns, fqdns_not_found):
 
         if self.verbose > 1:
             LOG.debug(_("Retrieve zones for canonized addresses."))
@@ -394,6 +409,7 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
             zones = self.pdns_api.get_all_zones_for_item(fqdn)
             if not zones:
                 LOG.warning(_("Did not found an appropriate zone for address {!r}.").format(fqdn))
+                fqdns_not_found[fqdn] = self.fqdn2addr[fqdn]
                 continue
 
             for zone_name in zones:
@@ -431,7 +447,7 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
         if self.verbose > 1:
             LOG.debug(_("Got reverse addresses to remove:") + "\n" + pp(addresses))
 
-        zones_of_records = self._get_zones_of_addresses(addresses.values())
+        zones_of_records = self._get_zones_of_addresses(addresses.values(), fqdns_not_found)
 
         if not zones_of_records:
             return
@@ -457,6 +473,8 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
                     if zone_name not in self.records2remove:
                         self.records2remove[zone_name] = {}
                     self.records2remove[zone_name][fqdn] = rrsets
+                    if fqdn in fqdns_not_found:
+                        del fqdns_not_found[fqdn]
                 else:
                     fqdns_not_found[fqdn] = self.fqdn2addr[fqdn]
 
