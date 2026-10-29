@@ -46,6 +46,7 @@ for ldir in "${locale_dir}"/* ; do
             --locale "${lang}" \
             --width ${po_with} \
             --ignore-obsolete \
+            --previous \
             --update-header-comment
     fi
 

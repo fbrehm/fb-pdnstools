@@ -7,6 +7,7 @@
 @contact: frank@brehm-online.com
 @copyright: © 2019 - 2026 by Frank Brehm, Berlin
 """
+
 from __future__ import absolute_import
 
 # Standard modules
@@ -34,17 +35,19 @@ from ..api.recordset import PowerDNSRecordSetList
 from ..descriptors import BooleanDescriptor
 from ..xlate import XLATOR
 
-__version__ = "0.6.1"
+__version__ = "0.7.0"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
 ngettext = XLATOR.ngettext
+
 
 # =============================================================================
 class PdnsRemoveAddrApp(BasePowerDNSApplication):
     """Class for the application object of the pdns-remove-addresses application."""
 
     show_simulate_option = True
+    show_assume_options = True
 
     remove_reverse = BooleanDescriptor(name="remove_reverse")
 
@@ -120,7 +123,7 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
                 "to remove. If a file was given, then the addresses in there must be separated "
                 "with whitespaces and/or newlines. Lines may be commented out by prepending them "
                 "with a hash sign '#'."
-            )
+            ),
         )
 
         super(PdnsRemoveAddrApp, self).init_arg_parser()
@@ -159,16 +162,25 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
         if address_token.startswith("@"):
             afile = Path(address_token.replace("@", "", 1))
             if not afile.exists():
-                LOG.error(_("File {f} does not exists.").format(
-                    self.colored(str(afile), ["cyan", "bold"])))
+                LOG.error(
+                    _("File {f} does not exists.").format(
+                        self.colored(str(afile), ["cyan", "bold"])
+                    )
+                )
                 self.exit(1)
             if not afile.is_file():
-                LOG.error(_("File {f} is not a regular file.").format(
-                    self.colored(str(afile), ["cyan", "bold"])))
+                LOG.error(
+                    _("File {f} is not a regular file.").format(
+                        self.colored(str(afile), ["cyan", "bold"])
+                    )
+                )
                 self.exit(1)
             if not os.access(str(afile), os.R_OK):
-                LOG.error(_("No read access to file {!r}.").format(
-                    self.colored(str(afile), ["cyan", "bold"])))
+                LOG.error(
+                    _("No read access to file {!r}.").format(
+                        self.colored(str(afile), ["cyan", "bold"])
+                    )
+                )
                 self.exit(1)
             afile = afile.resolve()
             if afile not in self.address_files:
@@ -183,8 +195,9 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
     def read_address_file(self, afile):
         """Read the file containing all addresses to remove."""
         if self.verbose > 1:
-            LOG.debug(_("Reading address file {} ...").format(
-                self.colored(str(afile), ["cyan", "bold"])))
+            LOG.debug(
+                _("Reading address file {} ...").format(self.colored(str(afile), ["cyan", "bold"]))
+            )
         content = afile.read_text(encoding=self.encoding, errors="surrogateescape")
         if self.verbose > 2:
             LOG.debug(_("Content of {!r}:").format(str(afile)) + "\n" + content)
@@ -223,8 +236,19 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
             self.zones = self.pdns_api.get_api_zones()
             ret = self.verify_addresses(copy.copy(self.addresses))
 
+            prompt = (
+                _("Confirm deletion of DNS records [{yes}/{no}]").format(
+                    yes=self.colored(_("Yes"), ["bold", "red"]),
+                    no=self.colored(_("no"), ["bold", "green"]),
+                )
+                + ": "
+            )
+
             if ret == 0:
                 self.print_records_remove()
+                if not self.ask_for_yes_or_no(prompt, True):
+                    self.exit(1)
+                self.countdown()
                 self.do_remove()
 
         finally:
@@ -249,6 +273,8 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
             if self.verbose > 3:
                 LOG.debug("Struct rrsets_rm:\n" + pp(rrsets_rm))
             zone.del_rrsets(rrsets_rm)
+
+            zone.notify()
 
         print()
 
@@ -383,16 +409,19 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
     def get_reverse_pointers(self, fqdns_not_found):
         """Collect reverse pointers of A- and AAAA-records, which should be removed."""
         if self.verbose > 1:
-            LOG.debug(_(
-                "Trying to get all reverse pointers of A- and AAAA-records, "
-                "which should be removed."))
+            LOG.debug(
+                _(
+                    "Trying to get all reverse pointers of A- and AAAA-records, "
+                    "which should be removed."
+                )
+            )
 
         addresses = {}
 
         for zone_name in self.records2remove:
             for fqdn in self.records2remove[zone_name]:
                 for rrset in self.records2remove[zone_name][fqdn]:
-                    if rrset.type in ('A', 'AAAA'):
+                    if rrset.type in ("A", "AAAA"):
                         for record in rrset.records:
                             address = record.content
                             fqdn = self.pdns_api.name2fqdn(address)
@@ -445,9 +474,8 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
 
         if count:
             caption = "\n" + ngettext(
-                "Total one DNS record to remove.",
-                "Total {} DNS records to remove.",
-                count).format(count)
+                "Total one DNS record to remove.", "Total {} DNS records to remove.", count
+            ).format(count)
         else:
             caption = "\n" + _("Found no DNS records to remove.")
 
@@ -503,6 +531,7 @@ class PdnsRemoveAddrApp(BasePowerDNSApplication):
         self.rich_console.print(table)
         if not self.quiet:
             print()
+
 
 # =============================================================================
 def main():
