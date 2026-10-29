@@ -36,7 +36,7 @@ from .descriptors import StringDescriptor
 from .errors import PowerDNSConfigError
 from .xlate import XLATOR
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -145,13 +145,13 @@ class PdnsApiConfigInfo(GenericPdnsObject):
                 msg = _(
                     "There must be given at least the PowerDNS API hostname and the "
                     "API key in section {sn!r}."
-                ).format(sec=section_name)
+                ).format(sn=section_name)
                 raise PowerDNSConfigError(msg)
             else:
                 msg = _(
                     "There should be given at least the PowerDNS API hostname and the "
                     "API key in section {sn!r}."
-                ).format(sec=section_name)
+                ).format(sn=section_name)
                 LOG.debug(msg)
 
         info.initialized = True

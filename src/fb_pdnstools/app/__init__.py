@@ -50,7 +50,7 @@ from ..xlate import __lib_dir__ as __xlate_lib_dir__
 from ..xlate import __mo_file__ as __xlate_mo_file__
 from ..xlate import __module_dir__ as __xlate_module_dir__
 
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 LOG = logging.getLogger(__name__)
 
 _ = XLATOR.gettext
@@ -369,11 +369,11 @@ class BasePowerDNSApplication(FbConfigApplication):
         """Check for empty host and API key and ask the user for it."""
         try:
             if not self.pdns_api_info.host:
-                self.pdns_api_info.host = NonEmptyStrPrompt.ask(_(
+                self.pdns_api_info.host = NonEmptyStrPrompt.ask("\n" + _(
                     "Get the name or address of the PowerDNS API server"))
 
             if not self.pdns_api_info.key:
-                self.pdns_api_info.key = NonEmptyStrPrompt.ask(_(
+                self.pdns_api_info.key = NonEmptyStrPrompt.ask("\n" + _(
                     "Get the API key for access the PowerDNS API"))
 
         except KeyboardInterrupt:
