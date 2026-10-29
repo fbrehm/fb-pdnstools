@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fb_pdnstools 1.2.0\n"
 "Report-Msgid-Bugs-To: frank.brehm@pixelpark.com\n"
-"POT-Creation-Date: 2026-10-28 17:35+0100\n"
+"POT-Creation-Date: 2026-10-29 12:06+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <frank.brehm@pixelpark.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -149,209 +149,209 @@ msgstr ""
 msgid "Serial overflow - old serial {o} is in future, new serial {n} has reached its maximum value."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:212
+#: src/fb_pdnstools/api/zone.py:217
 #, python-brace-format
 msgid "Given data {!r} is not a dict object."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:217
+#: src/fb_pdnstools/api/zone.py:222
 msgid "No zone name in import data given."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:235
+#: src/fb_pdnstools/api/zone.py:240
 msgid "Params initialisation:"
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:351
+#: src/fb_pdnstools/api/zone.py:356
 #, python-brace-format
 msgid "Invalid source tuples for detecting IPv4-network: {!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:444
+#: src/fb_pdnstools/api/zone.py:419
 #, python-brace-format
 msgid "Copying current {}-object into a new one."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:481
+#: src/fb_pdnstools/api/zone.py:456
 #, python-brace-format
 msgid "Cannot update zone {!r}, no API URL defined."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:493
+#: src/fb_pdnstools/api/zone.py:468
 #, python-brace-format
 msgid "Updating data of zone {n!r} from API path {u!r} ..."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:525
+#: src/fb_pdnstools/api/zone.py:500
 #, python-brace-format
 msgid "Patching zone {!r} ..."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:557
+#: src/fb_pdnstools/api/zone.py:532
 #, python-brace-format
 msgid "Found invalid comment {!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:569
+#: src/fb_pdnstools/api/zone.py:544
 #, python-brace-format
 msgid "New SOA must be of type {e}, given {t}: {s!r}"
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:581
+#: src/fb_pdnstools/api/zone.py:556
 #, python-brace-format
 msgid "Got no SOA for zone {!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:603
+#: src/fb_pdnstools/api/zone.py:578
 #, python-brace-format
 msgid "Setting new SOA {s!r} for zone {z!r}, TTL {t} ..."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:622
+#: src/fb_pdnstools/api/zone.py:597
 #, python-brace-format
 msgid "Increasing serial of zone {z!r} from {o} => {n}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:639 src/fb_pdnstools/api/zone.py:668 src/fb_pdnstools/api/zone.py:692
+#: src/fb_pdnstools/api/zone.py:614 src/fb_pdnstools/api/zone.py:643 src/fb_pdnstools/api/zone.py:667
 #, python-brace-format
 msgid "Parameter {w!r} {a!r} is not a {e} object, but a {c} object instead."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:684
+#: src/fb_pdnstools/api/zone.py:659
 #, python-brace-format
 msgid "Replacing record set in zone {!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:706
+#: src/fb_pdnstools/api/zone.py:681
 #, python-brace-format
 msgid "Deleting record set in zone {!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:731
+#: src/fb_pdnstools/api/zone.py:706
 #, python-brace-format
 msgid "Adding FQDN: {f!r}, type {t!r}, content: {c!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:742 src/fb_pdnstools/api/zone.py:810
+#: src/fb_pdnstools/api/zone.py:717 src/fb_pdnstools/api/zone.py:785
 #, python-brace-format
 msgid "Got an existing rrset for FQDN {f!r}, type {t!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:750 src/fb_pdnstools/api/zone.py:819
+#: src/fb_pdnstools/api/zone.py:725 src/fb_pdnstools/api/zone.py:794
 #, python-brace-format
 msgid "Got no existing rrset for FQDN {f!r}, type {t!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:763
+#: src/fb_pdnstools/api/zone.py:738
 #, python-brace-format
 msgid "Record {c!r} already contained in record set {f!r} type {t}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:799
+#: src/fb_pdnstools/api/zone.py:774
 #, python-brace-format
 msgid "Replacing FQDN: {f!r}, type {t!r} by content: {c!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:857 src/fb_pdnstools/api/zone.py:902
+#: src/fb_pdnstools/api/zone.py:832 src/fb_pdnstools/api/zone.py:877
 #, python-brace-format
 msgid "Parameter address {a!r} is not an IPv4Address or IPv6Address object, but a {c} object instead."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:866 src/fb_pdnstools/api/zone.py:911 src/fb_pdnstools/api/zone.py:946
+#: src/fb_pdnstools/api/zone.py:841 src/fb_pdnstools/api/zone.py:886 src/fb_pdnstools/api/zone.py:921
 #, python-brace-format
 msgid "Trying to create {t}-record {f!r} => {a!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:989
+#: src/fb_pdnstools/api/zone.py:964
 msgid "Current zone:"
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1000
+#: src/fb_pdnstools/api/zone.py:975
 #, python-brace-format
 msgid "DNS {t!r}-record {n!r} is already deleted."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1012
+#: src/fb_pdnstools/api/zone.py:987
 #, python-brace-format
 msgid "Removing one resource record set from zone {z!r}."
 msgid_plural "Removing {c} resource record sets from zone {z!r}."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/fb_pdnstools/api/zone.py:1018
+#: src/fb_pdnstools/api/zone.py:993
 msgid "Resorce record sets:"
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1021
+#: src/fb_pdnstools/api/zone.py:996
 msgid "Done."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1028
+#: src/fb_pdnstools/api/zone.py:1003
 #, python-brace-format
 msgid "Notifying slave servers of zone {!r} ..."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1036
+#: src/fb_pdnstools/api/zone.py:1025
 #, python-brace-format
 msgid "A {w} must be a string type, but is {v!r} instead."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1044
+#: src/fb_pdnstools/api/zone.py:1033
 #, python-brace-format
 msgid "Invalid, empty FQDN {!r} given."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1058
+#: src/fb_pdnstools/api/zone.py:1047
 #, python-brace-format
 msgid "Checking FQDN {f!r} for ending on {t!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1060
+#: src/fb_pdnstools/api/zone.py:1049
 #, python-brace-format
 msgid "Invalid FQDN {f!r}, it must end up with {t!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1069
+#: src/fb_pdnstools/api/zone.py:1058
 #, python-brace-format
 msgid "Basename of FQDN {f!r} is {h!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1092
+#: src/fb_pdnstools/api/zone.py:1081
 #, python-brace-format
 msgid "Searching for RecordSet {f!r} of type {t!r} in zone {z!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1103
+#: src/fb_pdnstools/api/zone.py:1092
 #, python-brace-format
 msgid "Found {} RecordSet:"
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1109
+#: src/fb_pdnstools/api/zone.py:1098
 #, python-brace-format
 msgid "Did not found RecordSet {f!r} of type {t!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1125
+#: src/fb_pdnstools/api/zone.py:1114
 #, python-brace-format
 msgid "Found address RRSETs for FQDN {!r}:"
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1128
+#: src/fb_pdnstools/api/zone.py:1117
 #, python-brace-format
 msgid "Found NO address RRSETs for FQDN {!r}."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1139
+#: src/fb_pdnstools/api/zone.py:1128
 #, python-brace-format
 msgid "Found PTR record set for FQDN {!r}:"
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1142
+#: src/fb_pdnstools/api/zone.py:1131
 #, python-brace-format
 msgid "Found NO PTR record set for FQDN {!r}:"
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1151
+#: src/fb_pdnstools/api/zone.py:1140
 #, python-brace-format
 msgid "Did not get SOA for zone {!r}."
 msgstr ""
@@ -469,7 +469,7 @@ msgstr ""
 msgid "Used URL to PowerDNS:"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:58
+#: src/fb_pdnstools/app/remove_addresses.py:61
 msgid ""
 "Removes the given addresses (A-, AAAA- or CNAME-Records) completety from PowerDNS. If there are "
 "multiple entries to a DNS-Name, all appropriate records are removed. Additionally all "
@@ -477,168 +477,181 @@ msgid ""
 "given A- or AAAA-record."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:100
+#: src/fb_pdnstools/app/remove_addresses.py:103
 #, python-brace-format
 msgid "Options of {}"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:108
+#: src/fb_pdnstools/app/remove_addresses.py:111
 msgid ""
 "Don't remove reverse DNS entries (PTR records) to the given addresses. (Default: False - reverse"
 " entries will be removed)."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:115
+#: src/fb_pdnstools/app/remove_addresses.py:118
 msgid "ADDRESS|@FILE"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:119
+#: src/fb_pdnstools/app/remove_addresses.py:122
 msgid ""
 "Addresses to remove or a file (given as @filename), containing the addresses to remove. If a "
 "file was given, then the addresses in there must be separated with whitespaces and/or newlines. "
 "Lines may be commented out by prepending them with a hash sign '#'."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:139
+#: src/fb_pdnstools/app/remove_addresses.py:142
 msgid "No addresses to remove given."
-msgstr ""
-
-#: src/fb_pdnstools/app/remove_addresses.py:162
-#, python-brace-format
-msgid "File {f} does not exists."
 msgstr ""
 
 #: src/fb_pdnstools/app/remove_addresses.py:166
 #, python-brace-format
+msgid "File {f} does not exists."
+msgstr ""
+
+#: src/fb_pdnstools/app/remove_addresses.py:173
+#, python-brace-format
 msgid "File {f} is not a regular file."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:170
+#: src/fb_pdnstools/app/remove_addresses.py:180
 #, python-brace-format
 msgid "No read access to file {!r}."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:186
+#: src/fb_pdnstools/app/remove_addresses.py:199
 #, python-brace-format
 msgid "Reading address file {} ..."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:190
+#: src/fb_pdnstools/app/remove_addresses.py:203
 #, python-brace-format
 msgid "Content of {!r}:"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:206
+#: src/fb_pdnstools/app/remove_addresses.py:221
 #, python-brace-format
 msgid "No addresses to remove found in {!r}."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:275
+#: src/fb_pdnstools/app/remove_addresses.py:241
+#, python-brace-format
+msgid "Confirm deletion of DNS records [{yes}/{no}]"
+msgstr ""
+
+#: src/fb_pdnstools/app/remove_addresses.py:242
+msgid "Yes"
+msgstr ""
+
+#: src/fb_pdnstools/app/remove_addresses.py:243
+msgid "no"
+msgstr ""
+
+#: src/fb_pdnstools/app/remove_addresses.py:302
 msgid "Verifying all given DNS addresses."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:283
+#: src/fb_pdnstools/app/remove_addresses.py:312
 msgid "Did not found any addresses with an appropriate zone in PowerDNS."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:288
+#: src/fb_pdnstools/app/remove_addresses.py:317
 msgid "Found zones for addresses:"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:316
+#: src/fb_pdnstools/app/remove_addresses.py:357
 msgid "The following FQDNs were found:"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:319
+#: src/fb_pdnstools/app/remove_addresses.py:360
 msgid "The following addresses (FQDNs) are not found:"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:330
+#: src/fb_pdnstools/app/remove_addresses.py:371
 msgid "Found resource record sets to remove:"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:340
+#: src/fb_pdnstools/app/remove_addresses.py:381
 msgid "Canonizing all given addresses."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:347
+#: src/fb_pdnstools/app/remove_addresses.py:388
 #, python-brace-format
 msgid "Address {!r} could not interpreted as a FQDN."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:356
+#: src/fb_pdnstools/app/remove_addresses.py:397
 msgid "Canonized addresses:"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:363
+#: src/fb_pdnstools/app/remove_addresses.py:404
 msgid "Retrieve zones for canonized addresses."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:370
+#: src/fb_pdnstools/app/remove_addresses.py:411
 #, python-brace-format
 msgid "Did not found an appropriate zone for address {!r}."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:379
+#: src/fb_pdnstools/app/remove_addresses.py:421
 msgid "Zones of addresses:"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:387
+#: src/fb_pdnstools/app/remove_addresses.py:430
 msgid "Trying to get all reverse pointers of A- and AAAA-records, which should be removed."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:403
+#: src/fb_pdnstools/app/remove_addresses.py:448
 msgid "Got reverse addresses to remove:"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:437
+#: src/fb_pdnstools/app/remove_addresses.py:484
 msgid "All DNS records to remove"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:448
+#: src/fb_pdnstools/app/remove_addresses.py:495
 #, python-brace-format
 msgid "Total one DNS record to remove."
 msgid_plural "Total {} DNS records to remove."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:452
+#: src/fb_pdnstools/app/remove_addresses.py:498
 msgid "Found no DNS records to remove."
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:471
+#: src/fb_pdnstools/app/remove_addresses.py:517
 msgid "Name"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:472
+#: src/fb_pdnstools/app/remove_addresses.py:518
 msgid "Name Unicode / Address"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:473
+#: src/fb_pdnstools/app/remove_addresses.py:519
 msgid "Zone"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:474
+#: src/fb_pdnstools/app/remove_addresses.py:520
 msgid "Type"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:475
+#: src/fb_pdnstools/app/remove_addresses.py:521
 msgid "Record"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:476
+#: src/fb_pdnstools/app/remove_addresses.py:522
 msgid "Status"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:497
+#: src/fb_pdnstools/app/remove_addresses.py:543
 msgid "Disabled"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:499
+#: src/fb_pdnstools/app/remove_addresses.py:545
 msgid "Enabled"
 msgstr ""
 
-#: src/fb_pdnstools/app/remove_addresses.py:519
+#: src/fb_pdnstools/app/remove_addresses.py:566
 #, python-brace-format
 msgid ""
 "{c}-Object:\n"
@@ -655,7 +668,7 @@ msgstr ""
 msgid "Name {!r} is not a valid IP address."
 msgstr ""
 
-#: src/fb_pdnstools/api/zone.py:1072 src/fb_pdnstools/base.py:96 src/fb_pdnstools/base_handler.py:482
+#: src/fb_pdnstools/api/zone.py:1061 src/fb_pdnstools/base.py:96 src/fb_pdnstools/base_handler.py:482
 #, python-brace-format
 msgid "Invalid FQDN {!r}."
 msgstr ""
@@ -829,54 +842,66 @@ msgstr ""
 msgid "Evaluating config section {!r}:"
 msgstr ""
 
-#: src/fb_pdnstools/descriptors.py:68
-msgid "The upper limit of an IntegerField must be greater or equal to its lower_limit."
+#: src/fb_pdnstools/descriptors.py:68 src/fb_pdnstools/descriptors.py:153
+#, python-brace-format
+msgid "The upper limit of an {} must be greater or equal to its lower_limit."
 msgstr ""
 
-#: src/fb_pdnstools/descriptors.py:73
+#: src/fb_pdnstools/descriptors.py:73 src/fb_pdnstools/descriptors.py:159
 #, python-brace-format
 msgid "Invalid value {{v}} of attribute {a}, must be greater or equal to {m}."
 msgstr ""
 
-#: src/fb_pdnstools/descriptors.py:76
+#: src/fb_pdnstools/descriptors.py:76 src/fb_pdnstools/descriptors.py:170
 #, python-brace-format
 msgid "Invalid value {{v}} of attribute {a}, must be less or equal to {m}."
 msgstr ""
 
-#: src/fb_pdnstools/descriptors.py:97 src/fb_pdnstools/descriptors.py:143
-#: src/fb_pdnstools/descriptors.py:180 src/fb_pdnstools/descriptors.py:226
-#: src/fb_pdnstools/descriptors.py:290 src/fb_pdnstools/descriptors.py:340
-#: src/fb_pdnstools/descriptors.py:405 src/fb_pdnstools/descriptors.py:469
+#: src/fb_pdnstools/descriptors.py:97 src/fb_pdnstools/descriptors.py:197
+#: src/fb_pdnstools/descriptors.py:251 src/fb_pdnstools/descriptors.py:288
+#: src/fb_pdnstools/descriptors.py:334 src/fb_pdnstools/descriptors.py:398
+#: src/fb_pdnstools/descriptors.py:448 src/fb_pdnstools/descriptors.py:513
+#: src/fb_pdnstools/descriptors.py:577
 #, python-brace-format
 msgid "The attribute {a!r} must not be None."
 msgstr ""
 
-#: src/fb_pdnstools/descriptors.py:187
+#: src/fb_pdnstools/descriptors.py:163
+#, python-brace-format
+msgid "Invalid value {{v}} of attribute {a}, must be greater to {m}."
+msgstr ""
+
+#: src/fb_pdnstools/descriptors.py:174
+#, python-brace-format
+msgid "Invalid value {{v}} of attribute {a}, must be less to {m}."
+msgstr ""
+
+#: src/fb_pdnstools/descriptors.py:295
 #, python-brace-format
 msgid "The attribute {a!r} must be an absolute Posix path, given {p!r}."
 msgstr ""
 
-#: src/fb_pdnstools/descriptors.py:233
+#: src/fb_pdnstools/descriptors.py:341
 #, python-brace-format
 msgid "The attribute {a!r} must be an absolute path, given {p!r}."
 msgstr ""
 
-#: src/fb_pdnstools/descriptors.py:267 src/fb_pdnstools/descriptors.py:382
+#: src/fb_pdnstools/descriptors.py:375 src/fb_pdnstools/descriptors.py:490
 #, python-brace-format
 msgid "The properties {lc!r} and {uc!r} of attribute {a!r} must not be set to {w} at the same time."
 msgstr ""
 
-#: src/fb_pdnstools/descriptors.py:301 src/fb_pdnstools/descriptors.py:345
+#: src/fb_pdnstools/descriptors.py:409 src/fb_pdnstools/descriptors.py:453
 #, python-brace-format
 msgid "The attribute {a!r} must not be empty."
 msgstr ""
 
-#: src/fb_pdnstools/descriptors.py:349
+#: src/fb_pdnstools/descriptors.py:457
 #, python-brace-format
 msgid "Invalid resource record set typ {t!r} for attribute {a!r} given."
 msgstr ""
 
-#: src/fb_pdnstools/descriptors.py:418 src/fb_pdnstools/descriptors.py:431
+#: src/fb_pdnstools/descriptors.py:526 src/fb_pdnstools/descriptors.py:539
 #, python-brace-format
 msgid "The attribute {a!r} must not contain empty strings."
 msgstr ""
